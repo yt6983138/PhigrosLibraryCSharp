@@ -34,14 +34,29 @@ public struct ScoreFormat
 }
 public struct InternalScoreFormat
 {
+	/// <summary>
+	/// 0 ~ 1000000
+	/// </summary>
 	public int Score = 0;
 	/// <summary>
 	/// note: format: 99.x% = 99.xxxx...
 	/// </summary>
 	public double Acc = 0;
+	/// <summary>
+	/// ex. 11.4
+	/// </summary>
 	public float ChartConstant = 0;
+	/// <summary>
+	/// ex. Stasis.Maozon (no .0)
+	/// </summary>
 	public string Name = "Unset";
+	/// <summary>
+	/// ex. AT
+	/// </summary>
 	public string DifficultyName = "Unset";
+	/// <summary>
+	/// ex. ScoreStatus.A
+	/// </summary>
 	public ScoreStatus Status = ScoreStatus.False;
 	public InternalScoreFormat(int score, double acc, float chartConstant, string name, string diffcultyName, ScoreStatus status)
 	{
