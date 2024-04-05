@@ -7,7 +7,7 @@ public struct RawSaveContainer
 	public List<SimplifiedSave> GetParsedSaves()
 	{
 		List<SimplifiedSave> saves = new();
-		foreach (var item in this.results) saves.Add(item.ToParsed());
+		foreach (RawSave item in this.results) saves.Add(item.ToParsed());
 		return saves;
 	}
 }

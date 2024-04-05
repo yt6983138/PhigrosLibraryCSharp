@@ -1,5 +1,4 @@
-﻿using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PhigrosLibraryCSharp;
@@ -55,11 +54,11 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	public bool ReadIsFc() // i have no idea why is it like this
 	{
 		this.Offset++;
-		return (this.Data[this.Offset - 1] & 1 << this.RecordRead) == 0 ? false : true;
+		return (this.Data[this.Offset - 1] & (1 << this.RecordRead)) != 0;
 	}
 	public bool ReadBool(int num, int index)
 	{
-		return (num & 1 << index) == 0 ? false : true;
+		return (num & (1 << index)) != 0;
 	}
 	public void ReadHeader(int size)
 	{
@@ -68,7 +67,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	public byte[] ReadStringBytes()
 	{
 		this.RecordRead++;
-		var data = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
+		byte[] data = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
 		this.Offset += this.Data[this.Offset] + 1;
 		return data;
 	}
@@ -92,7 +91,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 				// Offset += 8;
 				continue;
 			}
-			var record = SerialHelper.ByteToStruct<PartialGameRecord>(this.Data[this.Offset..(this.Offset + 8)]);
+			PartialGameRecord record = SerialHelper.ByteToStruct<PartialGameRecord>(this.Data[this.Offset..(this.Offset + 8)]);
 			if (record.Acc > 100 || record.Acc < 0) Console.WriteLine(BitConverter.ToString(this.Data[this.Offset..(this.Offset + 8)]).Replace('-', ' '));
 			scores.Add(
 				new MoreInfoPartialGameRecord(
@@ -115,7 +114,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	{
 		int headerLength;
 		// auto detection
-		string first64 = Encoding.ASCII.GetString(Data[0..64]);
+		string first64 = Encoding.ASCII.GetString(this.Data[0..64]);
 		int glaciaxionLocation = first64.IndexOf("Glaciaxion");
 		int nonMelodicLocation = first64.IndexOf("NonMelodic");
 		if (glaciaxionLocation != -1)
@@ -128,7 +127,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		}
 		else // fall back manual detection
 		{
-			headerLength = Data[0] switch
+			headerLength = this.Data[0] switch
 			{
 				0x9D => 2, // i have no idea what those are
 				0x7E => 1,
@@ -144,7 +143,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 			string id = Encoding.UTF8.GetString(this.ReadStringBytes())[..^2];
 			this.Jump(3);
 
-			foreach (var item in this.ReadRecord())
+			foreach (MoreInfoPartialGameRecord item in this.ReadRecord())
 			{
 				scores.Add(new InternalScoreFormat(item, id, difficulties[id][item.LevelType], IntLevelToStringLevel));
 			}

@@ -73,7 +73,7 @@ public struct InternalScoreFormat
 		this.Acc = record.Acc;
 		this.ChartConstant = chartConstant;
 		this.Name = name;
-		this.Status = Helper.ParseStatus(new ScoreFormat() { a = this.Acc, s = this.Score, c = record.IsFc ? ScoreStatus.Fc : ScoreStatus.NotFc} );
+		this.Status = Helper.ParseStatus(new ScoreFormat() { a = this.Acc, s = this.Score, c = record.IsFc ? ScoreStatus.Fc : ScoreStatus.NotFc });
 		this.DifficultyName = levelTranslateTable[record.LevelType];
 	}
 	public double GetRksCalculated()
