@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace PhigrosLibraryCSharp;
+namespace PhigrosLibraryCSharp.Cloud.DataStructure;
 
 
 [StructLayout(LayoutKind.Explicit)]

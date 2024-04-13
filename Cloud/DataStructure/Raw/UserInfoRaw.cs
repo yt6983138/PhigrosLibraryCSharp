@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PhigrosLibraryCSharp;
+namespace PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 
 public struct UserInfoRaw
 {

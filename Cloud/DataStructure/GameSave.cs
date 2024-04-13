@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp;
+﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure;
 
 public class GameSave
 {

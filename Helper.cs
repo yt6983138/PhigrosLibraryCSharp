@@ -1,4 +1,6 @@
-﻿namespace PhigrosLibraryCSharp;
+﻿using System.Text;
+
+namespace PhigrosLibraryCSharp;
 
 public static class Helper
 {
@@ -28,5 +30,14 @@ public static class Helper
 			case "AT": return 3;
 			default: goto case "EZ";
 		}
+	}
+	internal static string ToHex(this byte[] bytes)
+	{
+		StringBuilder sb = new();
+		for (int i = 0; i < bytes.Length; i++)
+		{
+			sb.Append(bytes[i].ToString("x2"));
+		}
+		return sb.ToString();
 	}
 }

@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp;
+﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 
 public class SimplifiedSave
 {
