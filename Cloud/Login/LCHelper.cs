@@ -14,8 +14,8 @@ public static class LCHelper
 	internal const string AppKey = @"Qr9AEqtuoSVS3zeD6iVbM4ZC0AtkJcQ89tywVyi0";
 	internal const string ClientId = @"rAK3FfdieFob2Nn8Am";
 
-	private static string MD5HashHexStringDefaultGetter(string input)
-		=> _md5.ComputeHash(Encoding.UTF8.GetBytes(input)).ToHex();
+	private static Task<string> MD5HashHexStringDefaultGetter(string input)
+		=> Task.FromResult(_md5.ComputeHash(Encoding.UTF8.GetBytes(input)).ToHex());
 	private static HttpClient Client { get; } = new()
 	{
 		BaseAddress = new(SaveHelper.CloudServerAddress)
@@ -24,10 +24,12 @@ public static class LCHelper
 	{
 		{ "X-LC-Id", ClientId }
 	};
-	internal readonly static MD5 _md5 = MD5.Create();
+	internal readonly static MD5 _md5;
 	#endregion
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 	static LCHelper()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 	{
 		try
 		{
@@ -39,17 +41,17 @@ public static class LCHelper
 	/// <summary>
 	/// A function to get MD5 hash string that can be changed if you are on unsupported platform (ex. WASM).
 	/// </summary>
-	public static Func<string, string> GetMD5HashHexString { get; set; } = MD5HashHexStringDefaultGetter;
+	public static Func<string, Task<string>> GetMD5HashHexString { get; set; } = MD5HashHexStringDefaultGetter;
 
 	/// <summary>
 	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
 	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
-	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData))"/>
+	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </summary>
 	/// <param name="data">
 	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
 	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
-	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData))"/>
+	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </param>
 	/// <param name="failOnNotExist">[Unknown]</param>
 	/// <returns>A <see cref="Dictionary{TKey, TValue}"/> containing the logged user information.</returns>
@@ -74,19 +76,19 @@ public static class LCHelper
 	/// <summary>
 	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
 	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>, then get the token. <br/>
-	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData))"/>
+	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </summary>
 	/// <param name="data">
 	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
 	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
-	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData))"/>
+	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </param>
 	/// <param name="failOnNotExist">[Unknown]</param>
 	/// <returns>The session token of the user.</returns>
 	public static async Task<string> LoginAndGetToken(LCCombinedAuthData data, bool failOnNotExist = false)
 		=> (string)(await LoginWithAuthData(data, failOnNotExist))["sessionToken"];
 
-	public static async Task<T> Request<T>(
+	internal static async Task<T> Request<T>(
 		string path,
 		HttpMethod method,
 		Dictionary<string, object>? headers = null,
@@ -100,7 +102,8 @@ public static class LCHelper
 			RequestUri = new Uri(url),
 			Method = method,
 		};
-		FillHeaders(request.Headers, headers);
+		request.SetNoCors();
+		await FillHeaders(request.Headers, headers);
 
 		string? content = null;
 		if (data != null)
@@ -145,7 +148,7 @@ public static class LCHelper
 		}
 		return url;
 	}
-	private static void FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null)
+	private static async Task FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null)
 	{
 		// 额外 headers
 		if (reqHeaders != null)
@@ -158,7 +161,7 @@ public static class LCHelper
 		// 签名
 		long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 		string data = $"{timestamp}{AppKey}";
-		string hash = GetMD5HashHexString(data);
+		string hash = await GetMD5HashHexString(data);
 		string sign = $"{hash},{timestamp}";
 		headers.Add("X-LC-Sign", sign);
 	}

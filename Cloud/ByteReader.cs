@@ -11,21 +11,21 @@ namespace PhigrosLibraryCSharp;
 // read header	| read string bytes					|read record																								| read string... 
 
 [StructLayout(LayoutKind.Sequential)]
-public struct PartialGameRecord
+internal struct PartialGameRecord
 {
 	//[FieldOffset(0)]
-	public int Score;
+	internal int Score;
 	//[FieldOffset(4)]
-	public float Acc;
+	internal float Acc;
 }
-public struct MoreInfoPartialGameRecord
+internal struct MoreInfoPartialGameRecord
 {
-	public int Score;
-	public float Acc;
-	public bool IsFc;
-	public int LevelType;
+	internal int Score;
+	internal float Acc;
+	internal bool IsFc;
+	internal int LevelType;
 
-	public MoreInfoPartialGameRecord(PartialGameRecord data, bool isfc, int levelType)
+	internal MoreInfoPartialGameRecord(PartialGameRecord data, bool isfc, int levelType)
 	{
 		this.Score = data.Score;
 		this.Acc = data.Acc;
@@ -33,12 +33,12 @@ public struct MoreInfoPartialGameRecord
 		this.LevelType = levelType;
 	}
 }
-public class ByteReader // fuck my brain is going to explode if i keep working on this shit
+internal class ByteReader // fuck my brain is going to explode if i keep working on this shit
 {
-	public byte[] Data { get; set; }
-	public int Offset { get; private set; }
-	public int RecordRead { get; private set; } = 0;
-	public static IReadOnlyDictionary<int, string> IntLevelToStringLevel { get; } = new Dictionary<int, string>()
+	internal byte[] Data { get; set; }
+	internal int Offset { get; private set; }
+	internal int RecordRead { get; private set; } = 0;
+	internal static IReadOnlyDictionary<int, string> IntLevelToStringLevel { get; } = new Dictionary<int, string>()
 	{
 		{ 0, "EZ" },
 		{ 1, "HD" },
@@ -46,32 +46,32 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		{ 3, "AT" }
 	};
 
-	public ByteReader(byte[] data, int offset = 0)
+	internal ByteReader(byte[] data, int offset = 0)
 	{
 		this.Offset = offset;
 		this.Data = data;
 	}
-	public bool ReadIsFc() // i have no idea why is it like this
+	internal bool ReadIsFc() // i have no idea why is it like this
 	{
 		this.Offset++;
 		return (this.Data[this.Offset - 1] & (1 << this.RecordRead)) != 0;
 	}
-	public bool ReadBool(int num, int index)
+	internal bool ReadBool(int num, int index)
 	{
 		return (num & (1 << index)) != 0;
 	}
-	public void ReadHeader(int size)
+	internal void ReadHeader(int size)
 	{
 		this.Offset += size;
 	}
-	public byte[] ReadStringBytes()
+	internal byte[] ReadStringBytes()
 	{
 		this.RecordRead++;
 		byte[] data = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
 		this.Offset += this.Data[this.Offset] + 1;
 		return data;
 	}
-	public List<MoreInfoPartialGameRecord> ReadRecord()
+	internal List<MoreInfoPartialGameRecord> ReadRecord()
 	{
 		List<MoreInfoPartialGameRecord> scores = new();
 		int readLen = this.Data[this.Offset - 3] - 2;
@@ -106,11 +106,11 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		// Offset++;
 		return scores;
 	}
-	public void Jump(int offset)
+	internal void Jump(int offset)
 	{
 		this.Offset += offset;
 	}
-	public List<InternalScoreFormat> ReadAll(in IReadOnlyDictionary<string, float[]> difficulties)
+	internal List<InternalScoreFormat> ReadAll(in IReadOnlyDictionary<string, float[]> difficulties)
 	{
 		int headerLength;
 		// auto detection

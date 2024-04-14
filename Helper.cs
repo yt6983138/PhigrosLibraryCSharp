@@ -40,4 +40,20 @@ public static class Helper
 		}
 		return sb.ToString();
 	}
+	private readonly static HttpRequestOptionsKey<IDictionary<string, object>> _fetchRequestKey = new("WebAssemblyFetchOptions");
+	internal static void SetNoCors(this HttpRequestMessage requestMessage)
+	{
+		IDictionary<string, object> dictionary;
+		if (requestMessage.Options.TryGetValue(_fetchRequestKey, out IDictionary<string, object>? value2))
+		{
+			dictionary = value2;
+		}
+		else
+		{
+			dictionary = new Dictionary<string, object>(StringComparer.Ordinal);
+			requestMessage.Options.Set(_fetchRequestKey, dictionary);
+		}
+
+		dictionary["mode"] = "no-cors";
+	}
 }

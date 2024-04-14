@@ -1,5 +1,7 @@
 ﻿namespace PhigrosLibraryCSharp;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+// #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 public enum ScoreStatus
 {
 	Bugged = -1,
@@ -67,7 +69,7 @@ public struct InternalScoreFormat
 		this.Status = status;
 		this.DifficultyName = diffcultyName;
 	}
-	public InternalScoreFormat(MoreInfoPartialGameRecord record, string name, float chartConstant, in IReadOnlyDictionary<int, string> levelTranslateTable)
+	internal InternalScoreFormat(MoreInfoPartialGameRecord record, string name, float chartConstant, in IReadOnlyDictionary<int, string> levelTranslateTable)
 	{
 		this.Score = record.Score;
 		this.Acc = record.Acc;

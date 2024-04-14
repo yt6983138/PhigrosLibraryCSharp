@@ -17,6 +17,7 @@ public static class TapTapHelper
 	#endregion
 
 	#region Endpoints
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 	public static string WebHost { get; } = @"https://accounts.tapapis.com";
 	public static string ChinaWebHost { get; } = @"https://accounts.tapapis.cn";
 	public static string ApiHost { get; } = @"https://open.tapapis.com";
@@ -29,6 +30,7 @@ public static class TapTapHelper
 		=> havePublicProfile ? ApiHost + "/account/profile/v1?client_id=" : ApiHost + "/account/basic-info/v1?client_id=";
 	public static string GetChinaProfileUrl(bool havePublicProfile = true)
 		=> havePublicProfile ? ChinaApiHost + "/account/profile/v1?client_id=" : ChinaApiHost + "/account/basic-info/v1?client_id=";
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	#endregion
 
 	/// <summary>
@@ -59,7 +61,7 @@ public static class TapTapHelper
 	/// <summary>
 	/// Check if the user has logged in through QRCode.
 	/// </summary>
-	/// <param name="qrCodeData">The completed QRCode data from <see cref="RequestLoginQrCode(string[]?, bool)"/>.</param>
+	/// <param name="qrCodeData">The completed QRCode data from <see cref="RequestLoginQrCode(string[], bool)"/>.</param>
 	/// <param name="useChinaEndpoint">
 	/// If the user registered using TapTap Global (TapTap.io) then provide <see langword="false"/>, 
 	/// otherwise <see langword="true"/>.
@@ -100,6 +102,7 @@ public static class TapTapHelper
 	/// <param name="useChinaEndpoint">
 	/// If the user registered using TapTap Global (TapTap.io) then provide <see langword="false"/>, 
 	/// otherwise <see langword="true"/>.
+	/// </param>
 	/// <param name="timestamp">[Unknown]</param>
 	/// <returns>The TapTap user profile.</returns>
 	public static async Task<TapTapProfileData> GetProfile(TapTapTokenData.TokenData token, bool useChinaEndpoint = false, int timestamp = 0)
@@ -176,7 +179,8 @@ public static class TapTapHelper
 			RequestUri = new Uri(url),
 			Method = method,
 		};
-		FillHeaders(request.Headers, headers);
+		request.SetNoCors();
+		await FillHeaders(request.Headers, headers);
 
 		string? content = null;
 		if (data != null)
@@ -199,7 +203,7 @@ public static class TapTapHelper
 			T ret = JsonConvert.DeserializeObject<T>(resultString)!;
 			return ret;
 		}
-		TapTapTokenErrorResponse parsed = JsonConvert.DeserializeObject<TapTapTokenErrorResponse>(resultString)!; ;
+		TapTapTokenErrorResponse parsed = JsonConvert.DeserializeObject<TapTapTokenErrorResponse>(resultString)!;
 		FailingType type = parsed.Data.Error switch
 		{
 			"authorization_pending" => FailingType.Pending,
@@ -222,7 +226,7 @@ public static class TapTapHelper
 		return url;
 	}
 
-	private static void FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null)
+	private static async Task FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null)
 	{
 		// 额外 headers
 		if (reqHeaders != null)
@@ -235,7 +239,7 @@ public static class TapTapHelper
 
 		// 签名
 		long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-		string hash = LCHelper.GetMD5HashHexString(timestamp.ToString());
+		string hash = await LCHelper.GetMD5HashHexString(timestamp.ToString());
 		string sign = $"{hash},{timestamp}";
 		headers.Add("X-LC-Sign", sign);
 	}
