@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -102,7 +103,7 @@ public static class LCHelper
 			RequestUri = new Uri(url),
 			Method = method,
 		};
-		request.SetNoCors();
+		// request.SetNoCors();
 		await FillHeaders(request.Headers, headers);
 
 		string? content = null;
@@ -146,6 +147,9 @@ public static class LCHelper
 			string queries = string.Join("&", queryPairs);
 			url = $"{url}?{queries}";
 		}
+
+		if (TapTapHelper.IsWASM)
+			url = TapTapHelper.WASMCorsProxy + WebUtility.UrlEncode(url);
 		return url;
 	}
 	private static async Task FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null)

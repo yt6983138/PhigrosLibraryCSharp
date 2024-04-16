@@ -1,18 +1,33 @@
 ﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 
+/// <summary>
+/// A container containing <see cref="RawSave"/>s.
+/// </summary>
 public struct RawSaveContainer
 {
+	/// <summary>
+	/// Player's <see cref="RawSave"/>s.
+	/// </summary>
 	public List<RawSave> results;
 
-	public List<SimplifiedSave> GetParsedSaves()
+	/// <summary>
+	/// Get <see cref="SimplifiedSave"/>s by parsing them.
+	/// </summary>
+	/// <returns>A <see cref="List{T}"/> of <see cref="SimplifiedSave"/>s containing parsed saves.</returns>
+	public readonly List<SimplifiedSave> GetParsedSaves()
 	{
 		List<SimplifiedSave> saves = new();
 		foreach (RawSave item in this.results) saves.Add(item.ToParsed());
 		return saves;
 	}
 }
+/// <summary>
+/// Raw save directly converted from cloud object.
+/// </summary>
 public class RawSave
 {
+	// yep i cant remember those too
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 	public DateTime createdAt;
 	public GameFile gameFile;
 	public RawSaveTime modifiedAt;
@@ -21,7 +36,12 @@ public class RawSave
 	public string summary = "";
 	public DateTime updatedAt;
 	public RawUserInfo user;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
+	/// <summary>
+	/// Convert to <see cref="SimplifiedSave"/>.
+	/// </summary>
+	/// <returns>A converted <see cref="SimplifiedSave"/>.</returns>
 	public SimplifiedSave ToParsed()
 	{
 		return new SimplifiedSave()
@@ -36,6 +56,8 @@ public class RawSave
 		};
 	}
 }
+// sorry i cant remember what those are anymore
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public struct GameFile
 {
 	public string __type;
@@ -67,3 +89,4 @@ public struct RawUserInfo
 	public string className;
 	public string objectId;
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

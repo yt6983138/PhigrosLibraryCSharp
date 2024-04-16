@@ -2,8 +2,16 @@
 
 namespace PhigrosLibraryCSharp;
 
+/// <summary>
+/// A helper class can be used to assist you.
+/// </summary>
 public static class Helper
 {
+	/// <summary>
+	/// Get <see cref="ScoreStatus"/> of a raw record.
+	/// </summary>
+	/// <param name="record">The game record.</param>
+	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
 	public static ScoreStatus ParseStatus(ScoreFormat record)
 	{
 		if (record.a == 100)
@@ -20,6 +28,11 @@ public static class Helper
 		if (record.s >= 0) { return ScoreStatus.False; }
 		return ScoreStatus.Bugged;
 	}
+	/// <summary>
+	/// Convert difficulty string to index, ex EZ, HD, IN...
+	/// </summary>
+	/// <param name="diff">Difficulty string, ex EZ, HD, IN...</param>
+	/// <returns>A <see cref="byte"/> presenting the difficulty index.</returns>
 	public static byte DifficultStringToIndex(string diff)
 	{
 		switch (diff.ToUpper())

@@ -4,33 +4,56 @@ namespace PhigrosLibraryCSharp.Cloud.DataStructure;
 
 
 [StructLayout(LayoutKind.Explicit)]
-public struct RawSummaryFirst
+internal struct RawSummaryFirst
 {
 	[FieldOffset(0)]
-	public byte SaveVersion;
+	internal byte SaveVersion;
 	[FieldOffset(1)]
-	public ushort ChallengeCode;
+	internal ushort ChallengeCode;
 	[FieldOffset(3)]
-	public float Rks;
+	internal float Rks;
 	[FieldOffset(7)]
-	public byte GameVersion;
+	internal byte GameVersion;
 	[FieldOffset(8)]
-	public byte AvatarStringSize;
+	internal byte AvatarStringSize;
 }
 [StructLayout(LayoutKind.Sequential)]
-public struct RawSummaryLast
+internal struct RawSummaryLast
 {
 	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-	public ushort[] Scores;
+	internal ushort[] Scores;
 }
+/// <summary>
+/// The player's summary.
+/// </summary>
 public struct Summary
 {
+	/// <summary>
+	/// The version of save.
+	/// </summary>
 	public short SaveVersion { get; set; }
+	/// <summary>
+	/// The version of game.
+	/// </summary>
 	public short GameVersion { get; set; }
+	/// <summary>
+	/// The player challenge code, example: 123 <br/>
+	/// 1 is the type of challenge, 0 = none, 1 = green... etc. <br/>
+	/// And the 23 part is level.
+	/// </summary>
 	public ushort ChallengeCode { get; set; }
+	/// <summary>
+	/// Avatar id.
+	/// </summary>
 	public string Avatar { get; set; }
+	/// <summary>
+	/// The cleared counts of songs.
+	/// </summary>
 	public List<ushort> Clears { get; set; }
 
+	/// <summary>
+	/// The default player <see cref="Summary"/>.
+	/// </summary>
 	public static Summary Default
 	{
 		get

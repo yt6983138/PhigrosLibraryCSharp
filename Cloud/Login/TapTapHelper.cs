@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using static PhigrosLibraryCSharp.Cloud.Login.DataStructure.RequestException;
@@ -14,10 +16,16 @@ public static class TapTapHelper
 	#region Constants
 	internal const string TapSDKVersion = "2.1";
 	private static readonly HttpClient _client = new();
+	internal static bool IsWASM { get; } = RuntimeInformation.ProcessArchitecture == Architecture.Wasm;
 	#endregion
 
 	#region Endpoints
+	/// <summary>
+	/// When on WASM, you may need to set this property to have cors disabled. (Browser limit)
+	/// </summary>
+	public static string WASMCorsProxy { get; set; } = "https://corsproxy.io/?";
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 	public static string WebHost { get; } = @"https://accounts.tapapis.com";
 	public static string ChinaWebHost { get; } = @"https://accounts.tapapis.cn";
 	public static string ApiHost { get; } = @"https://open.tapapis.com";
@@ -179,7 +187,7 @@ public static class TapTapHelper
 			RequestUri = new Uri(url),
 			Method = method,
 		};
-		request.SetNoCors();
+		// request.SetNoCors();
 		await FillHeaders(request.Headers, headers);
 
 		string? content = null;
@@ -223,6 +231,8 @@ public static class TapTapHelper
 			string queries = string.Join("&", queryPairs);
 			url = $"{url}?{queries}";
 		}
+		if (IsWASM)
+			url = WASMCorsProxy + WebUtility.UrlEncode(url);
 		return url;
 	}
 

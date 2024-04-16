@@ -26,35 +26,62 @@ public class LCCombinedAuthData
 		this.UnionID = profileData.UnionId;
 	}
 
+	/// <summary>
+	/// The user's kid data. [Unknown]
+	/// </summary>
 	[JsonProperty("kid")]
 	public string Kid { get; set; }
 
+	/// <summary>
+	/// The user's TapTap access token.
+	/// </summary>
 	[JsonProperty("access_token")]
 	public string Token { get; set; }
 
+	/// <summary>
+	/// The type of user's TapTapToken.
+	/// </summary>
 	[JsonProperty("token_type")]
 	public string TokenType { get; set; }
 
+	/// <summary>
+	/// The user's mac key. [Unknown]
+	/// </summary>
 	[JsonProperty("mac_key")]
 	public string MacKey { get; set; }
 
+	/// <summary>
+	/// The user's mac algorithm. [Unknown]
+	/// </summary>
 	[JsonProperty("mac_algorithm")]
 	public string MacAlgorithm { get; set; }
 
+	/// <summary>
+	/// The user's open id.
+	/// </summary>
 	[JsonProperty("openid")]
 	public string OpenID { get; set; }
 
+	/// <summary>
+	/// The user's TapTap name.
+	/// </summary>
 	[JsonProperty("name")]
 	public string Name { get; set; }
 
+	/// <summary>
+	/// The user's TapTap avatar.
+	/// </summary>
 	[JsonProperty("avatar")]
 	public string Avatar { get; set; }
 
+	/// <summary>
+	/// The user's union id. 
+	/// </summary>
 	[JsonProperty("unionid")]
 	public string UnionID { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-	public Dictionary<string, object> ToDictionary()
+	internal Dictionary<string, object> ToDictionary()
 	{
 		Type typeOfThis = typeof(LCCombinedAuthData);
 		System.Reflection.PropertyInfo[] properties = typeOfThis.GetProperties();

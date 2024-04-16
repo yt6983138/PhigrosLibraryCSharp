@@ -2,9 +2,9 @@
 
 namespace PhigrosLibraryCSharp;
 
-public static class SerialHelper
+internal static class SerialHelper
 {
-	public static byte[] StructToBytes<T>(T structure) where T : struct
+	internal static byte[] StructToBytes<T>(T structure) where T : struct
 	{
 		int size = Marshal.SizeOf(structure);
 		byte[] output = new byte[size];
@@ -22,7 +22,7 @@ public static class SerialHelper
 		}
 		return output;
 	}
-	public static T ByteToStruct<T>(byte[] bytes) where T : struct
+	internal static T ByteToStruct<T>(byte[] bytes) where T : struct
 	{
 		T str = new();
 

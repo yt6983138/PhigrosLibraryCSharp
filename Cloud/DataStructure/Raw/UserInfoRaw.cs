@@ -2,6 +2,7 @@
 
 namespace PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 public struct UserInfoRaw
 {
 	public ACLRaw ACL;
@@ -43,3 +44,4 @@ public struct ACLReadWrite
 	public bool read;
 	public bool write;
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
