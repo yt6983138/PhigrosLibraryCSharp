@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using PhigrosLibraryCSharp.Cloud.DataStructure;
 using PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
+using PhigrosLibraryCSharp.Cloud.Login;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -78,6 +79,8 @@ public class SaveHelper
 	internal const string CloudMeAddress = @"https://rak3ffdi.cloud.tds1.tapapis.cn/1.1/users/me";
 	internal const string CloudGameSaveAddress = @"https://rak3ffdi.cloud.tds1.tapapis.cn/1.1/classes/_GameSave";
 	internal const string CloudServerAddress = @"https://rak3ffdi.cloud.tds1.tapapis.cn";
+	internal static readonly byte[] Iv = Convert.FromBase64String(CloudAESIV);
+	internal static readonly byte[] Key = Convert.FromBase64String(CloudAESKey);
 	private readonly JsonSerializerSettings SerializerSettings = new()
 	{
 		Error = (_, args) =>
@@ -85,7 +88,10 @@ public class SaveHelper
 			args.ErrorContext.Handled = true; // ignore errors
 		}
 	};
-	private string? SessionToken { get; set; } = null;
+	/// <summary>
+	/// The user's session token.
+	/// </summary>
+	public string? SessionToken { get; private set; } = null;
 	private HttpClient Client { get; set; } = new();
 	/// <summary>
 	/// A delegate that can be used on WASM platform or other platforms where AES is not supported.
@@ -222,14 +228,19 @@ public class SaveHelper
 	{
 		this.SessionToken = sessionToken;
 		this.Client = new();
-		this.Client.DefaultRequestHeaders.Add("X-LC-Id", "rAK3FfdieFob2Nn8Am");
-		this.Client.DefaultRequestHeaders.Add("X-LC-Key", "Qr9AEqtuoSVS3zeD6iVbM4ZC0AtkJcQ89tywVyi0");
+		this.Client.DefaultRequestHeaders.Add("X-LC-Id", LCHelper.ClientId);
+		this.Client.DefaultRequestHeaders.Add("X-LC-Key", LCHelper.AppKey);
 		this.Client.DefaultRequestHeaders.Add("User-Agent", "LeanCloud-CSharp-SDK/1.0.3");
 		this.Client.DefaultRequestHeaders.Add("Accept", "application/json");
 		this.Client.DefaultRequestHeaders.Add("X-LC-Session", sessionToken);
 
-		if (sessionToken.Length != 25) throw new Exception("Invalid token.");
+		if (sessionToken.Length != 25 ||
+			!sessionToken.All(char.IsLetterOrDigit))
+		{
+			throw new ArgumentException("Invalid token.", nameof(sessionToken));
+		}
 	}
+	#region Raw operation
 	/// <summary>
 	/// Get the raw save from cloud.
 	/// </summary>
@@ -245,6 +256,28 @@ public class SaveHelper
 		return container;
 	}
 	/// <summary>
+	/// Get raw zip from cloud.
+	/// </summary>
+	/// <param name="obj">Target cloud object.</param>
+	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
+	public Task<byte[]> GetSaveRawZipAsync(PhiCloudObj obj)
+		=> this.GetRawAddressAsync(obj.Url);
+	/// <summary>
+	/// Get raw zip from cloud.
+	/// </summary>
+	/// <param name="obj">Target save.</param>
+	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
+	public Task<byte[]> GetSaveRawZipAsync(SimplifiedSave obj)
+		=> this.GetRawAddressAsync(obj.GameSave.Url);
+	/// <summary>
+	/// Decrypt using Phigros' key and iv.
+	/// </summary>
+	/// <param name="data">The data to decrypt.</param>
+	/// <returns>Decrypted data.</returns>
+	public Task<byte[]> Decrypt(byte[] data)
+		=> this.Decrypter(QuickCopy(Key), QuickCopy(Iv), data);
+	#endregion
+	/// <summary>
 	/// Get game saves that the user has.
 	/// </summary>
 	/// <param name="difficulties">Parsed difficulties CSV from <see href="https://github.com/3035936740/Phigros_Resource/"/>.</param>
@@ -255,14 +288,12 @@ public class SaveHelper
 		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
 		// Console.WriteLine(raw.Count);
 
-		byte[] iv = Convert.FromBase64String(CloudAESIV);
-		byte[] key = Convert.FromBase64String(CloudAESKey);
 
 		List<(Summary Summary, GameSave Save)> saves = new();
 		List<Task<byte[]>> saveTasks = new();
 		for (int k = 0; k < raw.Count && k < maxEntries; k++)
 		{
-			saveTasks.Add(this.Client.GetByteArrayAsync(raw[k].GameSave.Url));
+			saveTasks.Add(this.GetSaveRawZipAsync(raw[k]));
 		}
 
 		for (int j = 0; j < saveTasks.Count; j++)
@@ -285,7 +316,7 @@ public class SaveHelper
 				zipFile.GetInputStream(recordFile).Read(decompressed, 0, decompressed.Length);
 				decompressed = decompressed[1..]; // for some reason i need to trim the first byte
 
-				byte[] decrypted = await this.Decrypter(key, iv, decompressed);
+				byte[] decrypted = await this.Decrypt(decompressed);
 
 				ByteReader byteReader = new(decrypted);
 				List<InternalScoreFormat> readRecords;
@@ -346,16 +377,12 @@ public class SaveHelper
 		if (index < 0 || index >= raw.Count)
 			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
 
-		byte[] iv = Convert.FromBase64String(CloudAESIV);
-		byte[] key = Convert.FromBase64String(CloudAESKey);
-
-
 		SimplifiedSave save = raw[index];
 		(Summary Summary, GameSave Save) currentParsing = new();
 		byte[] rawData;
 		try
 		{
-			rawData = await this.Client.GetByteArrayAsync(raw[index].GameSave.Url); // note raw data is zip
+			rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
 		}
 		catch { throw new Exception("Failed to get file."); }
 		using (ZipFile zipFile = new(new MemoryStream(rawData)))
@@ -369,7 +396,7 @@ public class SaveHelper
 			decompressed = decompressed[1..]; // for some reason i need to trim the first byte
 
 			//byte[] decrypted = await this.Runtime!.InvokeAsync<byte[]>("AesDecrypt", decompressed, key, iv); 
-			byte[] decrypted = await this.Decrypter(key, iv, decompressed);
+			byte[] decrypted = await this.Decrypt(decompressed);
 
 			ByteReader byteReader = new(decrypted);
 			GameSave gameSave = new()

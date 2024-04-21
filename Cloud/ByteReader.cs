@@ -33,38 +33,75 @@ internal struct MoreInfoPartialGameRecord
 		this.LevelType = levelType;
 	}
 }
-internal class ByteReader // fuck my brain is going to explode if i keep working on this shit
+/// <summary>
+/// A class can be used to read gameRecord file.
+/// </summary>
+public class ByteReader // fuck my brain is going to explode if i keep working on this shit
 {
-	internal byte[] Data { get; set; }
-	internal int Offset { get; private set; }
-	internal int RecordRead { get; private set; } = 0;
-	internal static IReadOnlyDictionary<int, string> IntLevelToStringLevel { get; } = new Dictionary<int, string>()
+	/// <summary>
+	/// Raw decrypted data of the file.
+	/// </summary>
+	public byte[] Data { get; set; }
+	/// <summary>
+	/// Current reading offset.
+	/// </summary>
+	public int Offset { get; private set; }
+	/// <summary>
+	/// How many records are read.
+	/// </summary>
+	public int RecordRead { get; private set; } = 0;
+	/// <summary>
+	/// A map converting index to readable difficulty.
+	/// </summary>
+	public static IReadOnlyDictionary<int, string> IntLevelToStringLevel { get; } = new Dictionary<int, string>()
 	{
 		{ 0, "EZ" },
 		{ 1, "HD" },
 		{ 2, "IN" },
 		{ 3, "AT" }
 	};
-
-	internal ByteReader(byte[] data, int offset = 0)
+	/// <summary>
+	/// Construct the reader with raw data and starting offset.
+	/// </summary>
+	/// <param name="data">Raw data.</param>
+	/// <param name="offset">Starting offset.</param>
+	public ByteReader(byte[] data, int offset = 0)
 	{
 		this.Offset = offset;
 		this.Data = data;
 	}
-	internal bool ReadIsFc() // i have no idea why is it like this
+	/// <summary>
+	/// Read if the record is fc-ed.
+	/// </summary>
+	/// <returns>If fc-ed, <see langword="true"/>, otherwise <see langword="false"/>.</returns>
+	public bool ReadIsFc() // i have no idea why is it like this
 	{
 		this.Offset++;
 		return (this.Data[this.Offset - 1] & (1 << this.RecordRead)) != 0;
 	}
-	internal bool ReadBool(int num, int index)
+	/// <summary>
+	/// Phigros decided to put 4 or more <see cref="bool"/>s inside a <see cref="byte"/>, use this to get the bool from index.
+	/// </summary>
+	/// <param name="num">The data.</param>
+	/// <param name="index">Index of the <see cref="bool"/> you want to read.</param>
+	/// <returns>The <see cref="bool"/> gotten from num.</returns>
+	public static bool ReadBool(int num, int index)
 	{
 		return (num & (1 << index)) != 0;
 	}
-	internal void ReadHeader(int size)
+	/// <summary>
+	/// Reads the header.
+	/// </summary>
+	/// <param name="size">The size of the header.</param>
+	public void ReadHeader(int size)
 	{
 		this.Offset += size;
 	}
-	internal byte[] ReadStringBytes()
+	/// <summary>
+	/// Reads the string at current offset.
+	/// </summary>
+	/// <returns>The read decoded string.</returns>
+	public byte[] ReadStringBytes()
 	{
 		this.RecordRead++;
 		byte[] data = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
@@ -86,7 +123,7 @@ internal class ByteReader // fuck my brain is going to explode if i keep working
 		{
 			// Console.WriteLine(BitConverter.ToString(Data[Offset..(Offset + 8)]));
 			if (this.Offset == endOffset) break;
-			if (!this.ReadBool(exists, i) || this.Offset + 8 >= this.Data.Length)
+			if (!ReadBool(exists, i) || this.Offset + 8 > this.Data.Length)
 			{
 				// Offset += 8;
 				continue;
@@ -96,7 +133,7 @@ internal class ByteReader // fuck my brain is going to explode if i keep working
 			scores.Add(
 				new MoreInfoPartialGameRecord(
 					record,
-					this.ReadBool(fc, i),
+					ReadBool(fc, i),
 					i
 				)
 			);
@@ -106,11 +143,20 @@ internal class ByteReader // fuck my brain is going to explode if i keep working
 		// Offset++;
 		return scores;
 	}
-	internal void Jump(int offset)
+	/// <summary>
+	/// Jump with offset.
+	/// </summary>
+	/// <param name="offset">The offset relative to current position you want to jump.</param>
+	public void Jump(int offset)
 	{
 		this.Offset += offset;
 	}
-	internal List<InternalScoreFormat> ReadAll(in IReadOnlyDictionary<string, float[]> difficulties)
+	/// <summary>
+	/// Read all the records.
+	/// </summary>
+	/// <param name="difficulties">The difficulties table of the charts.</param>
+	/// <returns>A list of <see cref="InternalScoreFormat"/> containing the user's records.</returns>
+	public List<InternalScoreFormat> ReadAll(in IReadOnlyDictionary<string, float[]> difficulties)
 	{
 		int headerLength;
 		// auto detection
