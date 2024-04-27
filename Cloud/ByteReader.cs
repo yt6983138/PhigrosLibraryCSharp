@@ -158,31 +158,42 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// <returns>A list of <see cref="InternalScoreFormat"/> containing the user's records.</returns>
 	public List<InternalScoreFormat> ReadAll(in IReadOnlyDictionary<string, float[]> difficulties)
 	{
-		int headerLength;
 		// auto detection
-		string first64 = Encoding.ASCII.GetString(this.Data[0..64]);
-		int glaciaxionLocation = first64.IndexOf("Glaciaxion");
-		int nonMelodicLocation = first64.IndexOf("NonMelodic");
-		if (glaciaxionLocation != -1)
+		// int glaciaxionLocation = first64.IndexOf("Glaciaxion");
+		// int nonMelodicLocation = first64.IndexOf("NonMelodic");
+		// if (glaciaxionLocation != -1)
+		// {
+		// 	headerLength = glaciaxionLocation - 1;
+		// }
+		// else if (nonMelodicLocation != -1) // old version compatibility
+		// {
+		// 	headerLength = nonMelodicLocation - 1;
+		// }
+		bool success = false;
+		for (int i = 0; i < 16; i++) 
 		{
-			headerLength = glaciaxionLocation - 1;
+			byte[] datas = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
+			if (Encoding.ASCII.GetString(datas).All(x => !char.IsControl(x))) 
+			{
+				success = true;
+				break;
+			}
+			Offset++;
 		}
-		else if (nonMelodicLocation != -1) // old version compatibility
+		if (!success) // fall back manual detection
 		{
-			headerLength = nonMelodicLocation - 1;
-		}
-		else // fall back manual detection
-		{
-			headerLength = this.Data[0] switch
+			Offset = 0;
+			int headerLength = this.Data[0] switch
 			{
 				0x9D => 2, // i have no idea what those are
 				0x7E => 1,
 				0x2B => 24,
+				0x66 => 1,
 				_ => 2
 			};
+			this.ReadHeader(headerLength);
 		}
 
-		this.ReadHeader(headerLength);
 		List<InternalScoreFormat> scores = new();
 		while (this.Offset < this.Data.Length)
 		{
