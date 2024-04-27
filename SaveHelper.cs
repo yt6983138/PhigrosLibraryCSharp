@@ -250,8 +250,8 @@ public class SaveHelper
 	{
 		if (this.SessionToken == null) throw new Exception("Session token cannot be null.");
 		HttpResponseMessage response = await this.Client.GetAsync(CloudGameSaveAddress);
-		if (!response.IsSuccessStatusCode) throw new Exception("Failed to get.");
 		string content = await response.Content.ReadAsStringAsync();
+		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		RawSaveContainer container = JsonConvert.DeserializeObject<RawSaveContainer>(content, this.SerializerSettings);
 		return container;
 	}
@@ -305,7 +305,7 @@ public class SaveHelper
 			{
 				rawData = await saveTasks[j]; // note raw data is zip
 			}
-			catch { Console.WriteLine("failed"); continue; }
+			catch { continue; }
 			using (ZipFile zipFile = new(new MemoryStream(rawData)))
 			{
 				#region Save
@@ -379,12 +379,7 @@ public class SaveHelper
 
 		SimplifiedSave save = raw[index];
 		(Summary Summary, GameSave Save) currentParsing = new();
-		byte[] rawData;
-		try
-		{
-			rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
-		}
-		catch { throw new Exception("Failed to get file."); }
+		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
 		using (ZipFile zipFile = new(new MemoryStream(rawData)))
 		{
 			#region Save
@@ -445,7 +440,7 @@ public class SaveHelper
 	{
 		if (this.SessionToken == null) throw new Exception("Session token cannot be null.");
 		HttpResponseMessage response = await this.Client.GetAsync(address);
-		if (!response.IsSuccessStatusCode) throw new Exception("Failed to get.");
+		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch.", null, response.StatusCode);
 		byte[] content = await response.Content.ReadAsByteArrayAsync();
 
 		return content;
@@ -459,8 +454,8 @@ public class SaveHelper
 	{
 		if (this.SessionToken == null) throw new Exception("Session token cannot be null.");
 		HttpResponseMessage response = await this.Client.GetAsync(CloudMeAddress);
-		if (!response.IsSuccessStatusCode) throw new Exception("Failed to get.");
 		string content = await response.Content.ReadAsStringAsync();
+		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		UserInfoRaw user = JsonConvert.DeserializeObject<UserInfoRaw>(content, this.SerializerSettings);
 
 		return new UserInfo()
