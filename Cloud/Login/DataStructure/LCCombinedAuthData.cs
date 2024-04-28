@@ -11,8 +11,8 @@ public class LCCombinedAuthData
 	/// <summary>
 	/// Creates a combined collection of <see cref="TapTapProfileData.ProfileData"/> and <see cref="TapTapTokenData.TokenData"/>.
 	/// </summary>
-	/// <param name="profileData">Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>.</param>
-	/// <param name="tokenData">Token data gotten from <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>.</param>
+	/// <param name="profileData">Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>.</param>
+	/// <param name="tokenData">Token data gotten from <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>.</param>
 	public LCCombinedAuthData(TapTapProfileData.ProfileData profileData, TapTapTokenData.TokenData tokenData)
 	{
 		this.Kid = tokenData.Kid;

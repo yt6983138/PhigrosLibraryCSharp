@@ -26,16 +26,10 @@ public static class TapTapHelper
 	public static string WASMCorsProxy { get; set; } = "https://corsproxy.io/?";
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-	public static string WebHost { get; } = @"https://accounts.tapapis.com";
 	public static string ChinaWebHost { get; } = @"https://accounts.tapapis.cn";
-	public static string ApiHost { get; } = @"https://open.tapapis.com";
 	public static string ChinaApiHost { get; } = @"https://open.tapapis.cn";
-	public static string CodeUrl => WebHost + @"/oauth2/v1/device/code";
-	public static string ChinaCodeUrl => ChinaWebHost + @"/oauth2/v1/device/code";
-	public static string TokenUrl => WebHost + @"/oauth2/v1/token";
-	public static string ChinaTokenUrl => ChinaWebHost + @"/oauth2/v1/token";
-	public static string GetProfileUrl(bool havePublicProfile = true)
-		=> havePublicProfile ? ApiHost + "/account/profile/v1?client_id=" : ApiHost + "/account/basic-info/v1?client_id=";
+	public static string ChinaCodeUrl { get; } = ChinaWebHost + @"/oauth2/v1/device/code";
+	public static string ChinaTokenUrl { get; } = ChinaWebHost + @"/oauth2/v1/token";
 	public static string GetChinaProfileUrl(bool havePublicProfile = true)
 		=> havePublicProfile ? ChinaApiHost + "/account/profile/v1?client_id=" : ChinaApiHost + "/account/basic-info/v1?client_id=";
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
@@ -45,13 +39,9 @@ public static class TapTapHelper
 	/// Request a url for user to login.
 	/// </summary>
 	/// <param name="permissions">Extra permissions to ask, provide <see langword="null"/> to use default permissions.</param>
-	/// <param name="useChinaEndpoint">
-	/// If the user registered using TapTap Global (TapTap.io) then provide <see langword="false"/>, 
-	/// otherwise <see langword="true"/>.
-	/// </param>
 	/// <returns>A completed collection of QRCode data. See <see cref="CompleteQRCodeData"/> for more information.</returns>
 	/// <seealso cref="CompleteQRCodeData"/>
-	public static async Task<CompleteQRCodeData> RequestLoginQrCode(string[]? permissions = null, bool useChinaEndpoint = false)
+	public static async Task<CompleteQRCodeData> RequestLoginQrCode(string[]? permissions = null)
 	{
 		string clientId = Guid.NewGuid().ToString("N");
 		Dictionary<string, object> parameters = new()
@@ -64,19 +54,15 @@ public static class TapTapHelper
 			{ "info", "{\"device_id\":\"" + clientId + "\"}" } 
 			// ^ https://github.com/taptap/TapSDK-UE4/blob/f66d15048ebff4628f1614ca8df8a7a07dabf6cb/TapCommon/Source/TapCommon/Tools/TUDeviceInfo.h#L30 
 		};
-		return new(await Request<PartialTapTapQRCodeData>(useChinaEndpoint ? ChinaCodeUrl : CodeUrl, HttpMethod.Post, data: parameters), clientId);
+		return new(await Request<PartialTapTapQRCodeData>(ChinaCodeUrl, HttpMethod.Post, data: parameters), clientId);
 	}
 	/// <summary>
 	/// Check if the user has logged in through QRCode.
 	/// </summary>
-	/// <param name="qrCodeData">The completed QRCode data from <see cref="RequestLoginQrCode(string[], bool)"/>.</param>
-	/// <param name="useChinaEndpoint">
-	/// If the user registered using TapTap Global (TapTap.io) then provide <see langword="false"/>, 
-	/// otherwise <see langword="true"/>.
-	/// </param>
+	/// <param name="qrCodeData">The completed QRCode data from <see cref="RequestLoginQrCode(string[])"/>.</param>
 	/// <returns><see langword="null"/> if not verified, the token data if verified.</returns>
 	/// <exception cref="Exception">Received unknown response</exception>
-	public static async Task<TapTapTokenData?> CheckQRCodeResult(CompleteQRCodeData qrCodeData, bool useChinaEndpoint = false)
+	public static async Task<TapTapTokenData?> CheckQRCodeResult(CompleteQRCodeData qrCodeData)
 	{
 		Dictionary<string, string> data = new()
 		{
@@ -90,7 +76,7 @@ public static class TapTapHelper
 		};
 		try
 		{
-			TapTapTokenData token = await Request<TapTapTokenData>(useChinaEndpoint ? ChinaTokenUrl : TokenUrl, HttpMethod.Post, data: data);
+			TapTapTokenData token = await Request<TapTapTokenData>(ChinaTokenUrl, HttpMethod.Post, data: data);
 			return token;
 		}
 		catch (RequestException ex)
@@ -98,7 +84,7 @@ public static class TapTapHelper
 			if (ex.Failing == FailingType.None) // shouldnt happen
 				return null;
 			else if (ex.Failing == FailingType.Unknown)
-				throw new Exception("Unknown Response", ex);
+				throw;
 
 			return null;
 		}
@@ -106,18 +92,14 @@ public static class TapTapHelper
 	/// <summary>
 	/// Get the profile data of the user.
 	/// </summary>
-	/// <param name="token">The token gotten from <see cref="CheckQRCodeResult(CompleteQRCodeData, bool)"/>.</param>
-	/// <param name="useChinaEndpoint">
-	/// If the user registered using TapTap Global (TapTap.io) then provide <see langword="false"/>, 
-	/// otherwise <see langword="true"/>.
-	/// </param>
+	/// <param name="token">The token gotten from <see cref="CheckQRCodeResult(CompleteQRCodeData)"/>.</param>
 	/// <param name="timestamp">[Unknown]</param>
 	/// <returns>The TapTap user profile.</returns>
-	public static async Task<TapTapProfileData> GetProfile(TapTapTokenData.TokenData token, bool useChinaEndpoint = false, int timestamp = 0)
+	public static async Task<TapTapProfileData> GetProfile(TapTapTokenData.TokenData token, int timestamp = 0)
 	{
 		ArgumentNullException.ThrowIfNull(token, nameof(token));
 		bool hasPublicProfile = token.Scope.Contains("public_profile");
-		string url = (useChinaEndpoint ? GetChinaProfileUrl(hasPublicProfile) : GetProfileUrl(hasPublicProfile)) + LCHelper.ClientId;
+		string url = GetChinaProfileUrl(hasPublicProfile) + LCHelper.ClientId;
 		Uri uri = new(url);
 		int ts = timestamp;
 		if (ts == 0)

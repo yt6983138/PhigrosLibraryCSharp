@@ -1,7 +1,10 @@
 ﻿using System.Net;
 
 namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
-internal class RequestException : Exception
+/// <summary>
+/// An exception that will be thrown to user if server sent unknown response.
+/// </summary>
+public class RequestException : Exception
 {
 	internal enum FailingType
 	{
@@ -21,6 +24,10 @@ internal class RequestException : Exception
 		this.HttpStatus = code;
 	}
 
+	/// <summary>
+	/// Returns a <see cref="string"/> form of this instance.
+	/// </summary>
+	/// <returns>A <see cref="string"/> representing this instance.</returns>
 	public override string ToString()
 	{
 		return $"{this.Failing}, {this.HttpStatus}: {this.Message}";

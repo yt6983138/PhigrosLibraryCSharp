@@ -45,13 +45,13 @@ public static class LCHelper
 	public static Func<string, Task<string>> GetMD5HashHexString { get; set; } = MD5HashHexStringDefaultGetter;
 
 	/// <summary>
-	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
+	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </summary>
 	/// <param name="data">
-	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
+	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </param>
 	/// <param name="failOnNotExist">[Unknown]</param>
@@ -75,13 +75,13 @@ public static class LCHelper
 		return response;
 	}
 	/// <summary>
-	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>, then get the token. <br/>
+	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>, then get the token. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </summary>
 	/// <param name="data">
-	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, bool, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
+	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </param>
 	/// <param name="failOnNotExist">[Unknown]</param>
