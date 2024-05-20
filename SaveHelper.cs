@@ -322,7 +322,7 @@ public class SaveHelper
 				List<InternalScoreFormat> readRecords;
 				try
 				{
-					readRecords = byteReader.ReadAll(difficulties);
+					readRecords = byteReader.ReadAllGameRecord(difficulties);
 				}
 				catch { continue; }
 				GameSave gameSave = new()
@@ -380,31 +380,15 @@ public class SaveHelper
 		SimplifiedSave save = raw[index];
 		(Summary Summary, GameSave Save) currentParsing = new();
 		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
-		using (ZipFile zipFile = new(new MemoryStream(rawData)))
+		ByteReader reader = await this.DecompressForFileAsync(rawData, "gameProgress");
+		GameSave gameSave = new()
 		{
-			#region Save
-			ZipEntry recordFile = zipFile.GetEntry("gameRecord");
-			if (recordFile == null) throw new Exception("gameRecord not found. Format changed?");
-
-			byte[] decompressed = new byte[recordFile.Size];
-			zipFile.GetInputStream(recordFile).Read(decompressed, 0, decompressed.Length);
-			decompressed = decompressed[1..]; // for some reason i need to trim the first byte
-
-			//byte[] decrypted = await this.Runtime!.InvokeAsync<byte[]>("AesDecrypt", decompressed, key, iv); 
-			byte[] decrypted = await this.Decrypt(decompressed);
-
-			ByteReader byteReader = new(decrypted);
-			GameSave gameSave = new()
-			{
-				CreationDate = save.CreationDate,
-				ModificationTime = save.ModificationTime,
-				Records = byteReader.ReadAll(difficulties),
-				Summary = save.Summary
-			};
-			currentParsing.Save = gameSave;
-			#endregion
-
-		}
+			CreationDate = save.CreationDate,
+			ModificationTime = save.ModificationTime,
+			Records = reader.ReadAllGameRecord(difficulties),
+			Summary = save.Summary
+		};
+		currentParsing.Save = gameSave;
 		#region Summary
 		byte[] summary = Convert.FromBase64String(save.Summary);
 		int offset = 0;
@@ -465,6 +449,76 @@ public class SaveHelper
 			CreationTime = user.createdAt,
 			ModificationTime = user.updatedAt
 		};
+	}
+	/// <summary>
+	/// Get player's game progress.
+	/// </summary>
+	/// <param name="index">The index of the save. 0 is always latest.</param>
+	/// <returns>Player's game progress.</returns>
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
+	public async Task<GameProgress> GetGameProgressAsync(int index)
+	{
+		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
+		// Console.WriteLine(raw.Count);
+		if (index < 0 || index >= raw.Count)
+			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
+
+		SimplifiedSave save = raw[index];
+		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
+		ByteReader reader = await this.DecompressForFileAsync(rawData, "gameProgress");
+		return reader.ReadGameProgress();
+	}
+	/// <summary>
+	/// Get player's game settings.
+	/// </summary>
+	/// <param name="index">The index of the save. 0 is always latest.</param>
+	/// <returns>Player's game settings.</returns>
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
+	public async Task<GameSettings> GetGameSettingsAsync(int index)
+	{
+		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
+		// Console.WriteLine(raw.Count);
+		if (index < 0 || index >= raw.Count)
+			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
+
+		SimplifiedSave save = raw[index];
+		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
+		ByteReader reader = await this.DecompressForFileAsync(rawData, "settings");
+		return reader.ReadGameSettings();
+	}
+	/// <summary>
+	/// Get player's game user info.
+	/// </summary>
+	/// <param name="index">The index of the save. 0 is always latest.</param>
+	/// <returns>Player's game user info.</returns>
+	/// <exception cref="ArgumentOutOfRangeException"></exception>
+	public async Task<GameUserInfo> GetGameUserInfoAsync(int index)
+	{
+		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
+		// Console.WriteLine(raw.Count);
+		if (index < 0 || index >= raw.Count)
+			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
+
+		SimplifiedSave save = raw[index];
+		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
+		ByteReader reader = await this.DecompressForFileAsync(rawData, "user");
+		return reader.ReadGameUserInfo();
+	}
+	private async Task<ByteReader> DecompressForFileAsync(byte[] zipRaw, string entry)
+	{
+		using (ZipFile zipFile = new(new MemoryStream(zipRaw)))
+		{
+			ZipEntry recordFile = zipFile.GetEntry(entry);
+			if (recordFile == null) throw new Exception($"{entry} not found. Format changed?");
+
+			byte[] decompressed = new byte[recordFile.Size];
+			zipFile.GetInputStream(recordFile).Read(decompressed, 0, decompressed.Length);
+			decompressed = decompressed[1..]; // for some reason i need to trim the first byte
+
+			byte[] decrypted = await this.Decrypt(decompressed);
+
+			return new(decrypted);
+		}
 	}
 	#endregion
 }

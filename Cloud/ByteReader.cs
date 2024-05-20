@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using PhigrosLibraryCSharp.Cloud.DataStructure;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PhigrosLibraryCSharp;
@@ -33,6 +34,20 @@ internal struct MoreInfoPartialGameRecord
 		this.LevelType = levelType;
 	}
 }
+internal static class ByteReaderExtensions
+{
+	internal static T ThenJump<T>(this T obj, ByteReader reader, int offset)
+	{
+		reader.Jump(offset);
+		return obj;
+	}
+	internal static T Print<T>(this T obj)
+	{
+		Console.WriteLine(obj);
+		return obj;
+	}
+}
+
 /// <summary>
 /// A class can be used to read gameRecord file.
 /// </summary>
@@ -46,10 +61,6 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// Current reading offset.
 	/// </summary>
 	public int Offset { get; private set; }
-	/// <summary>
-	/// How many records are read.
-	/// </summary>
-	public int RecordRead { get; private set; } = 0;
 	/// <summary>
 	/// A map converting index to readable difficulty.
 	/// </summary>
@@ -71,15 +82,6 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		this.Data = data;
 	}
 	/// <summary>
-	/// Read if the record is fc-ed.
-	/// </summary>
-	/// <returns>If fc-ed, <see langword="true"/>, otherwise <see langword="false"/>.</returns>
-	public bool ReadIsFc() // i have no idea why is it like this
-	{
-		this.Offset++;
-		return (this.Data[this.Offset - 1] & (1 << this.RecordRead)) != 0;
-	}
-	/// <summary>
 	/// Phigros decided to put 4 or more <see cref="bool"/>s inside a <see cref="byte"/>, use this to get the bool from index.
 	/// </summary>
 	/// <param name="num">The data.</param>
@@ -90,6 +92,46 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		return (num & (1 << index)) != 0;
 	}
 	/// <summary>
+	/// Reads float at current offset, and jump.
+	/// </summary>
+	/// <returns>The float at current position.</returns>
+	public float ReadFloat()
+	{
+		this.Jump(4);
+		return SerialHelper.ByteToStruct<float>(this.Data[(this.Offset - 4)..this.Offset]);
+	}
+	/// <summary>
+	/// Reads byte at current offset, and jump.
+	/// </summary>
+	/// <returns>The byte at current position.</returns>
+	public byte ReadByte()
+	{
+		this.Jump(1);
+		return this.Data[this.Offset - 1];
+	}
+	/// <summary>
+	/// Reads short/byte at current offset, and jump.
+	/// </summary>
+	/// <returns>The short/byte at current position.</returns>
+	public short ReadVariedInt()
+	{
+		if (this.Data[this.Offset] > 127)
+		{
+			this.Offset += 2;
+			return (short)((0b01111111 & this.Data[this.Offset - 2]) ^ (this.Data[this.Offset - 1] << 7));
+		}
+		else return this.Data[this.Offset++];
+	}
+	/// <summary>
+	/// Reads short at current offset, and jump.
+	/// </summary>
+	/// <returns>The short at current position.</returns>
+	public short ReadShort()
+	{
+		this.Jump(2);
+		return SerialHelper.ByteToStruct<short>(this.Data[(this.Offset - 2)..this.Offset]);
+	}
+	/// <summary>
 	/// Reads the header.
 	/// </summary>
 	/// <param name="size">The size of the header.</param>
@@ -98,12 +140,11 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		this.Offset += size;
 	}
 	/// <summary>
-	/// Reads the string at current offset.
+	/// Reads the string at current offset, and jump.
 	/// </summary>
 	/// <returns>The read decoded string.</returns>
 	public byte[] ReadStringBytes()
 	{
-		this.RecordRead++;
 		byte[] data = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
 		this.Offset += this.Data[this.Offset] + 1;
 		return data;
@@ -156,7 +197,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// </summary>
 	/// <param name="difficulties">The difficulties table of the charts.</param>
 	/// <returns>A list of <see cref="InternalScoreFormat"/> containing the user's records.</returns>
-	public List<InternalScoreFormat> ReadAll(in IReadOnlyDictionary<string, float[]> difficulties)
+	public List<InternalScoreFormat> ReadAllGameRecord(in IReadOnlyDictionary<string, float[]> difficulties)
 	{
 		// auto detection
 		// int glaciaxionLocation = first64.IndexOf("Glaciaxion");
@@ -170,19 +211,19 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		// 	headerLength = nonMelodicLocation - 1;
 		// }
 		bool success = false;
-		for (int i = 0; i < 16; i++) 
+		for (int i = 0; i < 16; i++)
 		{
 			byte[] datas = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
-			if (Encoding.ASCII.GetString(datas).All(x => !char.IsControl(x))) 
+			if (Encoding.ASCII.GetString(datas).All(x => !char.IsControl(x)))
 			{
 				success = true;
 				break;
 			}
-			Offset++;
+			this.Offset++;
 		}
 		if (!success) // fall back manual detection
 		{
-			Offset = 0;
+			this.Offset = 0;
 			int headerLength = this.Data[0] switch
 			{
 				0x9D => 2, // i have no idea what those are
@@ -206,5 +247,66 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 			}
 		}
 		return scores;
+	}
+	/// <summary>
+	/// Read the current data as <see cref="GameUserInfo"/>.
+	/// </summary>
+	/// <returns>User's settings.</returns>
+	public GameUserInfo ReadGameUserInfo()
+	{
+		this.Jump(1);
+		return new(
+			ReadBool(this.Data[0], 0),
+			Encoding.UTF8.GetString(this.ReadStringBytes()),
+			Encoding.UTF8.GetString(this.ReadStringBytes()),
+			Encoding.UTF8.GetString(this.ReadStringBytes())
+			);
+	}
+	/// <summary>
+	/// Read current data as <see cref="GameSettings"/>.
+	/// </summary>
+	/// <returns>User's settings.</returns>
+	public GameSettings ReadGameSettings()
+	{
+		this.Jump(1);
+		return new(
+			ReadBool(this.Data[0], 0),
+			ReadBool(this.Data[0], 1),
+			ReadBool(this.Data[0], 2),
+			ReadBool(this.Data[0], 3),
+			Encoding.UTF8.GetString(this.ReadStringBytes()),
+			this.ReadFloat(),
+			this.ReadFloat(),
+			this.ReadFloat(),
+			this.ReadFloat(),
+			this.ReadFloat(),
+			this.ReadFloat()
+			);
+	}
+	/// <summary>
+	/// Get user's game progress.
+	/// </summary>
+	/// <returns>User's game progress.</returns>
+	public GameProgress ReadGameProgress()
+	{
+		this.Jump(1);
+		return new(
+			ReadBool(this.Data[0], 0),
+			ReadBool(this.Data[0], 1),
+			ReadBool(this.Data[0], 2),
+			ReadBool(this.Data[0], 3),
+			Encoding.UTF8.GetString(this.ReadStringBytes()),
+			this.ReadVariedInt(),
+			this.ReadShort(),
+			new(this.ReadVariedInt(), this.ReadVariedInt(), this.ReadVariedInt(), this.ReadVariedInt(), this.ReadVariedInt()),
+			this.ReadByte(),
+			this.ReadByte(),
+			this.ReadByte(),
+			this.ReadByte(),
+			this.ReadByte(),
+			ReadBool(this.Data[^2], 0),
+			ReadBool(this.Data[^2], 1),
+			ReadBool(this.Data[^2], 2),
+			this.Data[^1]);
 	}
 }
