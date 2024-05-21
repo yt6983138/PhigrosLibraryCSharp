@@ -8,7 +8,21 @@
 /// <param name="GiB">GiB count.</param>
 /// <param name="TiB">TiB count.</param>
 /// <param name="PiB">PiB count.</param>
-public record struct Money(short KiB, short MiB, short GiB, short TiB, short PiB);
+public record struct Money(short KiB, short MiB, short GiB, short TiB, short PiB)
+{
+	/// <inheritdoc/>
+	public override readonly string ToString()
+	{
+		return (this.KiB, this.MiB, this.GiB, this.TiB, this.PiB) switch
+		{
+			(_, _, _, _, > 0) => $"{this.PiB} PiB, {this.TiB} TiB, {this.GiB} GiB, {this.MiB} MiB, {this.KiB} KiB",
+			(_, _, _, > 0, _) => $"{this.TiB} TiB, {this.GiB} GiB, {this.MiB} MiB, {this.KiB} KiB",
+			(_, _, > 0, _, _) => $"{this.GiB} GiB, {this.MiB} MiB, {this.KiB} KiB",
+			(_, > 0, _, _, _) => $"{this.MiB} MiB, {this.KiB} KiB",
+			(_, _, _, _, _) => $"{this.KiB} KiB"
+		};
+	}
+}
 
 /// <summary>
 /// The user's game progress.
