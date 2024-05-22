@@ -380,7 +380,7 @@ public class SaveHelper
 		SimplifiedSave save = raw[index];
 		(Summary Summary, GameSave Save) currentParsing = new();
 		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
-		ByteReader reader = await this.DecompressForFileAsync(rawData, "gameProgress");
+		ByteReader reader = await this.DecompressForFileAsync(rawData, "gameRecord");
 		GameSave gameSave = new()
 		{
 			CreationDate = save.CreationDate,
