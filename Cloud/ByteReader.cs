@@ -34,19 +34,6 @@ internal struct MoreInfoPartialGameRecord
 		this.LevelType = levelType;
 	}
 }
-internal static class ByteReaderExtensions
-{
-	internal static T ThenJump<T>(this T obj, ByteReader reader, int offset)
-	{
-		reader.Jump(offset);
-		return obj;
-	}
-	internal static T Print<T>(this T obj)
-	{
-		Console.WriteLine(obj);
-		return obj;
-	}
-}
 
 /// <summary>
 /// A class can be used to read gameRecord file.
@@ -115,12 +102,12 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// <returns>The short/byte at current position.</returns>
 	public short ReadVariedInt()
 	{
-		if (this.Data[this.Offset] > 127)
+		if ((this.Data[this.Offset.Print("varied int at offset {0}")] > 127).Print("is larger than 127: {0}"))
 		{
 			this.Offset += 2;
-			return (short)((0b01111111 & this.Data[this.Offset - 2]) ^ (this.Data[this.Offset - 1] << 7));
+			return (short)((0b01111111 & this.Data[this.Offset - 2].Print("first: {0}")) ^ (this.Data[this.Offset - 1].Print("second: {0}") << 7));
 		}
-		else return this.Data[this.Offset++];
+		else return this.Data[this.Offset++].Print("single: {0}");
 	}
 	/// <summary>
 	/// Reads short at current offset, and jump.
@@ -145,9 +132,10 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// <returns>The read decoded string.</returns>
 	public byte[] ReadStringBytes()
 	{
-		byte[] data = this.Data[(this.Offset + 1)..(this.Offset + this.Data[this.Offset] + 1)];
-		this.Offset += this.Data[this.Offset] + 1;
-		return data;
+		short length = this.ReadVariedInt().Print("ReadStringBytes length {0}, data:");
+		byte[] data = this.Data[this.Offset..(this.Offset + length)].PrintHex();
+		this.Offset += length.Print("added offset {0}");
+		return data.PrintAsUTF8();
 	}
 	internal List<MoreInfoPartialGameRecord> ReadRecord()
 	{
