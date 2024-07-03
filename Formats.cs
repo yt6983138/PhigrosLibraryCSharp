@@ -15,10 +15,10 @@ public enum ScoreStatus
 	C = 7,
 	False = 8
 }
-public struct ScoreFormat
+public struct RawScoreFormat
 {
 	/// <summary>
-	/// Score, ex: 996105
+	/// CompleteScore, ex: 996105
 	/// </summary>
 	public int s;
 	/// <summary>
@@ -29,12 +29,12 @@ public struct ScoreFormat
 	/// Score Status, 0: not fc, 1: fc...
 	/// </summary>
 	public ScoreStatus c;
-	public InternalScoreFormat ToInternalFormat(float chartConstant, string songName, string diffcultyName)
+	public CompleteScore ToCompleteScore(float chartConstant, string songName, string diffcultyName)
 	{
-		return new InternalScoreFormat { Score = this.s, Acc = this.a, Status = Helper.ParseStatus(this), ChartConstant = chartConstant, Name = songName, DifficultyName = diffcultyName };
+		return new CompleteScore { Score = this.s, Acc = this.a, Status = ScoreHelper.ParseStatus(this), ChartConstant = chartConstant, Name = songName, DifficultyName = diffcultyName };
 	}
 }
-public struct InternalScoreFormat
+public struct CompleteScore
 {
 	/// <summary>
 	/// 0 ~ 1000000
@@ -60,7 +60,7 @@ public struct InternalScoreFormat
 	/// ex. ScoreStatus.A
 	/// </summary>
 	public ScoreStatus Status = ScoreStatus.False;
-	public InternalScoreFormat(int score, double acc, float chartConstant, string name, string diffcultyName, ScoreStatus status)
+	public CompleteScore(int score, double acc, float chartConstant, string name, string diffcultyName, ScoreStatus status)
 	{
 		this.Score = score;
 		this.Acc = acc;
@@ -69,13 +69,13 @@ public struct InternalScoreFormat
 		this.Status = status;
 		this.DifficultyName = diffcultyName;
 	}
-	internal InternalScoreFormat(MoreInfoPartialGameRecord record, string name, float chartConstant, in IReadOnlyDictionary<int, string> levelTranslateTable)
+	internal CompleteScore(MoreInfoPartialGameRecord record, string name, float chartConstant, in IReadOnlyDictionary<int, string> levelTranslateTable)
 	{
 		this.Score = record.Score;
 		this.Acc = record.Acc;
 		this.ChartConstant = chartConstant;
 		this.Name = name;
-		this.Status = Helper.ParseStatus(new ScoreFormat() { a = this.Acc, s = this.Score, c = record.IsFc ? ScoreStatus.Fc : ScoreStatus.NotFc });
+		this.Status = ScoreHelper.ParseStatus(new RawScoreFormat() { a = this.Acc, s = this.Score, c = record.IsFc ? ScoreStatus.Fc : ScoreStatus.NotFc });
 		this.DifficultyName = levelTranslateTable[record.LevelType];
 	}
 	public double GetRksCalculated()
@@ -86,9 +86,9 @@ public struct InternalScoreFormat
 		}
 		return Math.Pow((this.Acc - 55) / 45, 2) * this.ChartConstant;
 	}
-	public ExportScoreFormat Export(string name)
+	public ExportScore Export(string name)
 	{
-		return new ExportScoreFormat()
+		return new ExportScore()
 		{
 			ID = this.Name,
 			Name = name,
@@ -105,9 +105,9 @@ public struct InternalScoreFormat
 		return $"Score: {this.Score}, Acc: {this.Acc}, Status: {nameof(this.Status)}, cc: {this.ChartConstant}, calcedRks: {this.GetRksCalculated()}";
 	}
 }
-public struct ExportScoreFormat
+public struct ExportScore
 {
-	// ID, Name, Difficulty, Chart Constant, Score, Acc, Rks Given, Stat
+	// ID, Name, Difficulty, Chart Constant, CompleteScore, Acc, Rks Given, Stat
 	public string ID;
 	public string Name;
 	public string Difficulty;

@@ -184,8 +184,8 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// Read all the records.
 	/// </summary>
 	/// <param name="difficulties">The difficulties table of the charts.</param>
-	/// <returns>A list of <see cref="InternalScoreFormat"/> containing the user's records.</returns>
-	public List<InternalScoreFormat> ReadAllGameRecord(in IReadOnlyDictionary<string, float[]> difficulties)
+	/// <returns>A list of <see cref="CompleteScore"/> containing the user's records.</returns>
+	public List<CompleteScore> ReadAllGameRecord(in IReadOnlyDictionary<string, float[]> difficulties)
 	{
 		// auto detection
 		// int glaciaxionLocation = first64.IndexOf("Glaciaxion");
@@ -223,7 +223,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 			this.ReadHeader(headerLength);
 		}
 
-		List<InternalScoreFormat> scores = new();
+		List<CompleteScore> scores = new();
 		while (this.Offset < this.Data.Length)
 		{
 			string id = Encoding.UTF8.GetString(this.ReadStringBytes())[..^2];
@@ -231,7 +231,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 
 			foreach (MoreInfoPartialGameRecord item in this.ReadRecord())
 			{
-				scores.Add(new InternalScoreFormat(item, id, difficulties[id][item.LevelType], IntLevelToStringLevel));
+				scores.Add(new CompleteScore(item, id, difficulties[id][item.LevelType], IntLevelToStringLevel));
 			}
 		}
 		return scores;

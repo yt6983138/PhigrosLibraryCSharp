@@ -5,14 +5,14 @@ namespace PhigrosLibraryCSharp;
 /// <summary>
 /// A helper class can be used to assist you.
 /// </summary>
-public static class Helper
+public static class ScoreHelper
 {
 	/// <summary>
 	/// Get <see cref="ScoreStatus"/> of a raw record.
 	/// </summary>
 	/// <param name="record">The game record.</param>
 	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
-	public static ScoreStatus ParseStatus(ScoreFormat record)
+	public static ScoreStatus ParseStatus(RawScoreFormat record)
 	{
 		if (record.a == 100)
 		{
@@ -52,21 +52,5 @@ public static class Helper
 			sb.Append(bytes[i].ToString("x2"));
 		}
 		return sb.ToString();
-	}
-	private readonly static HttpRequestOptionsKey<IDictionary<string, object>> _fetchRequestKey = new("WebAssemblyFetchOptions");
-	internal static void SetNoCors(this HttpRequestMessage requestMessage)
-	{
-		IDictionary<string, object> dictionary;
-		if (requestMessage.Options.TryGetValue(_fetchRequestKey, out IDictionary<string, object>? value2))
-		{
-			dictionary = value2;
-		}
-		else
-		{
-			dictionary = new Dictionary<string, object>(StringComparer.Ordinal);
-			requestMessage.Options.Set(_fetchRequestKey, dictionary);
-		}
-
-		dictionary["mode"] = "no-cors";
 	}
 }

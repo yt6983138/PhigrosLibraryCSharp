@@ -19,7 +19,7 @@ public static class LCHelper
 		=> Task.FromResult(_md5.ComputeHash(Encoding.UTF8.GetBytes(input)).ToHex());
 	private static HttpClient Client { get; } = new()
 	{
-		BaseAddress = new(SaveHelper.CloudServerAddress)
+		BaseAddress = new(Save.CloudServerAddress)
 	};
 	private static Dictionary<string, object> UniversalHeaders { get; } = new()
 	{
@@ -132,7 +132,7 @@ public static class LCHelper
 	}
 	private static string BuildUrl(string path, Dictionary<string, object> queryParams, bool withAPIVersion)
 	{
-		StringBuilder urlSB = new(SaveHelper.CloudServerAddress);
+		StringBuilder urlSB = new(Save.CloudServerAddress);
 		if (withAPIVersion)
 		{
 			urlSB.Append("/1.1"); // https://github.com/leancloud/csharp-sdk/blob/master/Common/Common/LCCore.cs

@@ -8,7 +8,7 @@ public class GameSave
 	/// <summary>
 	/// The player song records.
 	/// </summary>
-	public required List<InternalScoreFormat> Records { get; set; }
+	public required List<CompleteScore> Records { get; set; }
 	/// <summary>
 	/// The creation date of the save.
 	/// </summary>
