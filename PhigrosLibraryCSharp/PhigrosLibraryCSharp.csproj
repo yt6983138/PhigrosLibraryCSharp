@@ -8,6 +8,8 @@
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 	<AssemblyVersion>1.0</AssemblyVersion>
+
+	<BaseOutputPath>..\output\bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

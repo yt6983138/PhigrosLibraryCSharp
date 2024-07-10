@@ -7,6 +7,8 @@
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 
 	<AssemblyVersion>0.1</AssemblyVersion>
+
+	<BaseOutputPath>..\output\bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
