@@ -3,7 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhigrosLibraryCSharp", "PhigrosLibraryCSharp.csproj", "{72957646-E577-402D-A416-EC2938383257}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp", "PhigrosLibraryCSharp\PhigrosLibraryCSharp.csproj", "{252CF720-7CBC-4178-9C77-14E1EA7C91D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C1D6C842-FD5B-4DC2-B61F-4CC2DFFBFBC2}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.PackageExtract", "PhigrosLibraryCSharp.PackageExtract\PhigrosLibraryCSharp.PackageExtract.csproj", "{514EA800-0DC7-4A4A-810F-4C326A78D3F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +21,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{72957646-E577-402D-A416-EC2938383257}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72957646-E577-402D-A416-EC2938383257}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72957646-E577-402D-A416-EC2938383257}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72957646-E577-402D-A416-EC2938383257}.Release|Any CPU.Build.0 = Release|Any CPU
+		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

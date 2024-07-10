@@ -1,4 +1,6 @@
-﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure;
+﻿using PhigrosLibraryCSharp.GameRecords;
+
+namespace PhigrosLibraryCSharp.Cloud.DataStructure;
 
 /// <summary>
 /// A container containing save records.

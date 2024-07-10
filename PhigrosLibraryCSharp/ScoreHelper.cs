@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using PhigrosLibraryCSharp.GameRecords;
+using PhigrosLibraryCSharp.GameRecords.Raw;
+using System.Text;
 
 namespace PhigrosLibraryCSharp;
 

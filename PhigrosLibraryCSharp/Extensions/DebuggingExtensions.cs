@@ -1,14 +1,27 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace PhigrosLibraryCSharp;
-internal static class DebuggingExtensions
+namespace PhigrosLibraryCSharp.Extensions;
+
+#if DEBUG
+public
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#else
+internal
+#endif
+	static class DebuggingExtensions
 {
+#if DEBUG
+	public static bool Enable { get; set; }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#endif
+
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	internal static T Print<T>(this T obj)
 	{
 #if DEBUG
-		Console.WriteLine(obj);
+		if (Enable)
+			Console.WriteLine(obj);
 #endif
 		return obj;
 	}
@@ -16,7 +29,8 @@ internal static class DebuggingExtensions
 	internal static T Print<T>(this T obj, string message)
 	{
 #if DEBUG
-		Console.WriteLine(string.Format(message, obj));
+		if (Enable)
+			Console.WriteLine(string.Format(message, obj));
 #endif
 		return obj;
 	}
@@ -24,7 +38,8 @@ internal static class DebuggingExtensions
 	internal static byte[] PrintAsUTF8(this byte[] obj)
 	{
 #if DEBUG
-		Console.WriteLine(Encoding.UTF8.GetString(obj));
+		if (Enable)
+			Console.WriteLine(Encoding.UTF8.GetString(obj));
 #endif
 		return obj;
 	}
@@ -32,7 +47,8 @@ internal static class DebuggingExtensions
 	internal static byte[] PrintAsUTF8(this byte[] obj, string message)
 	{
 #if DEBUG
-		Console.WriteLine(string.Format(message, Encoding.UTF8.GetString(obj)));
+		if (Enable)
+			Console.WriteLine(string.Format(message, Encoding.UTF8.GetString(obj)));
 #endif
 		return obj;
 	}
@@ -40,7 +56,8 @@ internal static class DebuggingExtensions
 	internal static byte[] PrintHex(this byte[] data)
 	{
 #if DEBUG
-		Console.WriteLine(BitConverter.ToString(data).Replace('-', ' '));
+		if (Enable)
+			Console.WriteLine(BitConverter.ToString(data).Replace('-', ' '));
 #endif
 		return data;
 	}

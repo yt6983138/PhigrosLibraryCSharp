@@ -3,6 +3,8 @@ using Newtonsoft.Json;
 using PhigrosLibraryCSharp.Cloud.DataStructure;
 using PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 using PhigrosLibraryCSharp.Cloud.Login;
+using PhigrosLibraryCSharp.Extensions;
+using PhigrosLibraryCSharp.GameRecords;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -218,35 +220,35 @@ public class Save
 		return Task.FromResult(decrypted);
 	}
 
-    /// <summary>
-    /// Initialize the cloud helper.
-    /// </summary>
-    /// <param name="sessionToken">Session token gotten from .userdata or somewhere else like 
-    /// <see cref="LCHelper.LoginAndGetToken(Cloud.Login.DataStructure.LCCombinedAuthData, bool)"/>.</param>
-    /// <exception cref="Exception">Thrown if the token format is invalid.</exception>
-    public Save(string sessionToken)
-    {
-        this.SessionToken = sessionToken;
-        this.Client = new();
-        this.Client.DefaultRequestHeaders.Add("X-LC-Id", LCHelper.ClientId);
-        this.Client.DefaultRequestHeaders.Add("X-LC-Key", LCHelper.AppKey);
-        this.Client.DefaultRequestHeaders.Add("User-Agent", "LeanCloud-CSharp-SDK/1.0.3");
-        this.Client.DefaultRequestHeaders.Add("Accept", "application/json");
-        this.Client.DefaultRequestHeaders.Add("X-LC-Session", sessionToken);
+	/// <summary>
+	/// Initialize the cloud helper.
+	/// </summary>
+	/// <param name="sessionToken">Session token gotten from .userdata or somewhere else like 
+	/// <see cref="LCHelper.LoginAndGetToken(Cloud.Login.DataStructure.LCCombinedAuthData, bool)"/>.</param>
+	/// <exception cref="Exception">Thrown if the token format is invalid.</exception>
+	public Save(string sessionToken)
+	{
+		this.SessionToken = sessionToken;
+		this.Client = new();
+		this.Client.DefaultRequestHeaders.Add("X-LC-Id", LCHelper.ClientId);
+		this.Client.DefaultRequestHeaders.Add("X-LC-Key", LCHelper.AppKey);
+		this.Client.DefaultRequestHeaders.Add("User-Agent", "LeanCloud-CSharp-SDK/1.0.3");
+		this.Client.DefaultRequestHeaders.Add("Accept", "application/json");
+		this.Client.DefaultRequestHeaders.Add("X-LC-Session", sessionToken);
 
-        if (sessionToken.Length != 25 ||
-            !sessionToken.All(char.IsLetterOrDigit))
-        {
-            throw new ArgumentException("Invalid token.", nameof(sessionToken));
-        }
-    }
-    #region Raw operation
-    /// <summary>
-    /// Get the raw save from cloud.
-    /// </summary>
-    /// <returns><see cref="RawSaveContainer"/> containing all raw information.</returns>
-    /// <exception cref="Exception">Thrown if the helper is not initialized.</exception>
-    public async Task<RawSaveContainer> GetRawSaveFromCloudAsync()
+		if (sessionToken.Length != 25 ||
+			!sessionToken.All(char.IsLetterOrDigit))
+		{
+			throw new ArgumentException("Invalid token.", nameof(sessionToken));
+		}
+	}
+	#region Raw operation
+	/// <summary>
+	/// Get the raw save from cloud.
+	/// </summary>
+	/// <returns><see cref="RawSaveContainer"/> containing all raw information.</returns>
+	/// <exception cref="Exception">Thrown if the helper is not initialized.</exception>
+	public async Task<RawSaveContainer> GetRawSaveFromCloudAsync()
 	{
 		if (this.SessionToken == null) throw new Exception("Session token cannot be null.");
 		HttpResponseMessage response = await this.Client.GetAsync(CloudGameSaveAddress);
