@@ -4,7 +4,7 @@
 /// The raw score format converted directly from local save.
 /// Don't blame me for the field names please.
 /// </summary>
-public struct RawScoreFormat
+public struct RawScore
 {
 	/// <summary>
 	/// CompleteScore, ex: 996105

@@ -10,7 +10,7 @@ This is a C# implementation of [PhigrosLibrary](https://github.com/7aGiven/Phigr
 5. do whatever you want to the data
 Full example code:
 ```cs
-public static InternalScoreFormat ExampleDecryptLocal(string key, string data, float chartConstant) 
+public static CompleteScore ExampleDecryptLocal(string key, string data, float chartConstant) 
 {
 	string decryptedKey = SaveHelper.DecryptSaveStringNew(System.Net.WebUtility.UrlDecode(key));
 	string decryptedData = SaveHelper.DecryptSaveStringNew(System.Net.WebUtility.UrlDecode(data));
@@ -18,7 +18,7 @@ public static InternalScoreFormat ExampleDecryptLocal(string key, string data, f
 	string[] splitted = decryptedKey.Split(".");
 		string id = $"{splitted[0]}.{splitted[1]}";
 		return
-			JsonConvert.DeserializeObject<ScoreFormat>(decryptedData)
+			JsonConvert.DeserializeObject<RawScore>(decryptedData)
 				.ToInternalFormat(
 					chartConstant,
 					id,
@@ -30,14 +30,23 @@ ExampleDecryptLocal(@"Cgw4SttKwRFIjb68TF8z5EC%2FLwVpK8KjKmjcm9T3M78%3D", @"eSB6Q
 
 ```
 ## Cloud Save
+### TapTap integration
+[See this method](/PhigrosLibraryCSharp.Examples/Program.cs#L47) for examples on getting in a better way.
+### Cloud save
+Most examples can be found [there](/PhigrosLibraryCSharp.Examples/Program.cs). <br/>
 1. First new a `SaveHelper` object ex. `var helper = new SaveHelper()` (note: if you are using this library in wasm project you need to set Decrypter property ex. `new SaveHelper() { Decrypter = async (byte[] key, byte[] iv, byte[] data) => { /* your decrypting function here */ } }` cuz aes doesnt work in wasm)
-2. Initialize it by `helper.InitializeCloudHelper(token)` and put the token here
-3. Get your save by `helper.GetGameSaveAsync` or `helper.GetGameSavesAsync` (parameter explain below)
-4. do whatever you want to the data (hint: the gameSave.Records holds all your record)
+```cs
+Save save = new(/* phigros token */);
+// if you are using it in wasm project then do this:
+// save.Decrypter = async (byte[] key, byte[] iv, byte[] data) => { /* your decrypting function here */ };
+var data = await save.GetSave(/* difficulties */, /* save index, 0 for latest */);
+data.Save.Records // all scores
+```
+Fore more info, go to [there](/PhigrosLibraryCSharp.Examples/Program.cs)
 ### Parameter explanation:
-`GetGameSavesAsync(IReadOnlyDictionary<string, float[]> difficulties, int maxEntries = int.MaxValue)` <br/>
+`GetGameSaveAsync(IReadOnlyDictionary<string, float[]> difficulties, int index)` <br/>
 difficulties is a `IReadOnlyDictionary<string, float[]>` (just pass in a `Dictionary<string, float[]>`), the string is the ID, and the float is the chart constant. <br/>
-`maxEntries`: Max count of save to get (cuz china network slow yk) <br/>
+`index`: The index of the save (0 for latest) <br/>
 `GetGameSaveAsync(IReadOnlyDictionary<string, float[]> difficulties, int index)` <br/>
 same as above, the index means which date of save to get (0 is latest) <br/>
 Elements of the float array: <br/>
@@ -49,8 +58,7 @@ Elements of the float array: <br/>
 ```cs
 public static Task<(Summary Summary, GameSave Save)> GetLatestSave(string token, Dictionary<string, float[]> difficulties) 
 {
-	var helper = new SaveHelper();
-	helper.InitializeCloudHelper(token);
+	var helper = new Save(token);
 	return await helper.GetGameSaveAsync(difficulties, 0);
 }
 // somewhere else in ur code...

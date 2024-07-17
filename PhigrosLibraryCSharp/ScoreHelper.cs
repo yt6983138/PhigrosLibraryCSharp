@@ -14,7 +14,7 @@ public static class ScoreHelper
 	/// </summary>
 	/// <param name="record">The game record.</param>
 	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
-	public static ScoreStatus ParseStatus(RawScoreFormat record)
+	public static ScoreStatus ParseStatus(RawScore record)
 	{
 		if (record.a == 100)
 		{

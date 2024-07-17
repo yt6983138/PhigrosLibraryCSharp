@@ -74,7 +74,7 @@ public struct CompleteScore
 		this.Accuracy = record.Acc;
 		this.ChartConstant = chartConstant;
 		this.Name = name;
-		this.Status = ScoreHelper.ParseStatus(new RawScoreFormat()
+		this.Status = ScoreHelper.ParseStatus(new RawScore()
 		{
 			a = this.Accuracy,
 			s = this.Score,
