@@ -365,6 +365,7 @@ FodyWeavers.xsd
 
 # contains senstive data
 PhigrosLibraryCSharp.HttpServiceProvider/RequestTest/
+Secret.cs
 
 # test only
 PhigrosLibraryCSharp.HttpServiceProvider/difficulty.tsv
