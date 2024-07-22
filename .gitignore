@@ -362,3 +362,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# contains senstive data
+PhigrosLibraryCSharp.HttpServiceProvider/RequestTest/
+
+# test only
+PhigrosLibraryCSharp.HttpServiceProvider/difficulty.tsv
+PhigrosLibraryCSharp.HttpServiceProvider/info.tsv
