@@ -73,6 +73,8 @@ public static class ByteReaderExtensions
 
 			foreach (MoreInfoPartialGameRecord item in reader.ReadRecord())
 			{
+				if (id.StartsWith("Introduc")) // shits in old version detection
+					break;
 				scores.Add(new CompleteScore(item, id, difficulties[id][item.LevelType], IntLevelToStringLevel));
 			}
 		}
