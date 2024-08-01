@@ -1,7 +1,7 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PhigrosLibraryCSharp.Cloud.DataStructure;
 using PhigrosLibraryCSharp.HttpServiceProvider.Dependency;
+using System.IO.Compression;
 
 namespace PhigrosLibraryCSharp.HttpServiceProvider.Controllers;
 public class CloudSaveController : Controller
@@ -166,27 +166,25 @@ public class CloudSaveController : Controller
 			return action!;
 
 		using MemoryStream newStream = new();
-		using ZipOutputStream newZip = new(newStream);
+		ZipArchive newZip = new(newStream, ZipArchiveMode.Create);
 		try
 		{
 			byte[] d = await save.GetSaveRawZipAsync((await save.GetRawSaveFromCloudAsync()).GetParsedSaves()[id]);
-			using ZipFile rawZip = new(new MemoryStream(d));
 
-			foreach (ZipEntry entry in rawZip)
+			foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(d), ZipArchiveMode.Read).Entries)
 			{
-				byte[] raw = new byte[entry.Size];
-				using Stream entryStream = rawZip.GetInputStream(entry);
-				entryStream.Read(raw);
+				ZipArchiveEntry newEntry = newZip.CreateEntry(entry.Name);
+
+				using Stream entryStream = entry.Open();
+				using Stream newEntryStream = newEntry.Open();
+
+				byte[] raw = new byte[entry.Length];
+				entryStream.ReadExactly(raw);
+
 				byte[] decrypted = await save.Decrypt(raw[1..]);
-				ZipEntry newEntry = new(entry.Name)
-				{
-					Size = decrypted.Length
-				};
-				newZip.PutNextEntry(newEntry);
-				newZip.Write(decrypted);
+				newEntryStream.Write(decrypted);
 			}
-			
-			newZip.Close();
+			newZip.Dispose();
 		}
 		catch (ArgumentOutOfRangeException ex)
 		{

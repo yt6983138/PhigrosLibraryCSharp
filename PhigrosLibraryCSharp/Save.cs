@@ -1,10 +1,10 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PhigrosLibraryCSharp.Cloud.DataStructure;
 using PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 using PhigrosLibraryCSharp.Cloud.Login;
 using PhigrosLibraryCSharp.Extensions;
 using PhigrosLibraryCSharp.GameRecords;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -308,36 +308,23 @@ public class Save
 				rawData = await saveTasks[j]; // note raw data is zip
 			}
 			catch { continue; }
-			using (ZipFile zipFile = new(new MemoryStream(rawData)))
+			#region Save
+			ByteReader byteReader = await this.DecompressForFileAsync(rawData, "gameRecord");
+			List<CompleteScore> readRecords;
+			try
 			{
-				#region Save
-				ZipEntry recordFile = zipFile.GetEntry("gameRecord");
-				if (recordFile == null) continue;
-
-				byte[] decompressed = new byte[recordFile.Size];
-				zipFile.GetInputStream(recordFile).Read(decompressed, 0, decompressed.Length);
-				decompressed = decompressed[1..]; // for some reason i need to trim the first byte
-
-				byte[] decrypted = await this.Decrypt(decompressed);
-
-				ByteReader byteReader = new(decrypted);
-				List<CompleteScore> readRecords;
-				try
-				{
-					readRecords = byteReader.ReadAllGameRecord(difficulties);
-				}
-				catch { continue; }
-				GameSave gameSave = new()
-				{
-					CreationDate = save.CreationDate,
-					ModificationTime = save.ModificationTime,
-					Records = readRecords,
-					Summary = save.Summary
-				};
-				currentParsing.Save = gameSave;
-				#endregion
-
+				readRecords = byteReader.ReadAllGameRecord(difficulties);
 			}
+			catch { continue; }
+			GameSave gameSave = new()
+			{
+				CreationDate = save.CreationDate,
+				ModificationTime = save.ModificationTime,
+				Records = readRecords,
+				Summary = save.Summary
+			};
+			currentParsing.Save = gameSave;
+			#endregion
 			#region Summary
 			byte[] summary = Convert.FromBase64String(save.Summary);
 			int offset = 0;
@@ -508,19 +495,20 @@ public class Save
 	}
 	private async Task<ByteReader> DecompressForFileAsync(byte[] zipRaw, string entry)
 	{
-		using (ZipFile zipFile = new(new MemoryStream(zipRaw)))
-		{
-			ZipEntry recordFile = zipFile.GetEntry(entry);
-			if (recordFile == null) throw new Exception($"{entry} not found. Format changed?");
+		using ZipArchive archive = new(new MemoryStream(zipRaw), ZipArchiveMode.Read);
+		ZipArchiveEntry? file = archive.GetEntry(entry);
 
-			byte[] decompressed = new byte[recordFile.Size];
-			zipFile.GetInputStream(recordFile).Read(decompressed, 0, decompressed.Length);
-			decompressed = decompressed[1..]; // for some reason i need to trim the first byte
+		if (file is null)
+			throw new InvalidDataException($"{entry} not found. Format changed?");
 
-			byte[] decrypted = await this.Decrypt(decompressed);
+		using Stream stream = file.Open();
+		byte[] decompressed = new byte[file.Length - 1];
+		stream.ReadByte();
+		stream.ReadExactly(decompressed);
 
-			return new(decrypted);
-		}
+		byte[] decrypted = await this.Decrypt(decompressed);
+
+		return new(decrypted);
 	}
 	#endregion
 }
