@@ -185,6 +185,8 @@ public class CloudSaveController : Controller
 				newZip.PutNextEntry(newEntry);
 				newZip.Write(decrypted);
 			}
+			
+			newZip.Close();
 		}
 		catch (ArgumentOutOfRangeException ex)
 		{

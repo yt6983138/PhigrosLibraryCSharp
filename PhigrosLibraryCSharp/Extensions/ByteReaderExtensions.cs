@@ -29,6 +29,7 @@ public static class ByteReaderExtensions
 	/// <returns>A list of <see cref="CompleteScore"/> containing the user's records.</returns>
 	public static List<CompleteScore> ReadAllGameRecord(this ByteReader reader, in IReadOnlyDictionary<string, float[]> difficulties)
 	{
+		#region old shit
 		// auto detection
 		// int glaciaxionLocation = first64.IndexOf("Glaciaxion");
 		// int nonMelodicLocation = first64.IndexOf("NonMelodic");
@@ -40,33 +41,36 @@ public static class ByteReaderExtensions
 		// {
 		// 	headerLength = nonMelodicLocation - 1;
 		// }
-		bool success = false;
-		for (int i = 0; i < 16; i++)
-		{
-			byte[] datas = reader.Data[(reader.Offset + 1)..(reader.Offset + reader.Data[reader.Offset] + 1)];
-			if (Encoding.ASCII.GetString(datas).All(x => !char.IsControl(x)))
-			{
-				success = true;
-				break;
-			}
-			reader.Jump(1);
-		}
-		if (!success) // fall back manual detection
-		{
-			reader.JumpTo(0);
-			int headerLength = reader.Data[0] switch
-			{
-				0x9D => 2, // i have no idea what those are
-				0x7E => 1,
-				0x2B => 24,
-				0x66 => 1,
-				_ => 2
-			};
-			reader.Jump(headerLength);
-		}
+		//bool success = false;
+		//for (int i = 0; i < 16; i++)
+		//{
+		//	byte[] datas = reader.Data[(reader.Offset + 1)..(reader.Offset + reader.Data[reader.Offset] + 1)];
+		//	if (Encoding.ASCII.GetString(datas).All(x => !char.IsControl(x)))
+		//	{
+		//		success = true;
+		//		break;
+		//	}
+		//	reader.Jump(1);
+		//}
+		//if (!success) // fall back manual detection
+		//{
+		//	reader.JumpTo(0);
+		//	int headerLength = reader.Data[0] switch
+		//	{
+		//		0x9D => 2, // i have no idea what those are
+		//		0x7E => 1,
+		//		0x2B => 24,
+		//		0x66 => 1,
+		//		_ => 2
+		//	};
+		//	reader.Jump(headerLength);
+		//}
+		#endregion
+
+		short scoreCount = reader.ReadVariedInteger();
 
 		List<CompleteScore> scores = new();
-		while (reader.Offset < reader.Data.Length)
+		for (int i = 0; i < scoreCount; i++)
 		{
 			string id = Encoding.UTF8.GetString(reader.ReadStringBytes())[..^2];
 			reader.Jump(3);
