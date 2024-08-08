@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace PhigrosLibraryCSharp.HttpServiceProvider;
 
@@ -18,6 +19,20 @@ public enum ErrorCode
 }
 public static class Helper
 {
+	public static Dictionary<ErrorCode, HttpStatusCode> ErrorCodeToHttpStatusCode { get; } = new()
+	{
+		{ ErrorCode.RequestError, HttpStatusCode.BadRequest },
+		{ ErrorCode.Unspecified, HttpStatusCode.NotImplemented },
+		{ ErrorCode.LoginProcessNotDone, HttpStatusCode.OK },
+		{ ErrorCode.LoginOtherError, HttpStatusCode.InternalServerError },
+		{ ErrorCode.GetProfileError, HttpStatusCode.InternalServerError },
+		{ ErrorCode.LCLoginError, HttpStatusCode.InternalServerError },
+		{ ErrorCode.DecryptingError, HttpStatusCode.UnprocessableContent },
+		{ ErrorCode.PhigrosTokenError, HttpStatusCode.UnprocessableContent },
+		{ ErrorCode.PhigrosLibraryInternalError, HttpStatusCode.InternalServerError },
+		{ ErrorCode.ArgumentOutOfRange, HttpStatusCode.UnprocessableContent }
+	};
+
 	public static async Task<string> ReadBodyAsString(this HttpRequest request)
 	{
 		request.EnableBuffering();
@@ -53,6 +68,15 @@ public static class Helper
 	public static IActionResult Error<T>(this T controller, ILogger<T> logger, string error, string message = "Error processing request", ErrorCode code = ErrorCode.Unspecified) where T : Controller
 	{
 		logger.LogInformation("{ip} went error: {message}; {error}; {code}", controller.HttpContext.GetIP(), message, error, code);
-		return controller.Json(new { Message = message, Error = error, Code = (int)code, CodeName = code.ToString() });
+		return controller.StatusCode(
+			(int)ErrorCodeToHttpStatusCode[code],
+			new
+			{
+				Message = message,
+				Error = error,
+				Code = (int)code,
+				CodeName = code.ToString()
+			}
+		);
 	}
 }

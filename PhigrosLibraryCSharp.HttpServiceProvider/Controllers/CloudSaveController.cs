@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PhigrosLibraryCSharp.Cloud.DataStructure;
 using PhigrosLibraryCSharp.HttpServiceProvider.Dependency;
+using System.Collections.Concurrent;
 using System.IO.Compression;
 
 namespace PhigrosLibraryCSharp.HttpServiceProvider.Controllers;
 public class CloudSaveController : Controller
 {
-	public static Dictionary<string, Save> TokenSaveCache { get; set; } = new();
+	public static ConcurrentDictionary<string, Save> TokenSaveCache { get; set; } = new();
 
 	private ILogger<CloudSaveController> _logger;
 	private PhigrosData _phigrosData;
@@ -25,7 +26,8 @@ public class CloudSaveController : Controller
 		Save newSave = new(token); // will throw if invalid token
 		await newSave.GetUserInfoAsync();
 		this._logger.LogInformation("Adding token {token} to cache", token);
-		TokenSaveCache.Add(token, newSave);
+		if (!TokenSaveCache.TryAdd(token, newSave))
+			throw new Exception("Failed to add to cache");
 		return newSave;
 	}
 	private async Task<(IActionResult?, Save?)> GetSaveAndHandleError(string token)
