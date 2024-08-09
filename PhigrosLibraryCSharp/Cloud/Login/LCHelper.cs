@@ -115,11 +115,19 @@ public static class LCHelper
 			request.Content = requestContent;
 		}
 		// LCHttpUtils.PrintRequest(client, request, content);
-		HttpResponseMessage response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+		HttpResponseMessage response;
+		if (TapTapHelper.Proxy is not null)
+		{
+			response = await TapTapHelper.Proxy(Client, request);
+		}
+		else
+		{
+			response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+		}
 		request.Dispose();
 
 		string resultString = await response.Content.ReadAsStringAsync();
-		System.Net.HttpStatusCode statusCode = response.StatusCode;
+		HttpStatusCode statusCode = response.StatusCode;
 		response.Dispose();
 		// LCHttpUtils.PrintResponse(response, resultString);
 
@@ -147,9 +155,6 @@ public static class LCHelper
 			string queries = string.Join("&", queryPairs);
 			url = $"{url}?{queries}";
 		}
-
-		if (TapTapHelper.IsWASM)
-			url = TapTapHelper.WASMCorsProxy + WebUtility.UrlEncode(url);
 		return url;
 	}
 	private static async Task FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null)

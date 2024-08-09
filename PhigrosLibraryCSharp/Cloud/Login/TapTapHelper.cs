@@ -16,14 +16,14 @@ public static class TapTapHelper
 	#region Constants
 	internal const string TapSDKVersion = "2.1";
 	private static readonly HttpClient _client = new();
-	internal static bool IsWASM { get; } = RuntimeInformation.ProcessArchitecture == Architecture.Wasm;
 	#endregion
 
 	#region Endpoints
 	/// <summary>
 	/// When on WASM, you may need to set this property to have cors disabled. (Browser limit)
+	/// Or, when you just want to use a proxy.
 	/// </summary>
-	public static string WASMCorsProxy { get; set; } = "https://corsproxy.io/?";
+	public static Func<HttpClient, HttpRequestMessage, Task<HttpResponseMessage>>? Proxy { get; set; }
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 	public static string ChinaWebHost { get; } = @"https://accounts.tapapis.cn";
@@ -181,11 +181,19 @@ public static class TapTapHelper
 			FormUrlEncodedContent requestContent = new(formData);
 			request.Content = requestContent;
 		}
-		HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+		HttpResponseMessage response;
+		if (Proxy is not null)
+		{
+			response = await Proxy(_client, request);
+		}
+		else
+		{
+			response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+		}
 		request.Dispose();
 
 		string resultString = await response.Content.ReadAsStringAsync();
-		System.Net.HttpStatusCode statusCode = response.StatusCode;
+		HttpStatusCode statusCode = response.StatusCode;
 		response.Dispose();
 
 		if (response.IsSuccessStatusCode)
@@ -213,8 +221,6 @@ public static class TapTapHelper
 			string queries = string.Join("&", queryPairs);
 			url = $"{url}?{queries}";
 		}
-		if (IsWASM)
-			url = WASMCorsProxy + WebUtility.UrlEncode(url);
 		return url;
 	}
 
