@@ -2,6 +2,8 @@
 This is a C# implementation of [PhigrosLibrary](https://github.com/7aGiven/PhigrosLibrary).
 
 # API Usage
+## Http wrapper
+Go to [there](https://github.com/yt6983138/PhigrosLibraryCSharp/blob/master/PhigrosLibraryCSharp.HttpServiceProvider/readme.md)
 ## Local save (...PlayerPrefv2.xml)
 1. You parse the xml and get the key string and value string ex. `xaHiFItVgoS6CBFNHTR2%2BA%3D%3D`
 2. Convert decode it using `System.Net.WebUtility.UrlDecode`, then get string like this (`xaHiFItVgoS6CBFNHTR2+A==`)
