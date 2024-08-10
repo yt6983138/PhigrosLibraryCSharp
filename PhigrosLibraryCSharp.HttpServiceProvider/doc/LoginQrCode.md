@@ -1,3 +1,8 @@
+Typically you'd do this in following order:
+1. GET /api/LoginQrCode/GetNewQrCode, save the response and give the login url to the user.
+2. do POST /api/LoginQrCode/CheckQRCode every [interval\] (specified in step one response), and once success continue step 3.
+3. POST /LoginQrCode/GetPhigrosToken, and get token.
+
 # GET /api/LoginQrCode/GetNewQrCode
 ## Requirements
 No headers/body are needed.
