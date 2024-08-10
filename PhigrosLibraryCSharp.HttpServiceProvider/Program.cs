@@ -9,6 +9,14 @@ public class Program
 		WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 		// Add services to the container.
+		builder.Services.AddCors(options => options.AddPolicy("Everything",
+			policy =>
+			{
+				policy.AllowAnyHeader()
+					.AllowAnyMethod()
+					.AllowAnyOrigin();
+			}));
+
 		builder.Services.AddControllersWithViews();
 
 		builder.Services.Configure<Config>(
@@ -27,10 +35,12 @@ public class Program
 		}
 		app.MapControllers().AllowAnonymous();
 
-		app.UseHttpsRedirection();
-		//app.UseStaticFiles();
+		//app.UseHttpsRedirection();
+		app.UseStaticFiles();
 
 		app.UseRouting();
+
+		app.UseCors("Everything");
 
 		app.UseAuthorization();
 
