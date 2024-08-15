@@ -3,24 +3,22 @@ using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 using PhigrosLibraryCSharp.UnmanagedWrapper.Structures;
 using System.Runtime.InteropServices;
 
+using AsyncHandle = nint;
+
 namespace PhigrosLibraryCSharp.UnmanagedWrapper;
 public unsafe static class LoginWrapper
 {
-	private static Dictionary<nint, Task<TapTapTokenData?>> _asyncCheckRequests = new();
-	private static Dictionary<nint, Task<CompleteQRCodeData>> _asyncQrcodeRequests = new();
-	private static nint _asyncCount = 0;
+	private static volatile Dictionary<AsyncHandle, Task<TapTapTokenData?>> _asyncCheckRequests = new();
+	private static volatile Dictionary<AsyncHandle, Task<CompleteQRCodeData>> _asyncQrcodeRequests = new();
+	private static volatile AsyncHandle _asyncCount = 0;
 
 	#region Get QrCodes
-	/// <summary>
-	/// returns async handle
-	/// </summary>
-	/// <returns></returns>
 	[UnmanagedCallersOnly(EntryPoint = nameof(GetQrcodeAsync))]
 	public static AsyncHandle GetQrcodeAsync()
 	{
 		_asyncCount++;
 		_asyncQrcodeRequests[_asyncCount] = TapTapHelper.RequestLoginQrCode();
-		return (AsyncHandle)_asyncCount;
+		return _asyncCount;
 	}
 	[UnmanagedCallersOnly(EntryPoint = nameof(CheckGetQrcodeHandle))]
 	public static ReturnType CheckGetQrcodeHandle(AsyncHandle asyncHandle, Qrcode* data)
@@ -69,7 +67,7 @@ public unsafe static class LoginWrapper
 	{
 		_asyncCount++;
 		_asyncCheckRequests[_asyncCount] = TapTapHelper.CheckQRCodeResult(data->ToLibraryType());
-		return (AsyncHandle)_asyncCount;
+		return _asyncCount;
 	}
 	[UnmanagedCallersOnly(EntryPoint = nameof(CheckCheckQrcodeHandle))]
 	public static ReturnType CheckCheckQrcodeHandle(AsyncHandle asyncHandle, TokenData* data)

@@ -86,7 +86,7 @@ Response body from this request is needed.
     "codeName": "LoginOtherError"
 }
 ```
-# POST /LoginQrCode/GetTapTapProfile
+# POST /api/LoginQrCode/GetTapTapProfile
 ## Requirements
 ### Headers
 Content-Type: application/json
@@ -126,7 +126,7 @@ Response body from `POST /api/LoginQrCode/CheckQRCode`.
     "codeName": "[Error code's name]"
 }
 ```
-# POST /LoginQrCode/GetPhigrosToken
+# POST /api/LoginQrCode/GetPhigrosToken
 ## Requirements
 ### Headers
 Content-Type: application/json

@@ -27,12 +27,23 @@ struct TapTapToken
 	char* Scope;
 };
 
+#pragma region Get Qrcode
+// async
 extern AsyncHandle GetQrcodeAsync(void);
-extern ReturnType CheckGetQrcodeHandle(AsyncHandle, Qrcode*);
-extern ReturnType GetQrcode(Qrcode*);
-extern void FreeQrcode(Qrcode*);
+extern ReturnType CheckGetQrcodeHandle(AsyncHandle handle, Qrcode* qrcode);
+// sync
+extern ReturnType GetQrcode(Qrcode* qrcode);
 
-extern AsyncHandle CheckQrcodeAsync(Qrcode*);
-extern ReturnType CheckCheckQrcodeHandle(AsyncHandle, TapTapToken*);
-extern ReturnType CheckQrcode(Qrcode*, TapTapToken*);
-extern void FreeTokenData(TapTapToken*);
+extern void FreeQrcode(Qrcode* qrcode);
+#pragma endregion
+
+#pragma region Check Qrcode
+// async
+extern AsyncHandle CheckQrcodeAsync(Qrcode* qrcode);
+extern ReturnType CheckCheckQrcodeHandle(AsyncHandle handle, TapTapToken* out);
+// sync
+extern ReturnType CheckQrcode(Qrcode* qrcode, TapTapToken* out);
+
+extern void FreeTokenData(TapTapToken* token);
+#pragma endregion
+

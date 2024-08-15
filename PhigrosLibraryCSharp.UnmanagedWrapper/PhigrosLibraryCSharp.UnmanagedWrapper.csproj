@@ -7,6 +7,7 @@
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 	<PublishAot>true</PublishAot>
+	<NativeLib>Static</NativeLib>
   </PropertyGroup>
 
   <ItemGroup>

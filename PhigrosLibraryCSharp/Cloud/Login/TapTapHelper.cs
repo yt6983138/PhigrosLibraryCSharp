@@ -2,7 +2,6 @@
 using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using static PhigrosLibraryCSharp.Cloud.Login.DataStructure.RequestException;
@@ -15,6 +14,11 @@ public static class TapTapHelper
 {
 	#region Constants
 	internal const string TapSDKVersion = "2.1";
+
+	internal static readonly string AssemblyVersion = (typeof(TapTapHelper).Assembly.GetName().Version?.ToString() ?? "unknown_version")
+		.Replace(" ", "_", StringComparison.InvariantCultureIgnoreCase);
+	internal static readonly string AssemblyName = (typeof(TapTapHelper).Assembly.GetName().Name ?? "unknown_dll")
+		.Replace(" ", "_", StringComparison.InvariantCultureIgnoreCase);
 	private static readonly HttpClient _client = new();
 	#endregion
 
@@ -43,7 +47,8 @@ public static class TapTapHelper
 	/// <seealso cref="CompleteQRCodeData"/>
 	public static async Task<CompleteQRCodeData> RequestLoginQrCode(string[]? permissions = null)
 	{
-		string clientId = Guid.NewGuid().ToString("N");
+		string clientId = $"{AssemblyName}-{AssemblyVersion}-" +
+			$"{(DateTime.UtcNow - DateTime.UnixEpoch).TotalMilliseconds}-{Random.Shared.Next(0, 114514):N}";
 		Dictionary<string, object> parameters = new()
 		{
 			{ "client_id", LCHelper.ClientId },

@@ -30,24 +30,32 @@ public class TapTapTokenData
 		/// </summary>
 		[JsonProperty("access_token")]
 		public string Token { get; set; }
+		[JsonProperty("token")]
+		private string TokenAlias { set => this.Token = value; }
 
 		/// <summary>
 		/// The user's token type.
 		/// </summary>
 		[JsonProperty("token_type")]
 		public string TokenType { get; set; }
+		[JsonProperty("tokenType")]
+		private string TokenTypeAlias { set => this.TokenType = value; }
 
 		/// <summary>
 		/// The user's mac key. [Unknown]
 		/// </summary>
 		[JsonProperty("mac_key")]
 		public string MacKey { get; set; }
+		[JsonProperty("macKey")]
+		private string MacKeyAlias { set => this.MacKey = value; }
 
 		/// <summary>
 		/// The user's mac algorithm. [Unknown]
 		/// </summary>
 		[JsonProperty("mac_algorithm")]
 		public string MacAlgorithm { get; set; }
+		[JsonProperty("macAlgorithm")]
+		private string MacAlgorithmAlias { set => this.MacAlgorithm = value; }
 
 		/// <summary>
 		/// The application permission scope.
