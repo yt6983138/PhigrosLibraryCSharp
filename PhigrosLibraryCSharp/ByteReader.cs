@@ -7,8 +7,8 @@ namespace PhigrosLibraryCSharp;
 //Glaciaxion.SunsetRay.0@B���ÈBk9�dÇB@B���ÈBCredits.Frums.0�·�Óø¾Bg
 
 // (9D 01)		| (16)				(47 ... 30)		 (1A)							(07)	(07)		(40 ... 42)														|
-// header		| id string length	id string		 record Offset (need to +1)		is fc	unknown		record start (structure: (int score then float acc) -> repeat)	| repeat (in pipe)
-// read header	| read string bytes					|read record																								| read string... 
+// header		| id string length	id string		 record Offset (need to +1)		is fc	exists		record start (structure: (int score then float acc) -> repeat)	| repeat (in pipe)
+// read header	| read string bytes					|read record																									| read string... 
 
 /// <summary>
 /// A class can be used to read gameRecord file.
@@ -59,15 +59,15 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// <returns>The struct directly converted from data</returns>
 	public unsafe T ReadUnmanaged<T>() where T : unmanaged
 	{
-		T dat = default;
+		int offset = this.Offset;
+		if (offset + sizeof(T) > this.Data.Length)
+			throw new ArgumentOutOfRangeException(nameof(T), "The size of T is too large to be read.");
 
-		byte* ptr = (byte*)&dat;
-		for (int i = 0; i < sizeof(T); i++)
+		fixed (byte* bytePtr = this.Data)
 		{
-			*ptr = this.Data[this.Offset++];
-			ptr++;
+			this.Jump(sizeof(T));
+			return *(T*)(bytePtr + offset);
 		}
-		return dat;
 	}
 	/// <summary>
 	/// Reads the data as marshalable struct.
