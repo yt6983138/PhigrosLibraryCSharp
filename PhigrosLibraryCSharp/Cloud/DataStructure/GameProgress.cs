@@ -29,23 +29,24 @@ public record struct Money(short KiB, short MiB, short GiB, short TiB, short PiB
 /// <summary>
 /// The user's game progress.
 /// </summary>
-/// <param name="IsFirstRun"></param>
-/// <param name="LegacyChapterFinished"></param>
-/// <param name="AlreadyShowCollectionTip"></param>
-/// <param name="AlreadyShowAutoUnlockINTip"></param>
-/// <param name="Completed"></param>
-/// <param name="SongUpdateInfo"></param>
-/// <param name="ChallengeModeRank"></param>
-/// <param name="Money"></param>
-/// <param name="UnlockFlagOfSpasmodic"></param>
-/// <param name="UnlockFlagOfIgallta"></param>
-/// <param name="UnlockFlagOfRrharil"></param>
-/// <param name="FlagOfSongRecordKey"></param>
-/// <param name="RandomVersionUnlocked"></param>
-/// <param name="Chapter8UnlockBegin"></param>
-/// <param name="Chapter8UnlockSecondPhase"></param>
-/// <param name="Chapter8Passed"></param>
-/// <param name="Chapter8SongUnlockFlag"></param>
+/// <param name="IsFirstRun">Indicates if the user is running the game for the first time.</param>
+/// <param name="LegacyChapterFinished">Indicates that the user has done legacy chapter or not.</param>
+/// <param name="AlreadyShowCollectionTip">Indicates that unlock tips for collections has shown or not.</param>
+/// <param name="AlreadyShowAutoUnlockINTip">Indicates that unlock tips for <see cref="Difficulty.IN"/> has shown or not.</param>
+/// <param name="Completed">[Unexplained]</param>
+/// <param name="SongUpdateInfo">[Unexplained]</param>
+/// <param name="ChallengeModeRank">The challenge mode rank.</param>
+/// <param name="Money">The money count.</param>
+/// <param name="UnlockFlagOfSpasmodic">[Unexplained]</param>
+/// <param name="UnlockFlagOfIgallta">[Unexplained]</param>
+/// <param name="UnlockFlagOfRrharil">[Unexplained]</param>
+/// <param name="FlagOfSongRecordKey">[Unexplained]</param>
+/// <param name="RandomVersionUnlocked">[Unexplained]</param>
+/// <param name="Chapter8UnlockBegin">[Unexplained]</param>
+/// <param name="Chapter8UnlockSecondPhase">[Unexplained]</param>
+/// <param name="Chapter8Passed">Indicates that the user has passed chapter 8 or not.</param>
+/// <param name="Chapter8SongUnlockFlag">[Unexplained]</param>
+/// <param name="FlagOfSongRecordKeyTakumi">[Unexplained]</param>
 public record class GameProgress(
 	bool IsFirstRun,
 	bool LegacyChapterFinished,
