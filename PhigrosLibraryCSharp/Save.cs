@@ -3,7 +3,6 @@ using PhigrosLibraryCSharp.Cloud.DataStructure;
 using PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 using PhigrosLibraryCSharp.Cloud.Login;
 using PhigrosLibraryCSharp.Extensions;
-using PhigrosLibraryCSharp.GameRecords;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -221,7 +220,7 @@ public class Save
 	}
 
 	/// <summary>
-	/// Initialize the cloud helper.
+	/// Initialize the helper.
 	/// </summary>
 	/// <param name="sessionToken">Session token gotten from .userdata or somewhere else like 
 	/// <see cref="LCHelper.LoginAndGetToken(Cloud.Login.DataStructure.LCCombinedAuthData, bool)"/>.</param>
@@ -242,6 +241,7 @@ public class Save
 			throw new ArgumentException("Invalid token.", nameof(sessionToken));
 		}
 	}
+
 	#region Raw operation
 	/// <summary>
 	/// Get the raw save from cloud.
@@ -279,80 +279,7 @@ public class Save
 	public Task<byte[]> Decrypt(byte[] data)
 		=> this.Decrypter(QuickCopy(Key), QuickCopy(Iv), data);
 	#endregion
-	/// <summary>
-	/// Get game saves that the user has.
-	/// </summary>
-	/// <param name="difficulties">Parsed difficulties CSV from <see href="https://github.com/3035936740/Phigros_Resource/"/>.</param>
-	/// <param name="maxEntries">The maximum number of saves to get (usually used to prevent slow network).</param>
-	/// <returns>A <see cref="List{T}"/> containing user's <see cref="GameSave"/> and <see cref="Summary"/>.</returns>
-	public async Task<List<(Summary Summary, GameSave Save)>> GetGameSavesAsync(IReadOnlyDictionary<string, float[]> difficulties, int maxEntries = int.MaxValue)
-	{
-		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
-		// Console.WriteLine(raw.Count);
 
-
-		List<(Summary Summary, GameSave Save)> saves = new();
-		List<Task<byte[]>> saveTasks = new();
-		for (int k = 0; k < raw.Count && k < maxEntries; k++)
-		{
-			saveTasks.Add(this.GetSaveRawZipAsync(raw[k]));
-		}
-
-		for (int j = 0; j < saveTasks.Count; j++)
-		{
-			SimplifiedSave save = raw[j];
-			(Summary Summary, GameSave Save) currentParsing = new();
-			byte[] rawData;
-			try
-			{
-				rawData = await saveTasks[j]; // note raw data is zip
-			}
-			catch { continue; }
-			#region Save
-			ByteReader byteReader = await this.DecompressForFileAsync(rawData, "gameRecord");
-			List<CompleteScore> readRecords;
-			try
-			{
-				readRecords = byteReader.ReadAllGameRecord(difficulties);
-			}
-			catch { continue; }
-			GameSave gameSave = new()
-			{
-				CreationDate = save.CreationDate,
-				ModificationTime = save.ModificationTime,
-				Records = readRecords,
-				Summary = save.Summary
-			};
-			currentParsing.Save = gameSave;
-			#endregion
-			#region Summary
-			byte[] summary = Convert.FromBase64String(save.Summary);
-			int offset = 0;
-
-			int firstStructSize = Marshal.SizeOf<RawSummaryFirst>();
-			int lastStructSize = Marshal.SizeOf<RawSummaryLast>();
-
-			offset += firstStructSize - 3; // ??? the size is larger than expected
-			RawSummaryFirst firstPart = SerialHelper.ByteToStruct<RawSummaryFirst>(summary[..firstStructSize]);
-			string avatarInfo = Encoding.UTF8.GetString(summary[offset..(offset + firstPart.AvatarStringSize)]);
-			RawSummaryLast lastPart = SerialHelper.ByteToStruct<RawSummaryLast>(summary[^lastStructSize..]);
-
-			currentParsing.Summary = new()
-			{
-				Avatar = avatarInfo,
-				SaveVersion = firstPart.SaveVersion,
-				GameVersion = firstPart.GameVersion,
-				ChallengeCode = firstPart.ChallengeCode,
-				Clears = new List<ushort>(lastPart.Scores)
-			};
-			#endregion
-
-			saves.Add(currentParsing);
-		}
-
-		return saves;
-
-	}
 	/// <summary>
 	/// Get game save that the user has with index.
 	/// </summary>
