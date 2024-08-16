@@ -75,8 +75,6 @@ public static class ByteReaderExtensions
 		{
 			string id = Encoding.UTF8.GetString(reader.ReadStringBytes())[..^2];
 
-			reader.Jump(3);
-
 			foreach (MoreInfoPartialGameRecord item in reader.ReadRecord())
 			{
 				if (id.StartsWith("Introduc")) // shits in old version detection
@@ -162,10 +160,10 @@ public static class ByteReaderExtensions
 	internal static List<MoreInfoPartialGameRecord> ReadRecord(this ByteReader reader)
 	{
 		List<MoreInfoPartialGameRecord> scores = new();
-		int readLen = reader.Data[reader.Offset - 3] - 2;
+		byte readLen = reader.ReadByte();
 		int endOffset = readLen + reader.Offset;
-		byte exists = reader.Data[reader.Offset - 2];
-		byte fc = reader.Data[reader.Offset - 1];
+		byte exists = reader.ReadByte();
+		byte fc = reader.ReadByte();
 
 		// Console.WriteLine((endOffset - Offset).ToString("X4"));
 		// Console.WriteLine(Offset.ToString("X4"));
@@ -189,7 +187,6 @@ public static class ByteReaderExtensions
 					i
 				)
 			);
-			reader.Jump(8);
 		}
 		reader.JumpTo(endOffset);
 		// Offset++;
