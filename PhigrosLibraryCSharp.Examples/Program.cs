@@ -1,5 +1,4 @@
-﻿using PhigrosLibraryCSharp.Cloud.DataStructure;
-using PhigrosLibraryCSharp.Cloud.Login;
+﻿using PhigrosLibraryCSharp.Cloud.Login;
 using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 
 namespace PhigrosLibraryCSharp.Examples;
@@ -69,7 +68,7 @@ internal class Program
 	private static async Task ShowMiscInfo()
 	{
 		Console.WriteLine("What is your phigros token? (can be acquired from example 1)");
-		Save save = new(Console.ReadLine()!);
+		Save save = new(Console.ReadLine()!.Trim());
 
 		Console.WriteLine("Progress:");
 		Console.WriteLine((await save.GetGameProgressAsync(0)).ToJson());
@@ -83,7 +82,7 @@ internal class Program
 	private static async Task ShowBest5()
 	{
 		Console.WriteLine("What is your phigros token? (can be acquired from example 1)");
-		Save save = new(Console.ReadLine()!);
+		Save save = new(Console.ReadLine()!.Trim());
 		Console.WriteLine("Where is difficulty.tsv?");
 		string tsvPath = Console.ReadLine()!;
 
@@ -103,7 +102,7 @@ internal class Program
 		}
 
 		// scores
-		(Summary Summary, GameSave Save) data = await save.GetGameSaveAsync(difficulties, 0);
+		SaveSummaryPair data = await save.GetGameSaveAsync(difficulties, 0);
 		Console.WriteLine("Your summary:");
 		Console.WriteLine(data.Summary.ToJson());
 		Console.WriteLine("Your top 5 scores:");
