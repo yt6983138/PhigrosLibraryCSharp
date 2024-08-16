@@ -23,19 +23,17 @@ public struct RawScore
 	/// Converts to <see cref="CompleteScore"/>.
 	/// </summary>
 	/// <param name="chartConstant">The chart constant of the chart. ex. 11.4 </param>
-	/// <param name="songName">The name of the song. ex. Stasis.Maozon (no .0)</param>
-	/// <param name="difficultyName">The difficulty name of the chart. ex. AT</param>
+	/// <param name="songId">The id of the song. ex. Stasis.Maozon (no .0)</param>
+	/// <param name="difficulty">The difficulty name of the chart. ex. AT</param>
 	/// <returns></returns>
-	public CompleteScore ToCompleteScore(float chartConstant, string songName, string difficultyName)
+	public CompleteScore ToCompleteScore(float chartConstant, string songId, Difficulty difficulty)
 	{
-		return new CompleteScore()
-		{
-			Score = this.s,
-			Accuracy = this.a,
-			Status = ScoreHelper.ParseStatus(this),
-			ChartConstant = chartConstant,
-			Name = songName,
-			DifficultyName = difficultyName
-		};
+		return new CompleteScore(
+			this.s,
+			this.a,
+			chartConstant,
+			songId,
+			difficulty,
+			ScoreHelper.ParseStatus(this));
 	}
 }

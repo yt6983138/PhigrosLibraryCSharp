@@ -23,6 +23,12 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// Current reading offset.
 	/// </summary>
 	public int Offset { get; private set; }
+
+	/// <summary>
+	/// The byte at current offset.
+	/// </summary>
+	public byte Current => this.Data[this.Offset];
+
 	/// <summary>
 	/// Construct the reader with raw data and starting offset.
 	/// </summary>
@@ -33,6 +39,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		this.Offset = offset;
 		this.Data = data;
 	}
+
 	/// <summary>
 	/// Phigros decided to put 4 or more <see cref="bool"/>s inside a <see cref="byte"/>, use this to get the bool from index.
 	/// </summary>
@@ -43,6 +50,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	{
 		return (num & (1 << index)) != 0;
 	}
+
 	/// <summary>
 	/// Reads the data as unmanaged struct. 
 	/// With structs that are managed but marshalable, use <see cref="ReadMarshalable{T}"/>

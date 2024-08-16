@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using PhigrosLibraryCSharp.GameRecords;
+using System.Runtime.InteropServices;
 
 namespace PhigrosLibraryCSharp.Cloud.DataStructure;
 
@@ -26,7 +27,7 @@ internal struct RawSummaryLast
 /// <summary>
 /// The player's summary.
 /// </summary>
-public struct Summary
+public class Summary
 {
 	/// <summary>
 	/// The version of save.
@@ -41,7 +42,7 @@ public struct Summary
 	/// 1 is the type of challenge, 0 = none, 1 = green... etc. <br/>
 	/// And the 23 part is level.
 	/// </summary>
-	public ushort ChallengeCode { get; set; }
+	public Challenge Challenge { get; set; }
 	/// <summary>
 	/// Avatar id.
 	/// </summary>
@@ -52,20 +53,30 @@ public struct Summary
 	public List<ushort> Clears { get; set; }
 
 	/// <summary>
+	/// Construct a new instance of <see cref="Summary"/>.
+	/// </summary>
+	/// <param name="saveVersion"></param>
+	/// <param name="gameVersion"></param>
+	/// <param name="challenge"></param>
+	/// <param name="avatar"></param>
+	/// <param name="clears"></param>
+	public Summary(short saveVersion, short gameVersion, Challenge challenge, string avatar, List<ushort> clears)
+	{
+		this.SaveVersion = saveVersion;
+		this.GameVersion = gameVersion;
+		this.Challenge = challenge;
+		this.Avatar = avatar;
+		this.Clears = clears;
+	}
+
+	/// <summary>
 	/// The default player <see cref="Summary"/>.
 	/// </summary>
 	public static Summary Default
 	{
 		get
 		{
-			return new Summary()
-			{
-				SaveVersion = 0,
-				GameVersion = 0,
-				ChallengeCode = 000,
-				Avatar = string.Empty,
-				Clears = new()
-			};
+			return new Summary(0, 0, default, "", new());
 		}
 	}
 }

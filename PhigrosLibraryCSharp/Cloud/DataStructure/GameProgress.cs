@@ -1,4 +1,6 @@
-﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure;
+﻿using PhigrosLibraryCSharp.GameRecords;
+
+namespace PhigrosLibraryCSharp.Cloud.DataStructure;
 
 /// <summary>
 /// The Phigros currency.
@@ -51,7 +53,7 @@ public record class GameProgress(
 	bool AlreadyShowAutoUnlockINTip,
 	string Completed,
 	short SongUpdateInfo,
-	short ChallengeModeRank,
+	Challenge ChallengeModeRank,
 	Money Money,
 	byte UnlockFlagOfSpasmodic,
 	byte UnlockFlagOfIgallta,

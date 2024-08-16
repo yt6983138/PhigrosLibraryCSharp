@@ -9,6 +9,13 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace PhigrosLibraryCSharp;
+
+/// <summary>
+/// A pair of summary and save.
+/// </summary>
+/// <param name="Summary">The summary.</param>
+/// <param name="Save">The save.</param>
+public record struct SaveSummaryPair(Summary Summary, GameSave Save);
 /// <summary>
 /// A helper that can be used to query save data or decrypt local save.
 /// </summary>
@@ -285,23 +292,28 @@ public class Save
 	/// </summary>
 	/// <param name="difficulties">Parsed difficulties CSV from <see href="https://github.com/3035936740/Phigros_Resource/"/>.</param>
 	/// <param name="index">The index of the save. 0 is always latest.</param>
+	/// <param name="exceptionHandler">The exception handler when something was wrong in the parser (instead just throwing)</param>
 	/// <returns>User's <see cref="GameSave"/> and <see cref="Summary"/>.</returns>
-	public async Task<(Summary Summary, GameSave Save)> GetGameSaveAsync(IReadOnlyDictionary<string, float[]> difficulties, int index)
+	public async Task<SaveSummaryPair> GetGameSaveAsync(
+		IReadOnlyDictionary<string, float[]> difficulties,
+		int index,
+		Action<string, Exception?>? exceptionHandler = null)
 	{
+
 		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
 		// Console.WriteLine(raw.Count);
 		if (index < 0 || index >= raw.Count)
 			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
 
 		SimplifiedSave save = raw[index];
-		(Summary Summary, GameSave Save) currentParsing = new();
+		SaveSummaryPair currentParsing = new();
 		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
 		ByteReader reader = await this.DecompressForFileAsync(rawData, "gameRecord");
 		GameSave gameSave = new()
 		{
 			CreationDate = save.CreationDate,
 			ModificationTime = save.ModificationTime,
-			Records = reader.ReadAllGameRecord(difficulties),
+			Records = reader.ReadAllGameRecord(difficulties, exceptionHandler),
 			Summary = save.Summary
 		};
 		currentParsing.Save = gameSave;
@@ -317,14 +329,12 @@ public class Save
 		string avatarInfo = Encoding.UTF8.GetString(summary[offset..(offset + firstPart.AvatarStringSize)]);
 		RawSummaryLast lastPart = SerialHelper.ByteToStruct<RawSummaryLast>(summary[^lastStructSize..]);
 
-		currentParsing.Summary = new()
-		{
-			Avatar = avatarInfo,
-			SaveVersion = firstPart.SaveVersion,
-			GameVersion = firstPart.GameVersion,
-			ChallengeCode = firstPart.ChallengeCode,
-			Clears = new List<ushort>(lastPart.Scores)
-		};
+		currentParsing.Summary = new(
+			firstPart.SaveVersion,
+			firstPart.GameVersion,
+			new(firstPart.ChallengeCode),
+			avatarInfo,
+			new(lastPart.Scores));
 		#endregion
 
 		return currentParsing;

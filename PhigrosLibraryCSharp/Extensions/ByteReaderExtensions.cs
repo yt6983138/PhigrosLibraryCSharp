@@ -10,24 +10,24 @@ namespace PhigrosLibraryCSharp.Extensions;
 /// </summary>
 public static class ByteReaderExtensions
 {
-	/// <summary>
-	/// A map converting index to readable difficulty.
-	/// </summary>
-	public static IReadOnlyDictionary<int, string> IntLevelToStringLevel { get; } = new Dictionary<int, string>()
+	internal static T Then<T>(this T value, Action todo)
 	{
-		{ 0, "EZ" },
-		{ 1, "HD" },
-		{ 2, "IN" },
-		{ 3, "AT" }
-	};
+		todo.Invoke();
+		return value;
+	}
 
 	/// <summary>
 	/// Read all the records.
 	/// </summary>
 	/// <param name="reader">The reader itself.</param>
 	/// <param name="difficulties">The difficulties table of the charts.</param>
+	/// <param name="exceptionHandler">The exception handler when bad thing happened, continue or abort.
+	/// Please remember, this <b>does not</b> grantee that this method would never throw, even you handle the exception in it,</param>
 	/// <returns>A list of <see cref="CompleteScore"/> containing the user's records.</returns>
-	public static List<CompleteScore> ReadAllGameRecord(this ByteReader reader, in IReadOnlyDictionary<string, float[]> difficulties)
+	public static List<CompleteScore> ReadAllGameRecord(
+		this ByteReader reader,
+		in IReadOnlyDictionary<string, float[]> difficulties,
+		Action<string, Exception?>? exceptionHandler)
 	{
 		#region old shit
 		// auto detection
@@ -67,19 +67,29 @@ public static class ByteReaderExtensions
 		//}
 		#endregion
 
+		exceptionHandler ??= new(static (str, ex) => { if (ex is null) throw new Exception(str); throw ex; });
 		short scoreCount = reader.ReadVariedInteger();
 
 		List<CompleteScore> scores = new();
 		for (int i = 0; i < scoreCount; i++)
 		{
 			string id = Encoding.UTF8.GetString(reader.ReadStringBytes())[..^2];
+
 			reader.Jump(3);
 
 			foreach (MoreInfoPartialGameRecord item in reader.ReadRecord())
 			{
 				if (id.StartsWith("Introduc")) // shits in old version detection
 					break;
-				scores.Add(new CompleteScore(item, id, difficulties[id][item.LevelType], IntLevelToStringLevel));
+				try
+				{
+					float cc = difficulties[id][item.LevelType];
+					scores.Add(new CompleteScore(item, id, cc, static (i) => (Difficulty)i));
+				}
+				catch (Exception e)
+				{
+					exceptionHandler.Invoke("Failed to get chart constant from score", e);
+				}
 			}
 		}
 		return scores;
@@ -136,17 +146,17 @@ public static class ByteReaderExtensions
 			ByteReader.ReadBool(reader.Data[0], 3),
 			Encoding.UTF8.GetString(reader.ReadStringBytes()),
 			reader.ReadVariedInteger(),
-			reader.ReadShort(),
+			reader.ReadUnmanaged<Challenge>(),
 			new(reader.ReadVariedInteger(), reader.ReadVariedInteger(), reader.ReadVariedInteger(), reader.ReadVariedInteger(), reader.ReadVariedInteger()),
 			reader.ReadByte(),
 			reader.ReadByte(),
 			reader.ReadByte(),
 			reader.ReadByte(),
 			reader.ReadByte(),
-			ByteReader.ReadBool(reader.Data[^2], 0),
-			ByteReader.ReadBool(reader.Data[^2], 1),
-			ByteReader.ReadBool(reader.Data[^2], 2),
-			reader.Data[^1]);
+			ByteReader.ReadBool(reader.Current, 0),
+			ByteReader.ReadBool(reader.Current, 1),
+			ByteReader.ReadBool(reader.Current, 2).Then(() => reader.Jump(1)),
+			reader.ReadByte());
 	}
 	internal static List<MoreInfoPartialGameRecord> ReadRecord(this ByteReader reader)
 	{
@@ -168,8 +178,9 @@ public static class ByteReaderExtensions
 				// Offset += 8;
 				continue;
 			}
-			PartialGameRecord record = SerialHelper.ByteToStruct<PartialGameRecord>(reader.Data[reader.Offset..(reader.Offset + 8)]);
-			if (record.Acc > 100 || record.Acc < 0) Console.WriteLine(BitConverter.ToString(reader.Data[reader.Offset..(reader.Offset + 8)]).Replace('-', ' '));
+			PartialGameRecord record = reader.ReadUnmanaged<PartialGameRecord>();
+			if (record.Acc > 100 || record.Acc < 0)
+				Console.WriteLine(BitConverter.ToString(reader.Data[reader.Offset..(reader.Offset + 8)]).Replace('-', ' '));
 			scores.Add(
 				new MoreInfoPartialGameRecord(
 					record,

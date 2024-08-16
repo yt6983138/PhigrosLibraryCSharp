@@ -224,7 +224,7 @@ public class CloudSaveController : Controller
 				{
 					gameSave.CreationDate,
 					gameSave.ModificationTime,
-					Records = gameSave.Records.Select(r => r.Export(this._phigrosData.NameMap[r.Name]))
+					Records = gameSave.Records.Select(r => r.Export(this._phigrosData.NameMap[r.Id]))
 				}
 			};
 		}

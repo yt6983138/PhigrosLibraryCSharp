@@ -3,38 +3,38 @@
 /// <summary>
 /// A more excel friendly form of the score.
 /// </summary>
-public struct ExportScore
+public class ExportScore
 {
 	/// <summary>
 	/// The ID of the song. ex. Stasis.Maozon
 	/// </summary>
-	public string ID { get; set; }
+	public required string ID { get; set; }
 	/// <summary>
 	/// The name of the song. ex. Stasis
 	/// </summary>
-	public string Name { get; set; }
+	public required string Name { get; set; }
 	/// <summary>
 	/// The difficulty name. ex. AT
 	/// </summary>
-	public string Difficulty { get; set; }
+	public required string Difficulty { get; set; }
 	/// <summary>
 	/// The chart constant. ex. 11.4
 	/// </summary>
-	public float ChartConstant { get; set; }
+	public required float ChartConstant { get; set; }
 	/// <summary>
 	/// The score.
 	/// </summary>
-	public int Score { get; set; }
+	public required int Score { get; set; }
 	/// <summary>
 	/// Accuracy.
 	/// </summary>
-	public double Acc { get; set; }
+	public required double Acc { get; set; }
 	/// <summary>
 	/// The rks given.
 	/// </summary>
-	public double RksGiven { get; set; }
+	public required double RksGiven { get; set; }
 	/// <summary>
 	/// The status. ex. A
 	/// </summary>
-	public string Stat { get; set; }
+	public required string Status { get; set; }
 }

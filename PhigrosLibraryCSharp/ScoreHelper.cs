@@ -15,19 +15,28 @@ public static class ScoreHelper
 	/// <param name="record">The game record.</param>
 	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
 	public static ScoreStatus ParseStatus(RawScore record)
+		=> ParseStatus(record.s, record.a, record.c == ScoreStatus.Fc);
+	/// <summary>
+	/// Get <see cref="ScoreStatus"/> of a raw record.
+	/// </summary>
+	/// <param name="accuracy">The accuracy of the score, ex. 11.45, 99.114514, 100</param>
+	/// <param name="isFc">If fc'ed, <see langword="true"/>, otherwise <see langword="false"/>.</param>
+	/// <param name="score">The score, ex. 920000, 1000000, 69420, 1145</param>
+	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
+	public static ScoreStatus ParseStatus(int score, double accuracy, bool isFc)
 	{
-		if (record.a == 100)
+		if (accuracy == 100)
 		{
-			if (record.s == 1000000) { return ScoreStatus.Phi; }
+			if (score == 1000000) { return ScoreStatus.Phi; }
 			return ScoreStatus.Bugged;
 		}
-		if (record.c == ScoreStatus.Fc) { return ScoreStatus.Fc; }
-		if (record.s >= 960000) { return ScoreStatus.Vu; }
-		if (record.s >= 920000) { return ScoreStatus.S; }
-		if (record.s >= 880000) { return ScoreStatus.A; }
-		if (record.s >= 820000) { return ScoreStatus.B; }
-		if (record.s >= 700000) { return ScoreStatus.C; }
-		if (record.s >= 0) { return ScoreStatus.False; }
+		if (isFc) { return ScoreStatus.Fc; }
+		if (accuracy >= 960000) { return ScoreStatus.Vu; }
+		if (accuracy >= 920000) { return ScoreStatus.S; }
+		if (accuracy >= 880000) { return ScoreStatus.A; }
+		if (accuracy >= 820000) { return ScoreStatus.B; }
+		if (accuracy >= 700000) { return ScoreStatus.C; }
+		if (accuracy >= 0) { return ScoreStatus.False; }
 		return ScoreStatus.Bugged;
 	}
 	/// <summary>
