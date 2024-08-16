@@ -43,16 +43,16 @@ public struct Challenge
 	/// <summary>
 	/// The challenge rank parsed from the code.
 	/// </summary>
-	public readonly ChallengeRank ChallengeType => (ChallengeRank)(this.RawCode / 100);
+	public readonly ChallengeRank Rank => (ChallengeRank)(this.RawCode / 100);
 	/// <summary>
 	/// The challenge level parsed from the code.
 	/// </summary>
-	public readonly byte ChallengeRank => unchecked((byte)(this.RawCode % 100));
+	public readonly byte Level => unchecked((byte)(this.RawCode % 100));
 	/// <summary>
 	/// If user have ever done challenge (and reached rank <see cref="ChallengeRank.Green"/>), 
 	/// returns <see langword="true"/>, otherwise <see langword="false"/>.
 	/// </summary>
-	public readonly bool ChallengeDone => this.RawCode != 0;
+	public readonly bool Done => this.RawCode != 0;
 
 	/// <summary>
 	/// Constructs a new instance of <see cref="Challenge"/>.
