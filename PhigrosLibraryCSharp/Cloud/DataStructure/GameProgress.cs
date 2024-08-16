@@ -63,4 +63,5 @@ public record class GameProgress(
 	bool Chapter8UnlockBegin,
 	bool Chapter8UnlockSecondPhase,
 	bool Chapter8Passed,
-	byte Chapter8SongUnlockFlag);
+	byte Chapter8SongUnlockFlag,
+	byte FlagOfSongRecordKeyTakumi);
