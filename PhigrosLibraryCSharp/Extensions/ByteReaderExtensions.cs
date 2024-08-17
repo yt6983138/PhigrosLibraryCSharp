@@ -155,7 +155,7 @@ public static class ByteReaderExtensions
 			ByteReader.ReadBool(reader.Current, 1),
 			ByteReader.ReadBool(reader.Current, 2).Then(() => reader.Jump(1)),
 			reader.ReadByte(),
-			reader.ReadByte());
+			reader.Offset == reader.Data.Length ? default : reader.ReadByte()); // compatibility issues
 	}
 	internal static List<MoreInfoPartialGameRecord> ReadRecord(this ByteReader reader)
 	{
