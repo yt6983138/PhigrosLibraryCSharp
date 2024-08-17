@@ -61,7 +61,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	{
 		int offset = this.Offset;
 		if (offset + sizeof(T) > this.Data.Length)
-			throw new ArgumentOutOfRangeException(nameof(T), "The size of T is too large to be read.");
+			throw new IndexOutOfRangeException("The size of T is too large to be read.");
 
 		fixed (byte* bytePtr = this.Data)
 		{
