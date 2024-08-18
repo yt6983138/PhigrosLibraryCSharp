@@ -31,12 +31,12 @@ public static class ScoreHelper
 			return ScoreStatus.Bugged;
 		}
 		if (isFc) { return ScoreStatus.Fc; }
-		if (accuracy >= 960000) { return ScoreStatus.Vu; }
-		if (accuracy >= 920000) { return ScoreStatus.S; }
-		if (accuracy >= 880000) { return ScoreStatus.A; }
-		if (accuracy >= 820000) { return ScoreStatus.B; }
-		if (accuracy >= 700000) { return ScoreStatus.C; }
-		if (accuracy >= 0) { return ScoreStatus.False; }
+		if (score >= 960000) { return ScoreStatus.Vu; }
+		if (score >= 920000) { return ScoreStatus.S; }
+		if (score >= 880000) { return ScoreStatus.A; }
+		if (score >= 820000) { return ScoreStatus.B; }
+		if (score >= 700000) { return ScoreStatus.C; }
+		if (score >= 0) { return ScoreStatus.False; }
 		return ScoreStatus.Bugged;
 	}
 	/// <summary>
