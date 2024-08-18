@@ -74,12 +74,7 @@ public class CompleteScore
 		this.Accuracy = record.Acc;
 		this.ChartConstant = chartConstant;
 		this.Id = id;
-		this.Status = ScoreHelper.ParseStatus(new RawScore()
-		{
-			a = this.Accuracy,
-			s = this.Score,
-			c = record.IsFc ? ScoreStatus.Fc : ScoreStatus.NotFc
-		});
+		this.Status = ScoreHelper.ParseStatus(this.Score, this.Accuracy, record.IsFc);
 		this.Difficulty = difficultyTranslator.Invoke(record.LevelType);
 	}
 
@@ -107,7 +102,7 @@ public class CompleteScore
 	{
 		return $"Score: {this.Score}, " +
 			$"Acc: {this.Accuracy}, " +
-			$"Status: {nameof(this.Status)}, " +
+			$"Status: {this.Status}, " +
 			$"cc: {this.ChartConstant}, " +
 			$"Rks: {this.Rks}";
 	}
