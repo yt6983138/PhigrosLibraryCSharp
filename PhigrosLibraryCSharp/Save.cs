@@ -234,6 +234,7 @@ public class Save
 	/// <exception cref="Exception">Thrown if the token format is invalid.</exception>
 	public Save(string sessionToken)
 	{
+		sessionToken = sessionToken.Trim();
 		this.SessionToken = sessionToken;
 		this.Client = new();
 		this.Client.DefaultRequestHeaders.Add("X-LC-Id", LCHelper.ClientId);
