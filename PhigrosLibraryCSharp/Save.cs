@@ -231,7 +231,7 @@ public class Save
 	/// </summary>
 	/// <param name="sessionToken">Session token gotten from .userdata or somewhere else like 
 	/// <see cref="LCHelper.LoginAndGetToken(Cloud.Login.DataStructure.LCCombinedAuthData, bool)"/>.</param>
-	/// <exception cref="Exception">Thrown if the token format is invalid.</exception>
+	/// <exception cref="ArgumentException">Thrown if the token format is invalid.</exception>
 	public Save(string sessionToken)
 	{
 		sessionToken = sessionToken.Trim();
@@ -255,10 +255,10 @@ public class Save
 	/// Get the raw save from cloud.
 	/// </summary>
 	/// <returns><see cref="RawSaveContainer"/> containing all raw information.</returns>
-	/// <exception cref="Exception">Thrown if the helper is not initialized.</exception>
+	/// <exception cref="ArgumentNullException">Thrown if the helper is not initialized.</exception>
 	public async Task<RawSaveContainer> GetRawSaveFromCloudAsync()
 	{
-		if (this.SessionToken == null) throw new Exception("Session token cannot be null.");
+		if (this.SessionToken == null) throw new ArgumentNullException("Session token cannot be null.");
 		HttpResponseMessage response = await this.Client.GetAsync(CloudGameSaveAddress);
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
@@ -295,6 +295,7 @@ public class Save
 	/// <param name="index">The index of the save. 0 is always latest.</param>
 	/// <param name="exceptionHandler">The exception handler when something was wrong in the parser (instead just throwing)</param>
 	/// <returns>User's <see cref="GameSave"/> and <see cref="Summary"/>.</returns>
+	/// <exception cref="MaxValueArgumentOutOfRangeException">Thrown if there's no save for such index.</exception>
 	public async Task<SaveSummaryPair> GetGameSaveAsync(
 		IReadOnlyDictionary<string, float[]> difficulties,
 		int index,
@@ -304,7 +305,7 @@ public class Save
 		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
 		// Console.WriteLine(raw.Count);
 		if (index < 0 || index >= raw.Count)
-			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
+			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, raw.Count); // raw count
 
 		SimplifiedSave save = raw[index];
 		SaveSummaryPair currentParsing = new();
@@ -346,10 +347,10 @@ public class Save
 	/// </summary>
 	/// <param name="address">Address of item.</param>
 	/// <returns><see cref="byte"/> array of item.</returns>
-	/// <exception cref="Exception">Thrown if the helper is not initialized.</exception>
+	/// <exception cref="ArgumentNullException">Thrown if the helper is not initialized.</exception>
 	public async Task<byte[]> GetRawAddressAsync(string address)
 	{
-		if (this.SessionToken == null) throw new Exception("Session token cannot be null.");
+		if (this.SessionToken == null) throw new ArgumentNullException("Session token cannot be null.");
 		HttpResponseMessage response = await this.Client.GetAsync(address);
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch.", null, response.StatusCode);
 		byte[] content = await response.Content.ReadAsByteArrayAsync();
@@ -360,10 +361,10 @@ public class Save
 	/// Get the <see cref="UserInfo"/> of the user.
 	/// </summary>
 	/// <returns><see cref="UserInfo"/> of the user.</returns>
-	/// <exception cref="Exception">Thrown if the helper is not initalized.</exception>
+	/// <exception cref="ArgumentNullException">Thrown if the helper is not initalized.</exception>
 	public async Task<UserInfo> GetUserInfoAsync()
 	{
-		if (this.SessionToken == null) throw new Exception("Session token cannot be null.");
+		if (this.SessionToken == null) throw new ArgumentNullException("Session token cannot be null.");
 		HttpResponseMessage response = await this.Client.GetAsync(CloudMeAddress);
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
@@ -382,13 +383,13 @@ public class Save
 	/// </summary>
 	/// <param name="index">The index of the save. 0 is always latest.</param>
 	/// <returns>Player's game progress.</returns>
-	/// <exception cref="ArgumentOutOfRangeException"></exception>
+	/// <exception cref="MaxValueArgumentOutOfRangeException">Thrown if there's no save for such index.</exception>
 	public async Task<GameProgress> GetGameProgressAsync(int index)
 	{
 		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
 		// Console.WriteLine(raw.Count);
 		if (index < 0 || index >= raw.Count)
-			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
+			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, raw.Count); // raw count
 
 		SimplifiedSave save = raw[index];
 		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
@@ -400,13 +401,13 @@ public class Save
 	/// </summary>
 	/// <param name="index">The index of the save. 0 is always latest.</param>
 	/// <returns>Player's game settings.</returns>
-	/// <exception cref="ArgumentOutOfRangeException"></exception>
+	/// <exception cref="MaxValueArgumentOutOfRangeException">Thrown if there's no save for such index.</exception>
 	public async Task<GameSettings> GetGameSettingsAsync(int index)
 	{
 		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
 		// Console.WriteLine(raw.Count);
 		if (index < 0 || index >= raw.Count)
-			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
+			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, raw.Count); // raw count
 
 		SimplifiedSave save = raw[index];
 		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
@@ -418,13 +419,13 @@ public class Save
 	/// </summary>
 	/// <param name="index">The index of the save. 0 is always latest.</param>
 	/// <returns>Player's game user info.</returns>
-	/// <exception cref="ArgumentOutOfRangeException"></exception>
+	/// <exception cref="MaxValueArgumentOutOfRangeException">Thrown if there's no save for such index.</exception>
 	public async Task<GameUserInfo> GetGameUserInfoAsync(int index)
 	{
 		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();
 		// Console.WriteLine(raw.Count);
 		if (index < 0 || index >= raw.Count)
-			throw new ArgumentOutOfRangeException(nameof(index), raw.Count.ToString()); // raw count
+			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, raw.Count); // raw count
 
 		SimplifiedSave save = raw[index];
 		byte[] rawData = await this.GetSaveRawZipAsync(save); // note raw data is zip
