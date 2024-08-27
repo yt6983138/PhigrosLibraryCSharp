@@ -3,16 +3,16 @@
 /// <summary>
 /// A struct presenting player's nickname, username...
 /// </summary>
-public struct UserInfo
+public class UserInfo
 {
 	/// <summary>
 	/// The player's nickname.
 	/// </summary>
-	public string NickName { get; set; }
+	public string NickName { get; set; } = "";
 	/// <summary>
 	/// The player's username.
 	/// </summary>
-	public string UserName { get; set; }
+	public string UserName { get; set; } = "";
 	/// <summary>
 	/// The player's creation time.
 	/// </summary>
