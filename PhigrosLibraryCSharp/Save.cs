@@ -299,7 +299,7 @@ public class Save
 	public async Task<SaveSummaryPair> GetGameSaveAsync(
 		IReadOnlyDictionary<string, float[]> difficulties,
 		int index,
-		Action<string, Exception?>? exceptionHandler = null)
+		Action<string, Exception?, object?>? exceptionHandler = null)
 	{
 
 		List<SimplifiedSave> raw = (await this.GetRawSaveFromCloudAsync()).GetParsedSaves();

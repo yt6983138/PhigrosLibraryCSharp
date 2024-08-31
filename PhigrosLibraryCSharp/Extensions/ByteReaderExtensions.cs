@@ -27,7 +27,7 @@ public static class ByteReaderExtensions
 	public static List<CompleteScore> ReadAllGameRecord(
 		this ByteReader reader,
 		in IReadOnlyDictionary<string, float[]> difficulties,
-		Action<string, Exception?>? exceptionHandler)
+		Action<string, Exception?, object?>? exceptionHandler)
 	{
 		#region old shit
 		// auto detection
@@ -67,7 +67,7 @@ public static class ByteReaderExtensions
 		//}
 		#endregion
 
-		exceptionHandler ??= new(static (str, ex) => { if (ex is null) throw new Exception(str); throw ex; });
+		exceptionHandler ??= new(static (str, ex, _) => { if (ex is null) throw new Exception(str); throw ex; });
 		short scoreCount = reader.ReadVariedInteger();
 
 		List<CompleteScore> scores = new();
@@ -86,7 +86,7 @@ public static class ByteReaderExtensions
 				}
 				catch (Exception e)
 				{
-					exceptionHandler.Invoke("Failed to get chart constant from score", e);
+					exceptionHandler.Invoke("Failed to get chart constant from score", e, id);
 				}
 			}
 		}
