@@ -100,10 +100,11 @@ public static class ByteReaderExtensions
 	public static GameUserInfo ReadGameUserInfo(this ByteReader reader)
 	{
 		reader.Jump(1);
+		string tmp;
 		return new(
 			ByteReader.ReadBool(reader.Data[0], 0),
 			Encoding.UTF8.GetString(reader.ReadStringBytes()),
-			Encoding.UTF8.GetString(reader.ReadStringBytes()),
+			string.IsNullOrWhiteSpace(tmp = Encoding.UTF8.GetString(reader.ReadStringBytes())) ? "Introduction" : tmp,
 			Encoding.UTF8.GetString(reader.ReadStringBytes())
 			);
 	}
