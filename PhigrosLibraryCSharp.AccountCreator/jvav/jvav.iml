@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="slf4j.api" level="project" />
+    <orderEntry type="library" name="slf4j.reload4j" level="project" />
+    <orderEntry type="library" name="apache.directory.studio.commons.io" level="project" />
+    <orderEntry type="library" name="scijava.native.lib.loader" level="project" />
+    <orderEntry type="library" name="net.java.dev.jna" level="project" />
+    <orderEntry type="library" name="net.dongliu.apk.parser" level="project" />
+    <orderEntry type="library" name="apache.commons.collections4" level="project" />
+    <orderEntry type="library" name="commons.codec" level="project" />
+    <orderEntry type="library" name="github.zhkl0228.capstone" level="project" />
+    <orderEntry type="library" name="github.zhkl0228.keystone" level="project" />
+    <orderEntry type="library" name="github.zhkl0228.unicorn" level="project" />
+    <orderEntry type="library" name="github.zhkl0228.demumble" level="project" />
+  </component>
+</module>

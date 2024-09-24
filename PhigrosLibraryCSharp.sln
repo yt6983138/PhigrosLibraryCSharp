@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.Unmana
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.HttpServiceProvider", "PhigrosLibraryCSharp.HttpServiceProvider\PhigrosLibraryCSharp.HttpServiceProvider.csproj", "{87AEEEF5-0A25-480C-AA89-F093C4D29CFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhigrosLibraryCSharp.HttpServiceProvider.Test", "PhigrosLibraryCSharp.HttpServiceProvider.Test\PhigrosLibraryCSharp.HttpServiceProvider.Test.csproj", "{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.HttpServiceProvider.Test", "PhigrosLibraryCSharp.HttpServiceProvider.Test\PhigrosLibraryCSharp.HttpServiceProvider.Test.csproj", "{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhigrosLibraryCSharp.AccountCreator", "PhigrosLibraryCSharp.AccountCreator\PhigrosLibraryCSharp.AccountCreator.csproj", "{5FAE992D-8863-4FD4-AB65-6D8D5F4DDAC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FAE992D-8863-4FD4-AB65-6D8D5F4DDAC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FAE992D-8863-4FD4-AB65-6D8D5F4DDAC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FAE992D-8863-4FD4-AB65-6D8D5F4DDAC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FAE992D-8863-4FD4-AB65-6D8D5F4DDAC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -370,3 +370,6 @@ Secret.cs
 # test only
 PhigrosLibraryCSharp.HttpServiceProvider/difficulty.tsv
 PhigrosLibraryCSharp.HttpServiceProvider/info.tsv
+
+# java
+.idea/
