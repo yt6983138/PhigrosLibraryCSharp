@@ -191,4 +191,8 @@ public class NewAccountTapTapHelper
 	}
 	internal static string GetAuthorizationParameter(string id, string value)
 		=> $"{id}=\"{value}\"";
+	internal static string CalculateXUASign(string xua)
+	{
+
+	}
 }
