@@ -1,3 +1,7 @@
+# ABANDONED BRANCH
+Due to technical difficulties this cannot be done. This branch will be archived.
+
+
 # PhigrosLibraryCSharp
 This is a C# implementation of [PhigrosLibrary](https://github.com/7aGiven/PhigrosLibrary).
 
