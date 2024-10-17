@@ -5,7 +5,7 @@ namespace PhigrosLibraryCSharp.GameRecords;
 /// <summary>
 /// The normalized, for use score.
 /// </summary>
-public class CompleteScore
+public class CompleteScore : IComparable<CompleteScore>
 {
 	/// <summary>
 	/// Scores, 0 ~ 1000000
@@ -105,5 +105,11 @@ public class CompleteScore
 			$"Status: {this.Status}, " +
 			$"cc: {this.ChartConstant}, " +
 			$"Rks: {this.Rks}";
+	}
+	/// <inheritdoc/>
+	public int CompareTo(CompleteScore? other)
+	{
+		if (other is null) throw new ArgumentNullException(nameof(other));
+		return this.Rks.CompareTo(other.Rks);
 	}
 }
