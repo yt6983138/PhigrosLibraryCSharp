@@ -100,7 +100,10 @@ public class Save
 	/// The user's session token.
 	/// </summary>
 	public string? SessionToken { get; private set; } = null;
-	private HttpClient Client { get; set; } = new();
+	private HttpClient Client { get; set; } = new()
+	{
+		Timeout = TimeSpan.FromSeconds(30)
+	};
 	/// <summary>
 	/// A delegate that can be used on WASM platform or other platforms where AES is not supported.
 	/// </summary>
