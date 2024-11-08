@@ -82,11 +82,14 @@ public class Save
 	private readonly static byte[] tempArray = new byte[16] { 0, 13, 10, 7, 4, 1, 14, 11, 8, 5, 2, 15, 12, 9, 6, 3 };
 
 	#region Cloud
-	internal const string CloudAESKey = @"6Jaa0qVAJZuXkZCLiOa/Ax5tIZVu+taKUN1V1nqwkks=";
-	internal const string CloudAESIV = @"Kk/wisgNYwcAV8WVGMgyUw==";
+	/// <summary>
+	/// The address of Phigros' save server.
+	/// </summary>
+	public const string CloudServerAddress = @"https://rak3ffdi.cloud.tds1.tapapis.cn";
 	internal const string CloudMeAddress = @"https://rak3ffdi.cloud.tds1.tapapis.cn/1.1/users/me";
 	internal const string CloudGameSaveAddress = @"https://rak3ffdi.cloud.tds1.tapapis.cn/1.1/classes/_GameSave";
-	internal const string CloudServerAddress = @"https://rak3ffdi.cloud.tds1.tapapis.cn";
+	internal const string CloudAESKey = @"6Jaa0qVAJZuXkZCLiOa/Ax5tIZVu+taKUN1V1nqwkks=";
+	internal const string CloudAESIV = @"Kk/wisgNYwcAV8WVGMgyUw==";
 	internal static readonly byte[] Iv = Convert.FromBase64String(CloudAESIV);
 	internal static readonly byte[] Key = Convert.FromBase64String(CloudAESKey);
 	private readonly JsonSerializerSettings SerializerSettings = new()
