@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using PhigrosLibraryCSharp.Cloud.DataStructure;
+﻿using PhigrosLibraryCSharp.Cloud.DataStructure;
 using PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
 using PhigrosLibraryCSharp.Cloud.Login;
 using PhigrosLibraryCSharp.Extensions;
@@ -7,6 +6,8 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace PhigrosLibraryCSharp;
 
@@ -92,12 +93,11 @@ public class Save
 	internal const string CloudAESIV = @"Kk/wisgNYwcAV8WVGMgyUw==";
 	internal static readonly byte[] Iv = Convert.FromBase64String(CloudAESIV);
 	internal static readonly byte[] Key = Convert.FromBase64String(CloudAESKey);
-	private readonly JsonSerializerSettings SerializerSettings = new()
+	internal static readonly JsonSerializerOptions SerializerSettings = new()
 	{
-		Error = (_, args) =>
-		{
-			args.ErrorContext.Handled = true; // ignore errors
-		}
+		AllowTrailingCommas = true,
+		PropertyNameCaseInsensitive = true,
+		IncludeFields = true,
 	};
 	/// <summary>
 	/// The user's session token.
@@ -268,7 +268,7 @@ public class Save
 		HttpResponseMessage response = await this.Client.GetAsync(CloudGameSaveAddress);
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
-		RawSaveContainer container = JsonConvert.DeserializeObject<RawSaveContainer>(content, this.SerializerSettings);
+		RawSaveContainer container = JsonSerializer.Deserialize<RawSaveContainer>(content, SerializerSettings);
 		return container;
 	}
 	/// <summary>
@@ -291,7 +291,7 @@ public class Save
 	/// <param name="data">The data to decrypt.</param>
 	/// <returns>Decrypted data.</returns>
 	public Task<byte[]> Decrypt(byte[] data)
-		=> this.Decrypter(QuickCopy(Key), QuickCopy(Iv), data);
+		=> this.Decrypter.Invoke(QuickCopy(Key), QuickCopy(Iv), data);
 	#endregion
 
 	/// <summary>
@@ -374,14 +374,14 @@ public class Save
 		HttpResponseMessage response = await this.Client.GetAsync(CloudMeAddress);
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
-		UserInfoRaw user = JsonConvert.DeserializeObject<UserInfoRaw>(content, this.SerializerSettings);
+		JsonNode node = JsonNode.Parse(content).EnsureNotNull();
 
 		return new UserInfo()
 		{
-			NickName = user.nickname,
-			UserName = user.username,
-			CreationTime = user.createdAt,
-			ModificationTime = user.updatedAt
+			NickName = node["nickname"].EnsureNotNull().GetValue<string>(),
+			UserName = node["username"].EnsureNotNull().GetValue<string>(),
+			CreationTime = node["createdAt"].EnsureNotNull().GetValue<DateTime>(),
+			ModificationTime = node["updatedAt"].EnsureNotNull().GetValue<DateTime>()
 		};
 	}
 	/// <summary>
