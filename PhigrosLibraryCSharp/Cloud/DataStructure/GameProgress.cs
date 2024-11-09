@@ -41,12 +41,7 @@ public record struct Money(short KiB, short MiB, short GiB, short TiB, short PiB
 /// <param name="UnlockFlagOfIgallta">[Unexplained]</param>
 /// <param name="UnlockFlagOfRrharil">[Unexplained]</param>
 /// <param name="FlagOfSongRecordKey">[Unexplained]</param>
-/// <param name="RandomVersionUnlocked">[Unexplained]</param>
-/// <param name="Chapter8UnlockBegin">[Unexplained]</param>
-/// <param name="Chapter8UnlockSecondPhase">[Unexplained]</param>
-/// <param name="Chapter8Passed">Indicates that the user has passed chapter 8 or not.</param>
-/// <param name="Chapter8SongUnlockFlag">[Unexplained]</param>
-/// <param name="FlagOfSongRecordKeyTakumi">[Unexplained]</param>
+/// <param name="Node2">Next node of GameProgress.</param>
 public record class GameProgress(
 	bool IsFirstRun,
 	bool LegacyChapterFinished,
@@ -60,9 +55,35 @@ public record class GameProgress(
 	byte UnlockFlagOfIgallta,
 	byte UnlockFlagOfRrharil,
 	byte FlagOfSongRecordKey,
+	GameProgressNodeVersion2? Node2);
+
+/// <summary>
+/// Version 2 node for GameProgress.
+/// </summary>
+/// <param name="RandomVersionUnlocked">[Unexplained]</param>
+/// <param name="Node3">Next node of GameProgress.</param>
+public record class GameProgressNodeVersion2(
 	byte RandomVersionUnlocked,
+	GameProgressNodeVersion3? Node3);
+
+/// <summary>
+/// Version 4 node for GameProgress.
+/// </summary>
+/// <param name="Chapter8UnlockBegin">[Unexplained]</param>
+/// <param name="Chapter8UnlockSecondPhase">[Unexplained]</param>
+/// <param name="Chapter8Passed">Indicates that the user has passed chapter 8 or not.</param>
+/// <param name="Chapter8SongUnlockFlag">[Unexplained]</param>
+/// <param name="Node4">Next node of GameProgress.</param>
+public record class GameProgressNodeVersion3(
 	bool Chapter8UnlockBegin,
 	bool Chapter8UnlockSecondPhase,
 	bool Chapter8Passed,
 	byte Chapter8SongUnlockFlag,
+	GameProgressNodeVersion4? Node4);
+
+/// <summary>
+/// Version 4 node for GameProgress.
+/// </summary>
+/// <param name="FlagOfSongRecordKeyTakumi">[Unexplained]</param>
+public record class GameProgressNodeVersion4(
 	byte FlagOfSongRecordKeyTakumi);

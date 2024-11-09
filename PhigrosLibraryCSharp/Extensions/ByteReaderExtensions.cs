@@ -17,6 +17,13 @@ public static class ByteReaderExtensions
 	}
 
 	/// <summary>
+	/// Indicates whether the reader has more data that can be read or not.
+	/// </summary>
+	/// <param name="reader"></param>
+	/// <returns><see langword="true"/> if there is more data, otherwise <see langword="false"/>.</returns>
+	public static bool HasMore(this ByteReader reader) => reader.Offset != reader.Data.Length;
+
+	/// <summary>
 	/// Read all the records.
 	/// </summary>
 	/// <param name="reader">The reader itself.</param>
@@ -151,12 +158,16 @@ public static class ByteReaderExtensions
 			reader.ReadByte(),
 			reader.ReadByte(),
 			reader.ReadByte(),
-			reader.ReadByte(),
-			ByteReader.ReadBool(reader.Current, 0),
-			ByteReader.ReadBool(reader.Current, 1),
-			ByteReader.ReadBool(reader.Current, 2).Then(() => reader.Jump(1)),
-			reader.ReadByte(),
-			reader.Offset == reader.Data.Length ? default : reader.ReadByte()); // compatibility issues
+			!reader.HasMore() ? null :
+			new(
+				reader.ReadByte(),
+				!reader.HasMore() ? null : new(
+					ByteReader.ReadBool(reader.Current, 0),
+					ByteReader.ReadBool(reader.Current, 1),
+					ByteReader.ReadBool(reader.Current, 2).Then(() => reader.Jump(1)),
+					reader.ReadByte(),
+					!reader.HasMore() ? null : new(
+						reader.Offset == reader.Data.Length ? default : reader.ReadByte()))));
 	}
 	internal static List<MoreInfoPartialGameRecord> ReadRecord(this ByteReader reader)
 	{
