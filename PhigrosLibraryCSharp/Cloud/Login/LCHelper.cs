@@ -1,9 +1,11 @@
-﻿using Newtonsoft.Json;
-using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+﻿using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+using PhigrosLibraryCSharp.Extensions;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace PhigrosLibraryCSharp.Cloud.Login;
 /// <summary>
@@ -56,14 +58,14 @@ public static class LCHelper
 	/// </param>
 	/// <param name="failOnNotExist">[Unknown]</param>
 	/// <returns>A <see cref="Dictionary{TKey, TValue}"/> containing the logged user information.</returns>
-	public static async Task<Dictionary<string, object>> LoginWithAuthData(LCCombinedAuthData data, bool failOnNotExist = false)
+	public static async Task<JsonNode> LoginWithAuthData(LCCombinedAuthData data, bool failOnNotExist = false)
 	{
 		Dictionary<string, object> authData = new()
 		{
 			{ "taptap", data }
 		};
 		string path = failOnNotExist ? "users?failOnNotExist=true" : "users";
-		Dictionary<string, object> response = await Request<Dictionary<string, object>>(
+		JsonNode response = await Request<JsonNode>(
 			path,
 			HttpMethod.Post,
 			headers: UniversalHeaders,
@@ -87,7 +89,7 @@ public static class LCHelper
 	/// <param name="failOnNotExist">[Unknown]</param>
 	/// <returns>The session token of the user.</returns>
 	public static async Task<string> LoginAndGetToken(LCCombinedAuthData data, bool failOnNotExist = false)
-		=> (string)(await LoginWithAuthData(data, failOnNotExist))["sessionToken"];
+		=> (await LoginWithAuthData(data, failOnNotExist))["sessionToken"].EnsureNotNull().GetValue<string>();
 
 	internal static async Task<T> Request<T>(
 		string path,
@@ -109,7 +111,7 @@ public static class LCHelper
 		string? content = null;
 		if (data != null)
 		{
-			content = JsonConvert.SerializeObject(data);
+			content = JsonSerializer.Serialize(data, Save.SerializerSettings);
 			StringContent requestContent = new(content);
 			requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 			request.Content = requestContent;
@@ -133,10 +135,10 @@ public static class LCHelper
 
 		if (response.IsSuccessStatusCode)
 		{
-			T ret = JsonConvert.DeserializeObject<T>(resultString)!;
+			T ret = JsonSerializer.Deserialize<T>(resultString, Save.SerializerSettings).EnsureNotNull();
 			return ret;
 		}
-		throw new Exception($"{statusCode}: {resultString}");
+		throw new ApplicationException($"{statusCode}: {resultString}");
 	}
 	private static string BuildUrl(string path, Dictionary<string, object> queryParams, bool withAPIVersion)
 	{

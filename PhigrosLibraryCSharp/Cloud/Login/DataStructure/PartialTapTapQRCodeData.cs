@@ -1,23 +1,28 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 internal class PartialTapTapQRCodeData
 {
-	[JsonProperty("data")]
-	internal QRCodeData Data { get; set; }
+	[JsonInclude]
+	[JsonPropertyName("data")]
+	public QRCodeData Data { get; set; }
 	internal class QRCodeData
 	{
-		[JsonProperty("device_code")]
+		[JsonInclude]
+		[JsonPropertyName("device_code")]
 		public string DeviceCode { get; set; }
 
-		[JsonProperty("expires_in")]
+		[JsonInclude]
+		[JsonPropertyName("expires_in")]
 		public int ExpiresIn { get; set; }
 
-		[JsonProperty("qrcode_url")]
+		[JsonInclude]
+		[JsonPropertyName("qrcode_url")]
 		public string Url { get; set; }
 
-		[JsonProperty("interval")]
+		[JsonInclude]
+		[JsonPropertyName("interval")]
 		public int Interval { get; set; }
 	}
 }

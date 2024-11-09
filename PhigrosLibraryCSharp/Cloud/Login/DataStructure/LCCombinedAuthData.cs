@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 /// <summary>
@@ -29,55 +29,55 @@ public class LCCombinedAuthData
 	/// <summary>
 	/// The user's kid data. [Unknown]
 	/// </summary>
-	[JsonProperty("kid")]
+	[JsonPropertyName("kid")]
 	public string Kid { get; set; }
 
 	/// <summary>
 	/// The user's TapTap access token.
 	/// </summary>
-	[JsonProperty("access_token")]
+	[JsonPropertyName("access_token")]
 	public string Token { get; set; }
 
 	/// <summary>
 	/// The type of user's TapTapToken.
 	/// </summary>
-	[JsonProperty("token_type")]
+	[JsonPropertyName("token_type")]
 	public string TokenType { get; set; }
 
 	/// <summary>
 	/// The user's mac key. [Unknown]
 	/// </summary>
-	[JsonProperty("mac_key")]
+	[JsonPropertyName("mac_key")]
 	public string MacKey { get; set; }
 
 	/// <summary>
 	/// The user's mac algorithm. [Unknown]
 	/// </summary>
-	[JsonProperty("mac_algorithm")]
+	[JsonPropertyName("mac_algorithm")]
 	public string MacAlgorithm { get; set; }
 
 	/// <summary>
 	/// The user's open id.
 	/// </summary>
-	[JsonProperty("openid")]
+	[JsonPropertyName("openid")]
 	public string OpenID { get; set; }
 
 	/// <summary>
 	/// The user's TapTap name.
 	/// </summary>
-	[JsonProperty("name")]
+	[JsonPropertyName("name")]
 	public string Name { get; set; }
 
 	/// <summary>
 	/// The user's TapTap avatar.
 	/// </summary>
-	[JsonProperty("avatar")]
+	[JsonPropertyName("avatar")]
 	public string Avatar { get; set; }
 
 	/// <summary>
 	/// The user's union id. 
 	/// </summary>
-	[JsonProperty("unionid")]
+	[JsonPropertyName("unionid")]
 	public string UnionID { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
