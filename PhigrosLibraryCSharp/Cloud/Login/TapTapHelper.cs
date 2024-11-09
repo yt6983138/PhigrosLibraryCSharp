@@ -1,9 +1,11 @@
-﻿using Newtonsoft.Json;
-using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+﻿using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+using PhigrosLibraryCSharp.Extensions;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using static PhigrosLibraryCSharp.Cloud.Login.DataStructure.RequestException;
 
 namespace PhigrosLibraryCSharp.Cloud.Login;
@@ -180,8 +182,8 @@ public static class TapTapHelper
 		string? content = null;
 		if (data != null)
 		{
-			content = JsonConvert.SerializeObject(data);
-			Dictionary<string, string> formData = JsonConvert.DeserializeObject<Dictionary<string, object>>(content)!
+			content = JsonSerializer.Serialize(data, Save.SerializerSettings);
+			Dictionary<string, string> formData = JsonSerializer.Deserialize<Dictionary<string, object>>(content, Save.SerializerSettings)!
 				.ToDictionary(item => item.Key, item => item.Value.ToString()!);
 			FormUrlEncodedContent requestContent = new(formData);
 			request.Content = requestContent;
@@ -203,11 +205,11 @@ public static class TapTapHelper
 
 		if (response.IsSuccessStatusCode)
 		{
-			T ret = JsonConvert.DeserializeObject<T>(resultString)!;
+			T ret = JsonSerializer.Deserialize<T>(resultString).EnsureNotNull();
 			return ret;
 		}
-		TapTapTokenErrorResponse parsed = JsonConvert.DeserializeObject<TapTapTokenErrorResponse>(resultString)!;
-		FailingType type = parsed.Data.Error switch
+		JsonNode parsed = JsonNode.Parse(resultString).EnsureNotNull();
+		FailingType type = parsed["data"].EnsureNotNull()["error"].EnsureNotNull().GetValue<string>() switch
 		{
 			"authorization_pending" => FailingType.Pending,
 			"authorization_waiting" => FailingType.Waiting,
