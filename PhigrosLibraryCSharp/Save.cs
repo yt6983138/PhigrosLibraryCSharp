@@ -249,11 +249,23 @@ public class Save
 		this.Client.DefaultRequestHeaders.Add("Accept", "application/json");
 		this.Client.DefaultRequestHeaders.Add("X-LC-Session", sessionToken);
 
+		if (!IsSemanticallyValidToken(sessionToken))
+			throw new ArgumentException("Invalid token.", nameof(sessionToken));
+	}
+
+	/// <summary>
+	/// Check if the token is semantically correct. Does NOT do a connect test.
+	/// </summary>
+	/// <param name="sessionToken">The Phigros session token.</param>
+	/// <returns><see langword="true"/> if the token is semantically correct, otherwise <see langword="false"/>.</returns>
+	public static bool IsSemanticallyValidToken(string sessionToken)
+	{
 		if (sessionToken.Length != 25 ||
 			!sessionToken.All(char.IsLetterOrDigit))
 		{
-			throw new ArgumentException("Invalid token.", nameof(sessionToken));
+			return false;
 		}
+		return true;
 	}
 
 	#region Raw operation
