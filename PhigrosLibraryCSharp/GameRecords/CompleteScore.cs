@@ -8,6 +8,13 @@ namespace PhigrosLibraryCSharp.GameRecords;
 public class CompleteScore : IComparable<CompleteScore>
 {
 	/// <summary>
+	/// The default empty score.
+	/// </summary>
+	public static CompleteScore Empty => new(0, 0, 0, "", Difficulty.EZ, ScoreStatus.False);
+
+	internal bool _isFc = false;
+
+	/// <summary>
 	/// Scores, 0 ~ 1000000
 	/// </summary>
 	public int Score { get; set; } = 0;
@@ -22,7 +29,7 @@ public class CompleteScore : IComparable<CompleteScore>
 	/// <summary>
 	/// ex. Stasis.Maozon (no .0)
 	/// </summary>
-	public string Id { get; set; } = "Unset";
+	public string Id { get; set; } = "";
 	/// <summary>
 	/// ex. AT
 	/// </summary>
@@ -30,7 +37,19 @@ public class CompleteScore : IComparable<CompleteScore>
 	/// <summary>
 	/// ex. ScoreStatus.A
 	/// </summary>
-	public ScoreStatus Status { get; set; } = ScoreStatus.False;
+	public ScoreStatus Status
+	{
+		get => ScoreHelper.ParseStatus(this.Score, this.Accuracy, this._isFc);
+		set
+		{
+			if (value == ScoreStatus.Fc || (value == ScoreStatus.Phi && this.Score == 1000000 && this.Accuracy == 100d))
+			{
+				this._isFc = true;
+				return;
+			}
+			this._isFc = false;
+		}
+	}
 
 	/// <summary>
 	/// The rks given from the score.
@@ -70,11 +89,11 @@ public class CompleteScore : IComparable<CompleteScore>
 		float chartConstant,
 		Func<int, Difficulty> difficultyTranslator)
 	{
+		this._isFc = record.IsFc;
 		this.Score = record.Score;
 		this.Accuracy = record.Acc;
 		this.ChartConstant = chartConstant;
 		this.Id = id;
-		this.Status = ScoreHelper.ParseStatus(this.Score, this.Accuracy, record.IsFc);
 		this.Difficulty = difficultyTranslator.Invoke(record.LevelType);
 	}
 
