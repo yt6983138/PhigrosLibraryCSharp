@@ -7,7 +7,7 @@
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-	<AssemblyVersion>2.0.0</AssemblyVersion>
+	<AssemblyVersion>2.1.0</AssemblyVersion>
 
 	<BaseOutputPath>..\output\bin</BaseOutputPath>
   </PropertyGroup>

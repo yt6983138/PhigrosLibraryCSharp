@@ -128,7 +128,7 @@ public class CompleteScore : IComparable<CompleteScore>
 	/// <inheritdoc/>
 	public int CompareTo(CompleteScore? other)
 	{
-		if (other is null) throw new ArgumentNullException(nameof(other));
-		return this.Rks.CompareTo(other.Rks);
+		ArgumentNullException.ThrowIfNull(other);
+		return other.Rks.CompareTo(this.Rks);
 	}
 }
