@@ -39,6 +39,11 @@ public class GameSave
 			.Take(3)
 			.ToList();
 
+		while (phi3.Count < 3)
+		{
+			phi3.Add(CompleteScore.Empty);
+		}
+
 		double rks = phi3.Sum(x => x.Rks / 30d);
 		rks += sorted.Take(27).Sum(x => x.Rks / 30d);
 
