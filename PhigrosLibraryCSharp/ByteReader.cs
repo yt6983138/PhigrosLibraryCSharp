@@ -30,12 +30,19 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	public byte Current => this.Data[this.Offset];
 
 	/// <summary>
+	/// The version read from save objects (gameSettings etc), like 0, 1, 2 etc.
+	/// </summary>
+	public byte ObjectVersion { get; set; }
+
+	/// <summary>
 	/// Construct the reader with raw data and starting offset.
 	/// </summary>
 	/// <param name="data">Raw data.</param>
 	/// <param name="offset">Starting offset.</param>
-	public ByteReader(byte[] data, int offset = 0)
+	/// <param name="version">Object version, see <see cref="ObjectVersion"/>.</param>
+	public ByteReader(byte[] data, int offset = 0, byte version = 0)
 	{
+		this.ObjectVersion = version;
 		this.Offset = offset;
 		this.Data = data;
 	}
@@ -152,7 +159,10 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 			return (short)((0b01111111 & this.Data[this.Offset - 2].Print("first: {0}"))
 				^ (this.Data[this.Offset - 1].Print("second: {0}") << 7));
 		}
-		else return this.Data[this.Offset++].Print("single: {0}");
+		else
+		{
+			return this.Data[this.Offset++].Print("single: {0}");
+		}
 	}
 	/// <summary>
 	/// Reads the string at current offset, and jump.

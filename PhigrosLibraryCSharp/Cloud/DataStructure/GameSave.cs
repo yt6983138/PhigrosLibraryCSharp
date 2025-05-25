@@ -8,6 +8,10 @@ namespace PhigrosLibraryCSharp.Cloud.DataStructure;
 public class GameSave
 {
 	/// <summary>
+	/// Version of the gameRecord file.
+	/// </summary>
+	public required byte Version { get; set; }
+	/// <summary>
 	/// The player song records.
 	/// </summary>
 	public required List<CompleteScore> Records { get; set; }
@@ -31,7 +35,7 @@ public class GameSave
 	/// <returns>A tuple containing the sorted list of scores and the RKS.</returns>
 	public (List<CompleteScore> Phis, List<CompleteScore> OtherScores, double Rks) GetSortedListForRks()
 	{
-		List<CompleteScore> sorted = new(this.Records);
+		List<CompleteScore> sorted = [.. this.Records];
 		sorted.Sort();
 
 		List<CompleteScore> phi3 = sorted

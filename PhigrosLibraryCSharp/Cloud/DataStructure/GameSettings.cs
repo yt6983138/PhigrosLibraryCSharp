@@ -2,6 +2,7 @@
 /// <summary>
 /// The user's settings in game.
 /// </summary>
+/// <param name="Version">Version of the settings file.</param>
 /// <param name="ChordSupport">[Unknown]</param>
 /// <param name="FcApIndicatorOn"><see langword="true"/> if the user has "FC/AP Indicator" on, otherwise <see langword="false"/>.</param>
 /// <param name="EnableHitSound"><see langword="true"/> if the user has hitsounds on, otherwise <see langword="false"/>.</param>
@@ -14,6 +15,7 @@
 /// <param name="SoundOffset">The player's sound offset, in seconds.</param>
 /// <param name="NoteScale">The player's note scale.</param>
 public record class GameSettings(
+	byte Version,
 	bool ChordSupport,
 	bool FcApIndicatorOn,
 	bool EnableHitSound,

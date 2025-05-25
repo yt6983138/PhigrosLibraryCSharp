@@ -77,7 +77,7 @@ public static class ByteReaderExtensions
 		exceptionHandler ??= new(static (str, ex, _) => { if (ex is null) throw new Exception(str); throw ex; });
 		short scoreCount = reader.ReadVariedInteger();
 
-		List<CompleteScore> scores = new();
+		List<CompleteScore> scores = [];
 		for (int i = 0; i < scoreCount; i++)
 		{
 			string id = Encoding.UTF8.GetString(reader.ReadStringBytes())[..^2];
@@ -109,6 +109,7 @@ public static class ByteReaderExtensions
 		reader.Jump(1);
 		string tmp;
 		return new(
+			reader.ObjectVersion,
 			ByteReader.ReadBool(reader.Data[0], 0),
 			Encoding.UTF8.GetString(reader.ReadStringBytes()),
 			string.IsNullOrWhiteSpace(tmp = Encoding.UTF8.GetString(reader.ReadStringBytes())) ? "Introduction" : tmp,
@@ -124,6 +125,7 @@ public static class ByteReaderExtensions
 	{
 		reader.Jump(1);
 		return new(
+			reader.ObjectVersion,
 			ByteReader.ReadBool(reader.Data[0], 0),
 			ByteReader.ReadBool(reader.Data[0], 1),
 			ByteReader.ReadBool(reader.Data[0], 2),
@@ -146,6 +148,7 @@ public static class ByteReaderExtensions
 	{
 		reader.Jump(1);
 		return new(
+			reader.ObjectVersion,
 			ByteReader.ReadBool(reader.Data[0], 0),
 			ByteReader.ReadBool(reader.Data[0], 1),
 			ByteReader.ReadBool(reader.Data[0], 2),
@@ -171,7 +174,7 @@ public static class ByteReaderExtensions
 	}
 	internal static List<MoreInfoPartialGameRecord> ReadRecord(this ByteReader reader)
 	{
-		List<MoreInfoPartialGameRecord> scores = new();
+		List<MoreInfoPartialGameRecord> scores = [];
 		byte readLen = reader.ReadByte();
 		int endOffset = readLen + reader.Offset;
 		byte exists = reader.ReadByte();

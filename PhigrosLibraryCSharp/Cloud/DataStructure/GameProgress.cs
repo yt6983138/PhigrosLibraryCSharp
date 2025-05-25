@@ -29,6 +29,7 @@ public record struct Money(short KiB, short MiB, short GiB, short TiB, short PiB
 /// <summary>
 /// The user's game progress.
 /// </summary>
+/// <param name="Version">Version of the game progress.</param>
 /// <param name="IsFirstRun">Indicates if the user is running the game for the first time.</param>
 /// <param name="LegacyChapterFinished">Indicates that the user has done legacy chapter or not.</param>
 /// <param name="AlreadyShowCollectionTip">Indicates that unlock tips for collections has shown or not.</param>
@@ -43,6 +44,7 @@ public record struct Money(short KiB, short MiB, short GiB, short TiB, short PiB
 /// <param name="FlagOfSongRecordKey">[Unexplained]</param>
 /// <param name="Node2">Next node of GameProgress.</param>
 public record class GameProgress(
+	byte Version,
 	bool IsFirstRun,
 	bool LegacyChapterFinished,
 	bool AlreadyShowCollectionTip,
