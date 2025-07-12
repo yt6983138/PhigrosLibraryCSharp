@@ -21,7 +21,9 @@ public static class TapTapHelper
 		.Replace(" ", "_", StringComparison.InvariantCultureIgnoreCase);
 	internal static readonly string AssemblyName = (typeof(TapTapHelper).Assembly.GetName().Name ?? "unknown_dll")
 		.Replace(" ", "_", StringComparison.InvariantCultureIgnoreCase);
+
 	private static readonly HttpClient _client = new();
+	private static readonly HttpClient _internationalClient = new();
 	#endregion
 
 	#region Endpoints
@@ -31,11 +33,16 @@ public static class TapTapHelper
 	/// </summary>
 	public static Func<HttpClient, HttpRequestMessage, Task<HttpResponseMessage>>? Proxy { get; set; }
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
+	public static string WebHost { get; } = @"https://accounts.tapapis.com";
 	public static string ChinaWebHost { get; } = @"https://accounts.tapapis.cn";
+	public static string ApiHost { get; } = @"https://open.tapapis.com";
 	public static string ChinaApiHost { get; } = @"https://open.tapapis.cn";
-	public static string ChinaCodeUrl { get; } = ChinaWebHost + @"/oauth2/v1/device/code";
-	public static string ChinaTokenUrl { get; } = ChinaWebHost + @"/oauth2/v1/token";
+	public static string CodeUrl => WebHost + @"/oauth2/v1/device/code";
+	public static string ChinaCodeUrl => ChinaWebHost + @"/oauth2/v1/device/code";
+	public static string TokenUrl => WebHost + @"/oauth2/v1/token";
+	public static string ChinaTokenUrl => ChinaWebHost + @"/oauth2/v1/token";
+	public static string GetProfileUrl(bool havePublicProfile = true)
+		=> havePublicProfile ? ApiHost + "/account/profile/v1?client_id=" : ApiHost + "/account/basic-info/v1?client_id=";
 	public static string GetChinaProfileUrl(bool havePublicProfile = true)
 		=> havePublicProfile ? ChinaApiHost + "/account/profile/v1?client_id=" : ChinaApiHost + "/account/basic-info/v1?client_id=";
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
@@ -45,36 +52,38 @@ public static class TapTapHelper
 	/// Request a url for user to login.
 	/// </summary>
 	/// <param name="permissions">Extra permissions to ask, provide <see langword="null"/> to use default permissions.</param>
+	/// <param name="useChinaEndpoint">Use China endpoints to login or not.</param>
 	/// <returns>A completed collection of QRCode data. See <see cref="CompleteQRCodeData"/> for more information.</returns>
 	/// <seealso cref="CompleteQRCodeData"/>
-	public static async Task<CompleteQRCodeData> RequestLoginQrCode(string[]? permissions = null)
+	public static async Task<CompleteQRCodeData> RequestLoginQrCode(string[]? permissions = null, bool useChinaEndpoint = true)
 	{
 		string clientId = $"{AssemblyName}-{AssemblyVersion}-" +
 			$"{(DateTime.UtcNow - DateTime.UnixEpoch).TotalMilliseconds}-{Random.Shared.Next(0, 114514):N}";
 		Dictionary<string, object> parameters = new()
 		{
-			{ "client_id", LCHelper.ClientId },
+			{ "client_id", useChinaEndpoint ? LCHelper.ClientId : LCHelper.InternationalClientId }, // TODO: refactor those ternary operators
 			{ "response_type", "device_code" },
-			{ "scope", string.Join(",", permissions ?? new string[] { "public_profile" }) },
+			{ "scope", string.Join(",", permissions ?? ["public_profile"]) },
 			{ "version", TapSDKVersion },
 			{ "platform", "unity" },
 			{ "info", "{\"device_id\":\"" + clientId + "\"}" } 
 			// ^ https://github.com/taptap/TapSDK-UE4/blob/f66d15048ebff4628f1614ca8df8a7a07dabf6cb/TapCommon/Source/TapCommon/Tools/TUDeviceInfo.h#L30 
 		};
-		return new(await Request<PartialTapTapQRCodeData>(ChinaCodeUrl, HttpMethod.Post, data: parameters), clientId);
+		return new(await Request<PartialTapTapQRCodeData>(useChinaEndpoint ? ChinaCodeUrl : CodeUrl, HttpMethod.Post, useChinaEndpoint, data: parameters), clientId);
 	}
 	/// <summary>
 	/// Check if the user has logged in through QRCode.
 	/// </summary>
-	/// <param name="qrCodeData">The completed QRCode data from <see cref="RequestLoginQrCode(string[])"/>.</param>
+	/// <param name="qrCodeData">The completed QRCode data from <see cref="RequestLoginQrCode(string[], bool)"/>.</param>
+	/// <param name="useChinaEndpoint">Use China endpoints to login or not.</param>
 	/// <returns><see langword="null"/> if not verified, the token data if verified.</returns>
 	/// <exception cref="Exception">Received unknown response</exception>
-	public static async Task<TapTapTokenData?> CheckQRCodeResult(CompleteQRCodeData qrCodeData)
+	public static async Task<TapTapTokenData?> CheckQRCodeResult(CompleteQRCodeData qrCodeData, bool useChinaEndpoint = true)
 	{
 		Dictionary<string, string> data = new()
 		{
 			{ "grant_type", "device_token" },
-			{ "client_id", LCHelper.ClientId },
+			{ "client_id", useChinaEndpoint ? LCHelper.ClientId : LCHelper.InternationalClientId },
 			{ "secret_type", "hmac-sha-1" },
 			{ "code", qrCodeData.DeviceCode },
 			{ "version", "1.0" },
@@ -83,7 +92,7 @@ public static class TapTapHelper
 		};
 		try
 		{
-			TapTapTokenData token = await Request<TapTapTokenData>(ChinaTokenUrl, HttpMethod.Post, data: data);
+			TapTapTokenData token = await Request<TapTapTokenData>(useChinaEndpoint ? ChinaTokenUrl : TokenUrl, HttpMethod.Post, useChinaEndpoint, data: data);
 			return token;
 		}
 		catch (RequestException ex)
@@ -99,14 +108,15 @@ public static class TapTapHelper
 	/// <summary>
 	/// Get the profile data of the user.
 	/// </summary>
-	/// <param name="token">The token gotten from <see cref="CheckQRCodeResult(CompleteQRCodeData)"/>.</param>
+	/// <param name="token">The token gotten from <see cref="CheckQRCodeResult(CompleteQRCodeData, bool)"/>.</param>
+	/// <param name="useChinaEndpoint">Use China endpoints to login or not.</param>
 	/// <param name="timestamp">[Unknown]</param>
 	/// <returns>The TapTap user profile.</returns>
-	public static async Task<TapTapProfileData> GetProfile(TapTapTokenData.TokenData token, int timestamp = 0)
+	public static async Task<TapTapProfileData> GetProfile(TapTapTokenData.TokenData token, int timestamp = 0, bool useChinaEndpoint = true)
 	{
 		ArgumentNullException.ThrowIfNull(token, nameof(token));
 		bool hasPublicProfile = token.Scope.Contains("public_profile");
-		string url = GetChinaProfileUrl(hasPublicProfile) + LCHelper.ClientId;
+		string url = (useChinaEndpoint ? GetChinaProfileUrl(hasPublicProfile) : GetProfileUrl(hasPublicProfile)) + (useChinaEndpoint ? LCHelper.ClientId : LCHelper.InternationalClientId);
 		Uri uri = new(url);
 		int ts = timestamp;
 		if (ts == 0)
@@ -127,7 +137,7 @@ public static class TapTapHelper
 		{
 			{ "Authorization", sign }
 		};
-		TapTapProfileData response = await Request<TapTapProfileData>(url, HttpMethod.Get, headers: headers);
+		TapTapProfileData response = await Request<TapTapProfileData>(url, HttpMethod.Get, useChinaEndpoint, headers: headers);
 		return response;
 	}
 	internal static string GetAuthorizationHeader(string kid,
@@ -139,23 +149,15 @@ public static class TapTapHelper
 		string port,
 		int timestamp)
 	{
-		string nonce = new System.Random().Next().ToString();
+		string nonce = new Random().Next().ToString();
 
 		string normalizedString = $"{timestamp}\n{nonce}\n{method}\n{uri}\n{host}\n{port}\n\n";
-
-		HashAlgorithm hashGenerator;
-		switch (macAlgorithm)
+		HashAlgorithm hashGenerator = macAlgorithm switch
 		{
-			case "hmac-sha-256":
-				hashGenerator = new HMACSHA256(Encoding.ASCII.GetBytes(macKey));
-				break;
-			case "hmac-sha-1":
-				hashGenerator = new HMACSHA1(Encoding.ASCII.GetBytes(macKey));
-				break;
-			default:
-				throw new InvalidOperationException("Unsupported MAC algorithm");
-		}
-
+			"hmac-sha-256" => new HMACSHA256(Encoding.ASCII.GetBytes(macKey)),
+			"hmac-sha-1" => new HMACSHA1(Encoding.ASCII.GetBytes(macKey)),
+			_ => throw new InvalidOperationException("Unsupported MAC algorithm"),
+		};
 		string hash = Convert.ToBase64String(hashGenerator.ComputeHash(Encoding.ASCII.GetBytes(normalizedString)));
 
 		StringBuilder authorizationHeader = new();
@@ -166,10 +168,12 @@ public static class TapTapHelper
 	}
 	internal static async Task<T> Request<T>(string url, // why do we have 2 same helper doing this bruh
 			HttpMethod method,
+			bool useChinaEndpoint,
 			Dictionary<string, object>? headers = null,
 			object? data = null,
 			Dictionary<string, object>? queryParams = null)
 	{
+		HttpClient client = useChinaEndpoint ? _client : _internationalClient;
 		url = BuildUrl(url, queryParams);
 		HttpRequestMessage request = new()
 		{
@@ -191,11 +195,11 @@ public static class TapTapHelper
 		HttpResponseMessage response;
 		if (Proxy is not null)
 		{
-			response = await Proxy(_client, request);
+			response = await Proxy(client, request);
 		}
 		else
 		{
-			response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+			response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 		}
 		request.Dispose();
 

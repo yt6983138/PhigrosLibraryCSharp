@@ -17,17 +17,21 @@ public static class LCHelper
 	internal const string AppKey = @"Qr9AEqtuoSVS3zeD6iVbM4ZC0AtkJcQ89tywVyi0";
 	internal const string ClientId = @"rAK3FfdieFob2Nn8Am";
 
+	internal const string InternationalAppKey = @"tG9CTm0LDD736k9HMM9lBZrbeBGRmUkjSfNLDNib";
+	internal const string InternationalClientId = @"kviehleldgxsagpozb";
+
 	private static Task<string> MD5HashHexStringDefaultGetter(string input)
 		=> Task.FromResult(_md5.ComputeHash(Encoding.UTF8.GetBytes(input)).ToHex());
 	private static HttpClient Client { get; } = new()
 	{
 		BaseAddress = new(Save.CloudServerAddress)
 	};
-	private static Dictionary<string, object> UniversalHeaders { get; } = new()
+	private static HttpClient InternationalClient { get; } = new()
 	{
-		{ "X-LC-Id", ClientId }
+		BaseAddress = new(Save.InternationalCloudServerAddress)
 	};
-	internal readonly static MD5 _md5;
+
+	internal static readonly MD5 _md5;
 	#endregion
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -47,18 +51,19 @@ public static class LCHelper
 	public static Func<string, Task<string>> GetMD5HashHexString { get; set; } = MD5HashHexStringDefaultGetter;
 
 	/// <summary>
-	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>. <br/>
+	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </summary>
 	/// <param name="data">
-	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>. <br/>
+	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </param>
+	/// <param name="useChinaEndpoint">Use China endpoints to login or not.</param>
 	/// <param name="failOnNotExist">[Unknown]</param>
 	/// <returns>A <see cref="Dictionary{TKey, TValue}"/> containing the logged user information.</returns>
-	public static async Task<JsonNode> LoginWithAuthData(LCCombinedAuthData data, bool failOnNotExist = false)
+	public static async Task<JsonNode> LoginWithAuthData(LCCombinedAuthData data, bool useChinaEndpoint = true, bool failOnNotExist = false)
 	{
 		Dictionary<string, object> authData = new()
 		{
@@ -68,7 +73,8 @@ public static class LCHelper
 		JsonNode response = await Request<JsonNode>(
 			path,
 			HttpMethod.Post,
-			headers: UniversalHeaders,
+			useChinaEndpoint,
+			headers: new() { ["X-LC-Id"] = useChinaEndpoint ? ClientId : InternationalClientId },
 			data: new Dictionary<string, object> {
 				{ "authData", authData }
 			}
@@ -77,36 +83,39 @@ public static class LCHelper
 		return response;
 	}
 	/// <summary>
-	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>, then get the token. <br/>
+	/// Login with combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>, then get the token. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </summary>
 	/// <param name="data">
-	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>
-	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>. <br/>
+	/// Combined data of <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>
+	/// and <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>. <br/>
 	/// See also: <see cref="LCCombinedAuthData(TapTapProfileData.ProfileData, TapTapTokenData.TokenData)"/>
 	/// </param>
+	/// <param name="useChinaEndpoint">Use China endpoints to login or not.</param>
 	/// <param name="failOnNotExist">[Unknown]</param>
 	/// <returns>The session token of the user.</returns>
-	public static async Task<string> LoginAndGetToken(LCCombinedAuthData data, bool failOnNotExist = false)
-		=> (await LoginWithAuthData(data, failOnNotExist))["sessionToken"].EnsureNotNull().GetValue<string>();
+	public static async Task<string> LoginAndGetToken(LCCombinedAuthData data, bool useChinaEndpoint = true, bool failOnNotExist = false)
+		=> (await LoginWithAuthData(data, useChinaEndpoint, failOnNotExist))["sessionToken"].EnsureNotNull().GetValue<string>();
 
 	internal static async Task<T> Request<T>(
 		string path,
 		HttpMethod method,
+		bool useChinaEndpoint,
 		Dictionary<string, object>? headers = null,
 		object? data = null,
 		Dictionary<string, object>? queryParams = null,
 		bool withAPIVersion = true)
 	{
-		string url = BuildUrl(path, queryParams!, withAPIVersion);
+		HttpClient client = useChinaEndpoint ? Client : InternationalClient;
+		string url = BuildUrl(path, useChinaEndpoint, queryParams!, withAPIVersion);
 		HttpRequestMessage request = new()
 		{
 			RequestUri = new Uri(url),
 			Method = method,
 		};
 		// request.SetNoCors();
-		await FillHeaders(request.Headers, headers);
+		await FillHeaders(request.Headers, useChinaEndpoint, headers);
 
 		string? content = null;
 		if (data != null)
@@ -120,11 +129,11 @@ public static class LCHelper
 		HttpResponseMessage response;
 		if (TapTapHelper.Proxy is not null)
 		{
-			response = await TapTapHelper.Proxy(Client, request);
+			response = await TapTapHelper.Proxy(client, request);
 		}
 		else
 		{
-			response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+			response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 		}
 		request.Dispose();
 
@@ -140,9 +149,9 @@ public static class LCHelper
 		}
 		throw new ApplicationException($"{statusCode}: {resultString}");
 	}
-	private static string BuildUrl(string path, Dictionary<string, object> queryParams, bool withAPIVersion)
+	private static string BuildUrl(string path, bool useChinaEndpoint, Dictionary<string, object> queryParams, bool withAPIVersion)
 	{
-		StringBuilder urlSB = new(Save.CloudServerAddress);
+		StringBuilder urlSB = new(useChinaEndpoint ? Save.CloudServerAddress : Save.InternationalCloudServerAddress);
 		if (withAPIVersion)
 		{
 			urlSB.Append("/1.1"); // https://github.com/leancloud/csharp-sdk/blob/master/Common/Common/LCCore.cs
@@ -159,7 +168,7 @@ public static class LCHelper
 		}
 		return url;
 	}
-	private static async Task FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null)
+	private static async Task FillHeaders(HttpRequestHeaders headers, bool useChinaEndpoint, Dictionary<string, object>? reqHeaders = null)
 	{
 		// 额外 headers
 		if (reqHeaders != null)
@@ -171,7 +180,7 @@ public static class LCHelper
 		}
 		// 签名
 		long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-		string data = $"{timestamp}{AppKey}";
+		string data = $"{timestamp}{(useChinaEndpoint ? AppKey : InternationalAppKey)}";
 		string hash = await GetMD5HashHexString(data);
 		string sign = $"{hash},{timestamp}";
 		headers.Add("X-LC-Sign", sign);

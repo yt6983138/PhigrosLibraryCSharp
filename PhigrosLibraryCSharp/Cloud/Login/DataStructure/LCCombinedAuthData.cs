@@ -11,8 +11,8 @@ public class LCCombinedAuthData
 	/// <summary>
 	/// Creates a combined collection of <see cref="TapTapProfileData.ProfileData"/> and <see cref="TapTapTokenData.TokenData"/>.
 	/// </summary>
-	/// <param name="profileData">Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int)"/>.</param>
-	/// <param name="tokenData">Token data gotten from <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData)"/>.</param>
+	/// <param name="profileData">Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>.</param>
+	/// <param name="tokenData">Token data gotten from <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>.</param>
 	public LCCombinedAuthData(TapTapProfileData.ProfileData profileData, TapTapTokenData.TokenData tokenData)
 	{
 		this.Kid = tokenData.Kid;
@@ -85,7 +85,7 @@ public class LCCombinedAuthData
 	{
 		Type typeOfThis = typeof(LCCombinedAuthData);
 		System.Reflection.PropertyInfo[] properties = typeOfThis.GetProperties();
-		Dictionary<string, object> dict = new();
+		Dictionary<string, object> dict = [];
 		foreach (System.Reflection.PropertyInfo property in properties)
 		{
 			dict.Add(property.Name, property.GetValue(this)!);

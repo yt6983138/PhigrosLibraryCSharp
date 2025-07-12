@@ -3,7 +3,7 @@
 namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 
 /// <summary>
-/// Profile data gotten from <see cref="TapTapHelper.GetProfile(PhigrosLibraryCSharp.Cloud.Login.DataStructure.TapTapTokenData.TokenData, int)"/>.
+/// Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>.
 /// </summary>
 public class TapTapProfileData
 {
