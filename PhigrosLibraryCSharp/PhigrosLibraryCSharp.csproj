@@ -1,18 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>preview</LangVersion>
 
-	<AssemblyVersion>2.3.0</AssemblyVersion>
+		<AssemblyVersion>3.0.0</AssemblyVersion>
 
-	<BaseOutputPath>..\output\bin</BaseOutputPath>
-  </PropertyGroup>
-
-  <ItemGroup>
-  </ItemGroup>
+		<BaseOutputPath>..\output\bin</BaseOutputPath>
+	</PropertyGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-﻿using PhigrosLibraryCSharp.GameRecords;
-
-namespace PhigrosLibraryCSharp.Cloud.DataStructure;
+﻿namespace PhigrosLibraryCSharp.GameRecords;
 
 /// <summary>
 /// The Phigros currency.

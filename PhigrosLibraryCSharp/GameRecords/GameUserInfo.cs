@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure;
+﻿namespace PhigrosLibraryCSharp.GameRecords;
 
 /// <summary>
 /// The user's info in game.

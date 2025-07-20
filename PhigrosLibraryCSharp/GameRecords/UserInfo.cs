@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure;
+﻿namespace PhigrosLibraryCSharp.GameRecords;
 
 /// <summary>
 /// A struct presenting player's nickname, username...

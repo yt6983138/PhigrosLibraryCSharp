@@ -1,18 +1,17 @@
 ﻿using PhigrosLibraryCSharp.Cloud.Login;
-using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 using System.Diagnostics;
 
 namespace PhigrosLibraryCSharp.Tests;
 
 [TestClass]
-public class LoginTest
+public class LoginTest // TODO: Add international test
 {
 	private TapTapTokenData? _data;
 	private TapTapProfileData? _profile;
 	private string? _token;
 
 	[TestMethod]
-	public async Task TestAll()
+	public async Task TestChinaMode()
 	{
 		await this.TestTapTapHelper();
 		await this.TestLCHelper();
@@ -50,13 +49,14 @@ public class LoginTest
 	}
 	private async Task TestSave()
 	{
-		Save save = new(this._token!);
+		Save save = new(this._token!, false);
+		SaveContext ctx = await save.GetSaveContextAsync(0);
 		Console.WriteLine("Progress:");
-		Console.WriteLine((await save.GetGameProgressAsync(0)).ToJson());
+		Console.WriteLine(ctx.ReadGameProgress().ToJson());
 		Console.WriteLine("Settings:");
-		Console.WriteLine((await save.GetGameSettingsAsync(0)).ToJson());
+		Console.WriteLine(ctx.ReadGameSettings().ToJson());
 		Console.WriteLine("Game userinfo:");
-		Console.WriteLine((await save.GetGameUserInfoAsync(0)).ToJson());
+		Console.WriteLine(ctx.ReadGameUserInfo().ToJson());
 		Console.WriteLine("Userinfo:");
 		Console.WriteLine((await save.GetUserInfoAsync()).ToJson());
 	}

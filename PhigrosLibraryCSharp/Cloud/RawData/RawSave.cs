@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
+﻿namespace PhigrosLibraryCSharp.Cloud.RawData;
 
 /// <summary>
 /// A container containing <see cref="RawSave"/>s.
