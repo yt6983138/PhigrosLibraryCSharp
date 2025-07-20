@@ -13,15 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.PackageExtract", "PhigrosLibraryCSharp.PackageExtract\PhigrosLibraryCSharp.PackageExtract.csproj", "{514EA800-0DC7-4A4A-810F-4C326A78D3F5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.Tests", "PhigrosLibraryCSharp.Tests\PhigrosLibraryCSharp.Tests.csproj", "{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.Examples", "PhigrosLibraryCSharp.Examples\PhigrosLibraryCSharp.Examples.csproj", "{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.HttpServiceProvider", "PhigrosLibraryCSharp.HttpServiceProvider\PhigrosLibraryCSharp.HttpServiceProvider.csproj", "{87AEEEF5-0A25-480C-AA89-F093C4D29CFF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.HttpServiceProvider.Test", "PhigrosLibraryCSharp.HttpServiceProvider.Test\PhigrosLibraryCSharp.HttpServiceProvider.Test.csproj", "{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +27,6 @@ Global
 		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{514EA800-0DC7-4A4A-810F-4C326A78D3F5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,14 +35,6 @@ Global
 		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.Release|Any CPU.Build.0 = Release|Any CPU
-		{87AEEEF5-0A25-480C-AA89-F093C4D29CFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{87AEEEF5-0A25-480C-AA89-F093C4D29CFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{87AEEEF5-0A25-480C-AA89-F093C4D29CFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{87AEEEF5-0A25-480C-AA89-F093C4D29CFF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6B27CB1-7E07-40C3-8D94-217AC567DB3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
