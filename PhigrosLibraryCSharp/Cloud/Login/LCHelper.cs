@@ -1,5 +1,4 @@
-﻿using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
-using PhigrosLibraryCSharp.Extensions;
+﻿using PhigrosLibraryCSharp.Extensions;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -20,16 +19,23 @@ public static class LCHelper
 	internal const string InternationalAppKey = @"tG9CTm0LDD736k9HMM9lBZrbeBGRmUkjSfNLDNib";
 	internal const string InternationalClientId = @"kviehleldgxsagpozb";
 
+	internal static string GetClientId(bool isChina)
+		=> isChina ? ClientId : InternationalClientId;
+	internal static string GetAppKey(bool isChina)
+		=> isChina ? AppKey : InternationalAppKey;
+
 	private static Task<string> MD5HashHexStringDefaultGetter(string input)
 		=> Task.FromResult(_md5.ComputeHash(Encoding.UTF8.GetBytes(input)).ToHex());
-	private static HttpClient Client { get; } = new()
+	private static readonly HttpClient Client = new()
 	{
 		BaseAddress = new(Save.CloudServerAddress)
 	};
-	private static HttpClient InternationalClient { get; } = new()
+	private static readonly HttpClient InternationalClient = new()
 	{
 		BaseAddress = new(Save.InternationalCloudServerAddress)
 	};
+	private static HttpClient GetClient(bool isChina)
+		=> isChina ? Client : InternationalClient;
 
 	internal static readonly MD5 _md5;
 	#endregion
@@ -107,7 +113,7 @@ public static class LCHelper
 		Dictionary<string, object>? queryParams = null,
 		bool withAPIVersion = true)
 	{
-		HttpClient client = useChinaEndpoint ? Client : InternationalClient;
+		HttpClient client = GetClient(useChinaEndpoint);
 		string url = BuildUrl(path, useChinaEndpoint, queryParams!, withAPIVersion);
 		HttpRequestMessage request = new()
 		{
@@ -151,7 +157,7 @@ public static class LCHelper
 	}
 	private static string BuildUrl(string path, bool useChinaEndpoint, Dictionary<string, object> queryParams, bool withAPIVersion)
 	{
-		StringBuilder urlSB = new(useChinaEndpoint ? Save.CloudServerAddress : Save.InternationalCloudServerAddress);
+		StringBuilder urlSB = new(Save.GetCloudServerAddress(useChinaEndpoint));
 		if (withAPIVersion)
 		{
 			urlSB.Append("/1.1"); // https://github.com/leancloud/csharp-sdk/blob/master/Common/Common/LCCore.cs
@@ -180,7 +186,7 @@ public static class LCHelper
 		}
 		// 签名
 		long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-		string data = $"{timestamp}{(useChinaEndpoint ? AppKey : InternationalAppKey)}";
+		string data = $"{timestamp}{GetAppKey(useChinaEndpoint)}";
 		string hash = await GetMD5HashHexString(data);
 		string sign = $"{hash},{timestamp}";
 		headers.Add("X-LC-Sign", sign);

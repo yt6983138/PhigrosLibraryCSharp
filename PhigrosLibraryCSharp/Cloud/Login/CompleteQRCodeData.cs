@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+﻿namespace PhigrosLibraryCSharp.Cloud.Login;
 
 /// <summary>
 /// A completed collection of <see cref="PartialTapTapQRCodeData"/>.

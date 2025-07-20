@@ -1,5 +1,4 @@
 ﻿using PhigrosLibraryCSharp.Cloud.Login;
-using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
 
 namespace PhigrosLibraryCSharp.Examples;
 
@@ -68,26 +67,28 @@ internal class Program
 	private static async Task ShowMiscInfo()
 	{
 		Console.WriteLine("What is your phigros token? (can be acquired from example 1)");
-		Save save = new(Console.ReadLine()!.Trim());
+		Save save = new(Console.ReadLine()!.Trim(), false);
+
+		SaveContext ctx = await save.GetSaveContextAsync(0);
 
 		Console.WriteLine("Progress:");
-		Console.WriteLine((await save.GetGameProgressAsync(0)).ToJson());
+		Console.WriteLine(ctx.ReadGameProgress().ToJson());
 		Console.WriteLine("Settings:");
-		Console.WriteLine((await save.GetGameSettingsAsync(0)).ToJson());
+		Console.WriteLine(ctx.ReadGameSettings().ToJson());
 		Console.WriteLine("Game user info:");
-		Console.WriteLine((await save.GetGameUserInfoAsync(0)).ToJson());
+		Console.WriteLine(ctx.ReadGameUserInfo().ToJson());
 		Console.WriteLine("User info:");
 		Console.WriteLine((await save.GetUserInfoAsync()).ToJson());
 	}
 	private static async Task ShowBest5()
 	{
 		Console.WriteLine("What is your phigros token? (can be acquired from example 1)");
-		Save save = new(Console.ReadLine()!.Trim());
+		Save save = new(Console.ReadLine()!.Trim(), false);
 		Console.WriteLine("Where is difficulty.tsv?");
 		string tsvPath = Console.ReadLine()!;
 
 		// parse tsv
-		Dictionary<string, float[]> difficulties = new();
+		Dictionary<string, float[]> difficulties = [];
 		foreach (string line in File.ReadAllLines(tsvPath))
 		{
 			string[] splitted = line.Split('\t', 2);
@@ -102,15 +103,13 @@ internal class Program
 		}
 
 		// scores
-		SaveSummaryPair data = await save.GetGameSaveAsync(difficulties, 0);
+		SaveContext ctx = await save.GetSaveContextAsync(0);
 		Console.WriteLine("Your summary:");
-		Console.WriteLine(data.Summary.ToJson());
+		Console.WriteLine(ctx.ReadSummary().ToJson());
 		Console.WriteLine("Your top 5 scores:");
+		GameRecords.GameRecord records = ctx.ReadGameRecord(difficulties);
+
 		int i = 0;
-		data.Save.Records.Sort((x, y) => y.Rks.CompareTo(x.Rks));
-		Console.WriteLine(data.Save.Records
-			.GetRange(0, 5)
-			.Select(x => $"{++i}:\n{x}")
-			.Join("\n"));
+		Console.WriteLine(records.GetSortedListForRks().OtherScores.Take(5).Select(x => $"{++i}:\n{x}").Join("\n\n"));
 	}
 }

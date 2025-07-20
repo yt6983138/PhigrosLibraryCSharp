@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+namespace PhigrosLibraryCSharp.Cloud.Login;
 /// <summary>
 /// A combined collection of <see cref="TapTapProfileData.ProfileData"/> and <see cref="TapTapTokenData.TokenData"/>.
 /// </summary>

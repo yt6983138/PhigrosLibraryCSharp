@@ -1,18 +1,17 @@
-﻿using PhigrosLibraryCSharp.Cloud.Login.DataStructure;
-using PhigrosLibraryCSharp.Extensions;
+﻿using PhigrosLibraryCSharp.Extensions;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using static PhigrosLibraryCSharp.Cloud.Login.DataStructure.RequestException;
+using static PhigrosLibraryCSharp.Cloud.Login.RequestException;
 
 namespace PhigrosLibraryCSharp.Cloud.Login;
 /// <summary>
 /// A helper to assist you login at TapTap.
 /// </summary>
-public static class TapTapHelper
+public static class TapTapHelper // TODO: Add callback login
 {
 	#region Constants
 	internal const string TapSDKVersion = "2.1";
@@ -24,6 +23,9 @@ public static class TapTapHelper
 
 	private static readonly HttpClient _client = new();
 	private static readonly HttpClient _internationalClient = new();
+
+	private static HttpClient GetClient(bool useChinaEndpoint)
+		=> useChinaEndpoint ? _client : _internationalClient;
 	#endregion
 
 	#region Endpoints
@@ -41,10 +43,21 @@ public static class TapTapHelper
 	public static string ChinaCodeUrl => ChinaWebHost + @"/oauth2/v1/device/code";
 	public static string TokenUrl => WebHost + @"/oauth2/v1/token";
 	public static string ChinaTokenUrl => ChinaWebHost + @"/oauth2/v1/token";
-	public static string GetProfileUrl(bool havePublicProfile = true)
+
+	public static string GetWebHost(bool useChinaEndpoint)
+		=> useChinaEndpoint ? ChinaWebHost : WebHost;
+	public static string GetApiHost(bool useChinaEndpoint)
+		=> useChinaEndpoint ? ChinaApiHost : ApiHost;
+	public static string GetCodeUrl(bool useChinaEndpoint)
+		=> useChinaEndpoint ? ChinaCodeUrl : CodeUrl;
+	public static string GetTokenUrl(bool useChinaEndpoint)
+		=> useChinaEndpoint ? ChinaTokenUrl : TokenUrl;
+	public static string GetInternationalProfileUrl(bool havePublicProfile = true)
 		=> havePublicProfile ? ApiHost + "/account/profile/v1?client_id=" : ApiHost + "/account/basic-info/v1?client_id=";
 	public static string GetChinaProfileUrl(bool havePublicProfile = true)
 		=> havePublicProfile ? ChinaApiHost + "/account/profile/v1?client_id=" : ChinaApiHost + "/account/basic-info/v1?client_id=";
+	public static string GetProfileUrl(bool useChinaEndpoint, bool havePublicProfile = true)
+		=> useChinaEndpoint ? GetChinaProfileUrl(havePublicProfile) : GetInternationalProfileUrl(havePublicProfile);
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	#endregion
 
@@ -61,7 +74,7 @@ public static class TapTapHelper
 			$"{(DateTime.UtcNow - DateTime.UnixEpoch).TotalMilliseconds}-{Random.Shared.Next(0, 114514):N}";
 		Dictionary<string, object> parameters = new()
 		{
-			{ "client_id", useChinaEndpoint ? LCHelper.ClientId : LCHelper.InternationalClientId }, // TODO: refactor those ternary operators
+			{ "client_id", LCHelper.GetClientId(useChinaEndpoint) },
 			{ "response_type", "device_code" },
 			{ "scope", string.Join(",", permissions ?? ["public_profile"]) },
 			{ "version", TapSDKVersion },
@@ -69,7 +82,7 @@ public static class TapTapHelper
 			{ "info", "{\"device_id\":\"" + clientId + "\"}" } 
 			// ^ https://github.com/taptap/TapSDK-UE4/blob/f66d15048ebff4628f1614ca8df8a7a07dabf6cb/TapCommon/Source/TapCommon/Tools/TUDeviceInfo.h#L30 
 		};
-		return new(await Request<PartialTapTapQRCodeData>(useChinaEndpoint ? ChinaCodeUrl : CodeUrl, HttpMethod.Post, useChinaEndpoint, data: parameters), clientId);
+		return new(await Request<PartialTapTapQRCodeData>(GetCodeUrl(useChinaEndpoint), HttpMethod.Post, useChinaEndpoint, data: parameters), clientId);
 	}
 	/// <summary>
 	/// Check if the user has logged in through QRCode.
@@ -83,7 +96,7 @@ public static class TapTapHelper
 		Dictionary<string, string> data = new()
 		{
 			{ "grant_type", "device_token" },
-			{ "client_id", useChinaEndpoint ? LCHelper.ClientId : LCHelper.InternationalClientId },
+			{ "client_id", LCHelper.GetClientId(useChinaEndpoint) },
 			{ "secret_type", "hmac-sha-1" },
 			{ "code", qrCodeData.DeviceCode },
 			{ "version", "1.0" },
@@ -92,7 +105,7 @@ public static class TapTapHelper
 		};
 		try
 		{
-			TapTapTokenData token = await Request<TapTapTokenData>(useChinaEndpoint ? ChinaTokenUrl : TokenUrl, HttpMethod.Post, useChinaEndpoint, data: data);
+			TapTapTokenData token = await Request<TapTapTokenData>(GetTokenUrl(useChinaEndpoint), HttpMethod.Post, useChinaEndpoint, data: data);
 			return token;
 		}
 		catch (RequestException ex)
@@ -116,7 +129,7 @@ public static class TapTapHelper
 	{
 		ArgumentNullException.ThrowIfNull(token, nameof(token));
 		bool hasPublicProfile = token.Scope.Contains("public_profile");
-		string url = (useChinaEndpoint ? GetChinaProfileUrl(hasPublicProfile) : GetProfileUrl(hasPublicProfile)) + (useChinaEndpoint ? LCHelper.ClientId : LCHelper.InternationalClientId);
+		string url = GetProfileUrl(useChinaEndpoint, hasPublicProfile) + LCHelper.GetClientId(useChinaEndpoint);
 		Uri uri = new(url);
 		int ts = timestamp;
 		if (ts == 0)
@@ -173,7 +186,7 @@ public static class TapTapHelper
 			object? data = null,
 			Dictionary<string, object>? queryParams = null)
 	{
-		HttpClient client = useChinaEndpoint ? _client : _internationalClient;
+		HttpClient client = GetClient(useChinaEndpoint);
 		url = BuildUrl(url, queryParams);
 		HttpRequestMessage request = new()
 		{

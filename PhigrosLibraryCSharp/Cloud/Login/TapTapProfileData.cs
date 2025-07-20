@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+namespace PhigrosLibraryCSharp.Cloud.Login;
 
 /// <summary>
 /// Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>.

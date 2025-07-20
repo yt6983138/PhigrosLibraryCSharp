@@ -1,7 +1,6 @@
-﻿using PhigrosLibraryCSharp.GameRecords;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace PhigrosLibraryCSharp.Cloud.DataStructure;
+namespace PhigrosLibraryCSharp.GameRecords;
 
 
 [StructLayout(LayoutKind.Explicit)]

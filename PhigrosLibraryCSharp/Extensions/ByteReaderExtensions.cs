@@ -1,5 +1,4 @@
-﻿using PhigrosLibraryCSharp.Cloud.DataStructure;
-using PhigrosLibraryCSharp.GameRecords;
+﻿using PhigrosLibraryCSharp.GameRecords;
 using PhigrosLibraryCSharp.GameRecords.Raw;
 using System.Text;
 

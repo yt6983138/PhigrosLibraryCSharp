@@ -1,11 +1,9 @@
-﻿using PhigrosLibraryCSharp.GameRecords;
-
-namespace PhigrosLibraryCSharp.Cloud.DataStructure;
+﻿namespace PhigrosLibraryCSharp.GameRecords;
 
 /// <summary>
 /// A container containing save records.
 /// </summary>
-public class GameSave
+public class GameRecord
 {
 	/// <summary>
 	/// Version of the gameRecord file.
@@ -15,14 +13,6 @@ public class GameSave
 	/// The player song records.
 	/// </summary>
 	public required List<CompleteScore> Records { get; set; }
-	/// <summary>
-	/// The creation date of the save.
-	/// </summary>
-	public required DateTime CreationDate { get; set; }
-	/// <summary>
-	/// The creation date of the save.
-	/// </summary>
-	public required DateTime ModificationTime { get; set; }
 	/// <summary>
 	/// [Unknown]
 	/// </summary>

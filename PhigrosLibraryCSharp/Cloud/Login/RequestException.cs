@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace PhigrosLibraryCSharp.Cloud.Login.DataStructure;
+namespace PhigrosLibraryCSharp.Cloud.Login;
 /// <summary>
 /// An exception that will be thrown to user if server sent unknown response.
 /// </summary>

@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp.Cloud.DataStructure.Raw;
+﻿namespace PhigrosLibraryCSharp.Cloud.RawData;
 
 /// <summary>
 /// The save parsed from cloud object.
@@ -18,9 +18,9 @@ public class SimplifiedSave
 	/// </summary>
 	public required DateTime ModificationTime { get; set; }
 	/// <summary>
-	/// [Unknown]
+	/// Player's summary in base64 format.
 	/// </summary>
-	public string Summary { get; set; } = ""; // unused, unknown	
+	public required string Summary { get; set; }
 }
 /// <summary>
 /// A container containing the URL of object.
