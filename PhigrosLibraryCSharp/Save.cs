@@ -221,6 +221,15 @@ public class Save
 			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, rawSaves.Count); // raw count
 
 		RawSave rawSave = rawSaves[index];
+		return await this.GetSaveContextAsync(rawSave);
+	}
+	/// <summary>
+	/// Retrieves the save context for the specified raw save.
+	/// </summary>
+	/// <param name="rawSave">The raw save object to retrieve the context for.</param>
+	/// <returns>A <see cref="SaveContext"/> object containing the save data.</returns>
+	public async Task<SaveContext> GetSaveContextAsync(RawSave rawSave)
+	{
 		SimplifiedSave simplifiedSave = rawSave.ToParsed();
 		byte[] rawZip = await this.GetSaveRawZipAsync(simplifiedSave);
 
