@@ -25,7 +25,7 @@ public static class LCHelper
 		=> isChina ? AppKey : InternationalAppKey;
 
 	private static Task<string> MD5HashHexStringDefaultGetter(string input)
-		=> Task.FromResult(_md5.ComputeHash(Encoding.UTF8.GetBytes(input)).ToHex());
+		=> Task.FromResult(MD5.HashData(Encoding.UTF8.GetBytes(input)).ToHex());
 	private static readonly HttpClient Client = new()
 	{
 		BaseAddress = new(Save.CloudServerAddress)
@@ -36,20 +36,7 @@ public static class LCHelper
 	};
 	private static HttpClient GetClient(bool isChina)
 		=> isChina ? Client : InternationalClient;
-
-	internal static readonly MD5 _md5;
 	#endregion
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-	static LCHelper()
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-	{
-		try
-		{
-			_md5 = MD5.Create();
-		}
-		catch { }
-	}
 
 	/// <summary>
 	/// A function to get MD5 hash string that can be changed if you are on unsupported platform (ex. WASM).
