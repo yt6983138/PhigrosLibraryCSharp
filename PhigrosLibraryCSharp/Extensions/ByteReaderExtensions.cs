@@ -1,6 +1,5 @@
 ﻿using PhigrosLibraryCSharp.GameRecords;
 using PhigrosLibraryCSharp.GameRecords.Raw;
-using System.Text;
 
 namespace PhigrosLibraryCSharp.Extensions;
 
@@ -79,7 +78,7 @@ public static class ByteReaderExtensions
 		List<CompleteScore> scores = [];
 		for (int i = 0; i < scoreCount; i++)
 		{
-			string id = Encoding.UTF8.GetString(reader.ReadStringBytes())[..^2];
+			string id = reader.ReadString()[..^2];
 
 			foreach (MoreInfoPartialGameRecord item in reader.ReadRecord())
 			{
@@ -110,9 +109,9 @@ public static class ByteReaderExtensions
 		return new(
 			reader.ObjectVersion,
 			ByteReader.ReadBool(reader.Data[0], 0),
-			Encoding.UTF8.GetString(reader.ReadStringBytes()),
-			string.IsNullOrWhiteSpace(tmp = Encoding.UTF8.GetString(reader.ReadStringBytes())) ? "Introduction" : tmp,
-			Encoding.UTF8.GetString(reader.ReadStringBytes())
+			reader.ReadString(),
+			string.IsNullOrWhiteSpace(tmp = reader.ReadString()) ? "Introduction" : tmp,
+			reader.ReadString()
 			);
 	}
 	/// <summary>
@@ -129,7 +128,7 @@ public static class ByteReaderExtensions
 			ByteReader.ReadBool(reader.Data[0], 1),
 			ByteReader.ReadBool(reader.Data[0], 2),
 			ByteReader.ReadBool(reader.Data[0], 3),
-			Encoding.UTF8.GetString(reader.ReadStringBytes()),
+			reader.ReadString(),
 			reader.ReadFloat(),
 			reader.ReadFloat(),
 			reader.ReadFloat(),
@@ -152,7 +151,7 @@ public static class ByteReaderExtensions
 			ByteReader.ReadBool(reader.Data[0], 1),
 			ByteReader.ReadBool(reader.Data[0], 2),
 			ByteReader.ReadBool(reader.Data[0], 3),
-			Encoding.UTF8.GetString(reader.ReadStringBytes()),
+			reader.ReadString(),
 			reader.ReadVariedInteger(),
 			reader.ReadUnmanaged<Challenge>(),
 			new(reader.ReadVariedInteger(), reader.ReadVariedInteger(), reader.ReadVariedInteger(), reader.ReadVariedInteger(), reader.ReadVariedInteger()),

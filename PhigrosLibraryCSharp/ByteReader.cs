@@ -1,5 +1,6 @@
 ﻿using PhigrosLibraryCSharp.Extensions;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PhigrosLibraryCSharp;
 
@@ -165,18 +166,46 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		}
 	}
 	/// <summary>
-	/// Reads the string at current offset, and jump.
+	/// Read a byte array with given length at current offset, and jump.
 	/// </summary>
-	/// <returns>The read decoded string.</returns>
+	/// <param name="length">Length of the bytes to read.</param>
+	/// <returns></returns>
+	public byte[] ReadBytes(int length)
+	{
+		byte[] data = this.Data[this.Offset..(this.Offset + length)].PrintHex();
+		this.Offset += length.Print("added offset {0}");
+		return data;
+	}
+	/// <summary>
+	/// Reads the string at current offset, and jump. Length is read as a varied integer before the string.
+	/// </summary>
+	/// <returns>The read raw string bytes.</returns>
 	public byte[] ReadStringBytes()
 	{
 		short length = this.ReadVariedInteger().Print("ReadStringBytes length {0}, data:");
-		byte[] data = this.Data[this.Offset..(this.Offset + length)].PrintHex();
-		this.Offset += length.Print("added offset {0}");
+		byte[] data = this.ReadBytes(length);
 		return data.PrintAsUTF8();
 	}
 	/// <summary>
-	/// Jump with offset.
+	/// Read the string at current offset, and jump. The string is decoded with the given encoding, if not supplied UTF8 is used.
+	/// </summary>
+	/// <param name="encoding">The encoding used to read string, if not supplied UTF8 is used.</param>
+	/// <returns>The read decoded string.</returns>
+	public string ReadString(Encoding? encoding = null)
+		=> (encoding ?? Encoding.UTF8).GetString(this.ReadStringBytes());
+	/// <summary>
+	/// Reads a string of a specified length from the current offset and advances the offset.
+	/// </summary>
+	/// <param name="length">The number of bytes to read for the string.</param>
+	/// <param name="encoding">The encoding used to decode the string. If not provided, UTF8 is used by default.</param>
+	/// <returns>The decoded string from the specified length of bytes.</returns>
+	public string ReadStringCustomLength(int length, Encoding? encoding = null)
+	{
+		byte[] data = this.ReadBytes(length);
+		return (encoding ?? Encoding.UTF8).GetString(data);
+	}
+	/// <summary>
+	/// Jump by offset.
 	/// </summary>
 	/// <param name="offset">The offset relative to current position you want to jump.</param>
 	public void Jump(int offset)
