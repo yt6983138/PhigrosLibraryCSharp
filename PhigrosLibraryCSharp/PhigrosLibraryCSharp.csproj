@@ -16,7 +16,7 @@
 		<Description>
 			A C# implementation of PhigrosLibrary, allowing you to integrate Phigros login workflow and process your scores nicely.
 		</Description>
-		<Copyright>None</Copyright>
+		<Copyright>Copyright © 2026 yt6983138 aka static_void</Copyright>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/yt6983138/PhigrosLibraryCSharp</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
