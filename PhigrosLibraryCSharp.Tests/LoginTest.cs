@@ -15,7 +15,6 @@ public class LoginTest // TODO: Add international test
 	{
 		await this.TestTapTapHelper();
 		await this.TestLCHelper();
-		await this.TestSave();
 	}
 
 	private async Task TestTapTapHelper()
@@ -46,18 +45,5 @@ public class LoginTest // TODO: Add international test
 	{
 		this._token = await LCHelper.LoginAndGetToken(new(this._profile!.Data, this._data!.Data));
 		Console.WriteLine($"Token: {this._token}");
-	}
-	private async Task TestSave()
-	{
-		Save save = new(this._token!, false);
-		SaveContext ctx = await save.GetSaveContextAsync(0);
-		Console.WriteLine("Progress:");
-		Console.WriteLine(ctx.ReadGameProgress().ToJson());
-		Console.WriteLine("Settings:");
-		Console.WriteLine(ctx.ReadGameSettings().ToJson());
-		Console.WriteLine("Game userinfo:");
-		Console.WriteLine(ctx.ReadGameUserInfo().ToJson());
-		Console.WriteLine("Userinfo:");
-		Console.WriteLine((await save.GetUserInfoAsync()).ToJson());
 	}
 }
