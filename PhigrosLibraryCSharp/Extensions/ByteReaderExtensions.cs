@@ -138,6 +138,34 @@ public static class ByteReaderExtensions
 			);
 	}
 	/// <summary>
+	/// Read current data as <see cref="GameKey"/>.
+	/// </summary>
+	/// <param name="reader">The reader itself.</param>
+	/// <returns>User's game key.</returns>
+	public static GameKey ReadGameKey(this ByteReader reader)
+	{
+		short entryCount = reader.ReadVariedInteger();
+		Dictionary<string, GameKeyFlag> dict = [];
+		for (int i = 0; i < entryCount; i++)
+		{
+			byte stringLength = reader.ReadByte();
+			string key = reader.ReadStringCustomLength(stringLength);
+
+			byte flagLength = reader.ReadByte();
+			byte[] flag = reader.ReadBytes(flagLength);
+			dict.Add(key, new GameKeyFlag(flag));
+		}
+
+		return new(
+			dict,
+			reader.ReadByte(),
+			!reader.HasMore() ? null : new(
+				reader.ReadByte() != 0,
+				!reader.HasMore() ? null : new(
+					reader.ReadByte() != 0,
+					reader.ReadByte() != 0)));
+	}
+	/// <summary>
 	/// Get user's game progress.
 	/// </summary>
 	/// <param name="reader">The reader itself.</param>

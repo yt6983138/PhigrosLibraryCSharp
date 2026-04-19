@@ -47,6 +47,11 @@ public class SaveContext
 	public byte[] DecryptedGameProgress => this.DecryptedDataEntries["gameProgress"];
 
 	/// <summary>
+	/// Gets the decrypted game key data.
+	/// </summary>
+	public byte[] DecryptedGameKey => this.DecryptedDataEntries["gameKey"];
+
+	/// <summary>
 	/// Gets the decrypted game settings data.
 	/// </summary>
 	public byte[] DecryptedGameSettings => this.DecryptedDataEntries["settings"];
@@ -65,6 +70,11 @@ public class SaveContext
 	/// Gets the raw game progress data.
 	/// </summary>
 	public byte[] RawGameProgress => this.RawDataEntries["gameProgress"];
+
+	/// <summary>
+	/// Gets the raw game key data.
+	/// </summary>
+	public byte[] RawGameKey => this.RawDataEntries["gameKey"];
 
 	/// <summary>
 	/// Gets the raw game settings data.
@@ -158,6 +168,16 @@ public class SaveContext
 	{
 		ByteReader reader = new(this.DecryptedGameProgress, version: this.RawGameProgress[0]);
 		return reader.ReadGameProgress();
+	}
+
+	/// <summary>
+	/// Reads the player's game key.
+	/// </summary>
+	/// <returns>The player's game key.</returns>
+	public GameKey ReadGameKey()
+	{
+		ByteReader reader = new(this.DecryptedGameKey, version: this.RawGameKey[0]);
+		return reader.ReadGameKey();
 	}
 
 	/// <summary>
