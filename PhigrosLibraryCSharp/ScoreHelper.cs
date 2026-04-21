@@ -1,5 +1,5 @@
-﻿using PhigrosLibraryCSharp.GameRecords;
-using PhigrosLibraryCSharp.GameRecords.Raw;
+﻿using PhigrosLibraryCSharp.CloudSave;
+using PhigrosLibraryCSharp.LocalSave;
 using System.Text;
 
 namespace PhigrosLibraryCSharp;
@@ -15,7 +15,7 @@ public static class ScoreHelper
 	/// <param name="record">The game record.</param>
 	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
 	public static ScoreStatus ParseStatus(RawScore record)
-		=> ParseStatus(record.s, record.a, record.c == ScoreStatus.Fc);
+		=> ParseStatus(record.Score, record.Accuracy, record.Status == ScoreStatus.Fc);
 	/// <summary>
 	/// Get <see cref="ScoreStatus"/> of a raw record.
 	/// </summary>

@@ -1,4 +1,6 @@
-﻿namespace PhigrosLibraryCSharp.Tests;
+﻿using PhigrosLibraryCSharp.CloudSave;
+
+namespace PhigrosLibraryCSharp.Tests;
 
 [TestClass]
 public class SaveTest

@@ -1,4 +1,4 @@
-﻿using PhigrosLibraryCSharp.Cloud.Login;
+﻿using PhigrosLibraryCSharp.CloudSave.Login;
 using System.Diagnostics;
 
 namespace PhigrosLibraryCSharp.Tests;

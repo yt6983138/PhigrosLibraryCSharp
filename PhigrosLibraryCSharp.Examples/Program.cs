@@ -1,4 +1,5 @@
-﻿using PhigrosLibraryCSharp.Cloud.Login;
+﻿using PhigrosLibraryCSharp.CloudSave;
+using PhigrosLibraryCSharp.CloudSave.Login;
 
 namespace PhigrosLibraryCSharp.Examples;
 
@@ -107,7 +108,7 @@ internal class Program
 		Console.WriteLine("Your summary:");
 		Console.WriteLine(ctx.ReadSummary().ToJson());
 		Console.WriteLine("Your top 5 scores:");
-		GameRecords.GameRecord records = ctx.ReadGameRecord(difficulties);
+		GameRecord records = ctx.ReadGameRecord(difficulties);
 
 		int i = 0;
 		Console.WriteLine(records.GetSortedListForRks().OtherScores.Take(5).Select(x => $"{++i}:\n{x}").Join("\n\n"));
