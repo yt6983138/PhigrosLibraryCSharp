@@ -98,6 +98,16 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 			return Marshal.PtrToStructure<T>((IntPtr)bytePtr)!;
 		}
 	}
+
+	public bool ReadFromPackedBoolNoJump(int offset)
+		=> ReadBool(this.Data[this.Offset], offset);
+	public bool ReadFromPackedBoolThenJump(int offset)
+	{
+		bool result = this.ReadFromPackedBoolNoJump(offset);
+		this.Jump(1);
+		return result;
+	}
+
 	/// <summary>
 	/// Reads byte at current offset, and jump.
 	/// </summary>
@@ -166,13 +176,16 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	{
 		if (this.Data[this.Offset] > 127)
 		{
+			if (this.Offset + 2 >= this.Data.Length)
+				throw new IndexOutOfRangeException("Varied integer requires another byte, but has already reached EOF.");
+
 			this.Offset += 2;
 			return (short)((0b01111111 & this.Data[this.Offset - 2])
 				^ (this.Data[this.Offset - 1] << 7));
 		}
 		else
 		{
-			return this.Data[this.Offset++];
+			return this.ReadByte();
 		}
 	}
 	/// <summary>

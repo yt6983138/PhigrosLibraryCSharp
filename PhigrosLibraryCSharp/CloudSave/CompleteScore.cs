@@ -1,7 +1,7 @@
 ﻿namespace PhigrosLibraryCSharp.CloudSave;
 
 public record struct ChartConstantKey(string SongId, Difficulty Difficulty);
-public struct CompleteScore
+public struct CompleteScore : IComparable<CompleteScore>
 {
 	private readonly IReadOnlyDictionary<ChartConstantKey, float> _constantMap;
 	private readonly IReadOnlyDictionary<string, string> _nameMap;
@@ -25,5 +25,11 @@ public struct CompleteScore
 		this.Score = score;
 		this._constantMap = constantMap;
 		this._nameMap = nameMap;
+	}
+
+	public int CompareTo(CompleteScore other)
+	{
+		ArgumentNullException.ThrowIfNull(other);
+		return other.Rks.CompareTo(this.Rks);
 	}
 }

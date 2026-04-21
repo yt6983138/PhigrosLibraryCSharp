@@ -113,8 +113,9 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 	}
 	public void Serialize(ByteWriter writer)
 	{
-		writer.WriteVariedInteger((short)this.Records.Count);
-		foreach (IGrouping<string, SongScore> group in this.Records.GroupBy(x => x.Id))
+		IGrouping<string, SongScore>[] grouped = this.Records.GroupBy(x => x.Id).ToArray();
+		writer.WriteVariedInteger((short)grouped.Length);
+		foreach (IGrouping<string, SongScore> group in grouped)
 		{
 			writer.WriteString(group.Key);
 			writer.WriteByte((byte)((sizeof(byte) * 2) + ((sizeof(int) + sizeof(float)) * group.Count())));

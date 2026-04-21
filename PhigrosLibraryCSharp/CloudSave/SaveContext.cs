@@ -28,7 +28,7 @@ public class SaveContext
 	/// <summary>
 	/// The original raw save data object.
 	/// </summary>
-	public RawSave OriginalCloudObject { get; set; }
+	public SaveInfo OriginalCloudObject { get; set; }
 
 	/// <summary>
 	/// A dictionary containing decrypted data entries corresponding to the raw data entries.
@@ -66,13 +66,13 @@ public class SaveContext
 	/// <param name="rawZip">The raw ZIP file data.</param>
 	/// <param name="originalData">The original raw save data object.</param>
 	/// <param name="decryptor">A function to decrypt the raw data entries.</param>
-	public SaveContext(Dictionary<string, Entry> decryptedEntries, RawSave originalData)
+	public SaveContext(Dictionary<string, Entry> decryptedEntries, SaveInfo originalData)
 	{
 		this.DecryptedDataEntries = decryptedEntries;
 		this.OriginalCloudObject = originalData;
-		this.RawSummary = Convert.FromBase64String(originalData.summary);
+		this.RawSummary = Convert.FromBase64String(originalData.Summary);
 	}
-	public static async Task<SaveContext> FromZipAsync(byte[] rawZip, RawSave originalData, Func<byte[], Task<byte[]>> decryptor)
+	public static async Task<SaveContext> FromZipAsync(byte[] rawZip, SaveInfo originalData, Func<byte[], Task<byte[]>> decryptor)
 	{
 		Dictionary<string, Entry> decryptedEntries = [];
 
@@ -88,6 +88,7 @@ public class SaveContext
 		return new(decryptedEntries, originalData);
 	}
 
+	#region Read operations
 	/// <summary>
 	/// Reads the player's play summary.
 	/// </summary>
@@ -107,7 +108,7 @@ public class SaveContext
 	public GameRecord ReadGameRecord()
 	{
 		Entry entry = this.DecryptedGameRecord;
-		ByteReader reader = new(entry.Data, entry.ObjectVersion);
+		ByteReader reader = new(entry.Data, version: entry.ObjectVersion);
 		return GameRecord.FromReader(reader);
 	}
 
@@ -154,4 +155,50 @@ public class SaveContext
 		ByteReader reader = new(entry.Data, entry.ObjectVersion);
 		return GameUserInfo.FromReader(reader);
 	}
+	#endregion
+
+	#region Save operations
+	public void SaveSummary(Summary summary)
+	{
+		using MemoryStream stream = new();
+		ByteWriter writer = new(stream);
+		summary.Serialize(writer);
+		this.RawSummary = stream.ToArray();
+	}
+	public void SaveGameRecord(GameRecord record)
+	{
+		using MemoryStream stream = new();
+		ByteWriter writer = new(stream);
+		record.Serialize(writer);
+		this.DecryptedGameRecord = new(record.Version, stream.ToArray());
+	}
+	public void SaveGameSettings(GameSettings settings)
+	{
+		using MemoryStream stream = new();
+		ByteWriter writer = new(stream);
+		settings.Serialize(writer);
+		this.DecryptedGameSettings = new(settings.Version, stream.ToArray());
+	}
+	public void SaveGameProgress(GameProgress progress)
+	{
+		using MemoryStream stream = new();
+		ByteWriter writer = new(stream);
+		progress.Serialize(writer);
+		this.DecryptedGameProgress = new(progress.Version, stream.ToArray());
+	}
+	public void SaveGameKey(GameKey key)
+	{
+		using MemoryStream stream = new();
+		ByteWriter writer = new(stream);
+		key.Serialize(writer);
+		this.DecryptedGameKey = new(key.Version, stream.ToArray());
+	}
+	public void SaveGameUserInfo(GameUserInfo userInfo)
+	{
+		using MemoryStream stream = new();
+		ByteWriter writer = new(stream);
+		userInfo.Serialize(writer);
+		this.DecryptedGameUserInfo = new(userInfo.Version, stream.ToArray());
+	}
+	#endregion
 }

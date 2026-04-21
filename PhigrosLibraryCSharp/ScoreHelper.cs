@@ -44,16 +44,16 @@ public static class ScoreHelper
 	/// </summary>
 	/// <param name="diff">Difficulty string, ex EZ, HD, IN...</param>
 	/// <returns>A <see cref="byte"/> presenting the difficulty index.</returns>
-	public static byte DifficultStringToIndex(string diff)
+	public static byte DifficultyStringToIndex(string diff)
 	{
-		switch (diff.ToUpper())
+		return diff.ToUpper() switch
 		{
-			case "EZ": return 0;
-			case "HD": return 1;
-			case "IN": return 2;
-			case "AT": return 3;
-			default: goto case "EZ";
-		}
+			"EZ" => 0,
+			"HD" => 1,
+			"IN" => 2,
+			"AT" => 3,
+			_ => throw new ArgumentException("Cannot parse difficulty string.", nameof(diff)),
+		};
 	}
 	internal static string ToHex(this byte[] bytes)
 	{

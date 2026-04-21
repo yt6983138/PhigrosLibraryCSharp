@@ -9,7 +9,7 @@ namespace PhigrosLibraryCSharp.CloudSave;
 /// <summary>
 /// A helper that can be used to query save data or decrypt local save.
 /// </summary>
-public class Save
+public class Save : IDisposable
 {
 	#region Constants
 	/// <summary>
@@ -127,19 +127,24 @@ public class Save
 			sessionToken.All(char.IsLetterOrDigit);
 	}
 
+	public void Dispose()
+	{
+		this.Client.Dispose();
+	}
+
 	#region Raw operation
 	/// <summary>
 	/// Get the raw save from cloud.
 	/// </summary>
-	/// <returns><see cref="RawSaveContainer"/> containing all raw information.</returns>
+	/// <returns><see cref="SaveInfoContainer"/> containing all raw information.</returns>
 	/// <exception cref="ArgumentNullException">Thrown if the helper is not initialized.</exception>
-	public async Task<RawSaveContainer> GetRawSaveFromCloudAsync()
+	public async Task<SaveInfoContainer> GetRawSaveFromCloudAsync()
 	{
-		if (this.SessionToken == null) throw new ArgumentNullException("Session token cannot be null.");
+		ArgumentNullException.ThrowIfNull(this.SessionToken);
 		HttpResponseMessage response = await this.Client.GetAsync(this.GetAddress(CloudGameSaveAddress));
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
-		RawSaveContainer container = JsonSerializer.Deserialize<RawSaveContainer>(content, SerializerSettings);
+		SaveInfoContainer container = JsonSerializer.Deserialize<SaveInfoContainer>(content, SerializerSettings);
 		return container;
 	}
 	/// <summary>
@@ -150,7 +155,7 @@ public class Save
 	/// <exception cref="ArgumentNullException">Thrown if the helper is not initialized.</exception>
 	public async Task<byte[]> GetRawAddressAsync(string address)
 	{
-		if (this.SessionToken == null) throw new ArgumentNullException(nameof(this.SessionToken), "Session token cannot be null.");
+		ArgumentNullException.ThrowIfNull(this.SessionToken);
 		HttpResponseMessage response = await this.Client.GetAsync(address);
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch.", null, response.StatusCode);
 		byte[] content = await response.Content.ReadAsByteArrayAsync();
@@ -169,7 +174,7 @@ public class Save
 	/// </summary>
 	/// <param name="obj">Target save.</param>
 	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
-	public Task<byte[]> GetSaveRawZipAsync(SimplifiedSave obj)
+	public Task<byte[]> GetSaveRawZipAsync(SimplifiedSaveInfo obj)
 		=> this.GetRawAddressAsync(obj.GameSave.Url);
 	/// <summary>
 	/// Decrypt using Phigros' key and iv.
@@ -187,7 +192,7 @@ public class Save
 	/// <exception cref="ArgumentNullException">Thrown if the helper is not initalized.</exception>
 	public async Task<UserInfo> GetUserInfoAsync()
 	{
-		if (this.SessionToken == null) throw new ArgumentNullException("Session token cannot be null.");
+		ArgumentNullException.ThrowIfNull(this.SessionToken);
 		HttpResponseMessage response = await this.Client.GetAsync(this.GetAddress(CloudMeAddress));
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
@@ -214,11 +219,11 @@ public class Save
 	/// </exception>
 	public async Task<SaveContext> GetSaveContextAsync(int index)
 	{
-		List<RawSave> rawSaves = (await this.GetRawSaveFromCloudAsync()).results;
+		List<SaveInfo> rawSaves = (await this.GetRawSaveFromCloudAsync()).Results;
 		if (index < 0 || index >= rawSaves.Count)
 			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, rawSaves.Count); // raw count
 
-		RawSave rawSave = rawSaves[index];
+		SaveInfo rawSave = rawSaves[index];
 		return await this.GetSaveContextAsync(rawSave);
 	}
 	/// <summary>
@@ -226,9 +231,9 @@ public class Save
 	/// </summary>
 	/// <param name="rawSave">The raw save object to retrieve the context for.</param>
 	/// <returns>A <see cref="SaveContext"/> object containing the save data.</returns>
-	public async Task<SaveContext> GetSaveContextAsync(RawSave rawSave)
+	public async Task<SaveContext> GetSaveContextAsync(SaveInfo rawSave)
 	{
-		SimplifiedSave simplifiedSave = rawSave.ToParsed();
+		SimplifiedSaveInfo simplifiedSave = rawSave.Simplify();
 		byte[] rawZip = await this.GetSaveRawZipAsync(simplifiedSave);
 
 		return await SaveContext.FromZipAsync(rawZip, rawSave, this.Decrypt);

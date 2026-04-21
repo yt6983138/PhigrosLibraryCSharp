@@ -1,9 +1,10 @@
 ﻿namespace PhigrosLibraryCSharp.CloudSave.RawData;
 
 /// <summary>
-/// The save parsed from cloud object.
+/// The simplified save info, trimmed down just for the basic (common) information 
+/// of a save, which is more convenient to use in most cases.
 /// </summary>
-public class SimplifiedSave
+public class SimplifiedSaveInfo
 {
 	/// <summary>
 	/// The URL of the game save.

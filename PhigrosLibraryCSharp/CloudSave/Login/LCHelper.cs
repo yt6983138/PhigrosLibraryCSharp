@@ -1,5 +1,4 @@
-﻿using PhigrosLibraryCSharp.CloudSave;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -121,7 +120,9 @@ public static class LCHelper
 		// LCHttpUtils.PrintRequest(client, request, content);
 		HttpResponseMessage response;
 		if (TapTapHelper.Proxy is not null)
+		{
 			response = await TapTapHelper.Proxy(client, request);
+		}
 		else
 		{
 			response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -138,7 +139,7 @@ public static class LCHelper
 			T ret = JsonSerializer.Deserialize<T>(resultString, Save.SerializerSettings).EnsureNotNull();
 			return ret;
 		}
-		throw new ApplicationException($"{statusCode}: {resultString}");
+		throw new HttpRequestException(resultString, null, statusCode);
 	}
 	private static string BuildUrl(string path, bool useChinaEndpoint, Dictionary<string, object> queryParams, bool withAPIVersion)
 	{

@@ -1,5 +1,4 @@
-﻿using PhigrosLibraryCSharp.CloudSave;
-using System.Data;
+﻿using System.Data;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
@@ -72,7 +71,7 @@ public static class TapTapHelper // TODO: Add callback login
 	#endregion
 
 	internal static string GenerateDeviceId() => $"{AssemblyName}-{AssemblyVersion}-" +
-			$"{(DateTime.UtcNow - DateTime.UnixEpoch).TotalMilliseconds}-{Random.Shared.Next(0, 114514):N}";
+			$"{(DateTime.UtcNow - DateTime.UnixEpoch).TotalMilliseconds}-{Random.Shared.Next(0, 114514)}";
 	internal static string GenerateCodeVerifier()
 	{
 		const string CharList = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
@@ -288,7 +287,9 @@ public static class TapTapHelper // TODO: Add callback login
 		}
 		HttpResponseMessage response;
 		if (Proxy is not null)
+		{
 			response = await Proxy(client, request);
+		}
 		else
 		{
 			response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

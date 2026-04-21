@@ -115,10 +115,10 @@ public class GameSettings : IPhigrosCustomSerialization<GameSettings>
 		reader.Jump(1);
 		return new(
 			reader.ObjectVersion,
-			ByteReader.ReadBool(reader.Data[0], 0),
-			ByteReader.ReadBool(reader.Data[0], 1),
-			ByteReader.ReadBool(reader.Data[0], 2),
-			ByteReader.ReadBool(reader.Data[0], 3),
+			reader.ReadFromPackedBoolNoJump(0),
+			reader.ReadFromPackedBoolNoJump(1),
+			reader.ReadFromPackedBoolNoJump(2),
+			reader.ReadFromPackedBoolThenJump(3),
 			reader.ReadString(),
 			reader.ReadFloat(),
 			reader.ReadFloat(),

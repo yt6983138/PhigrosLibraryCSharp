@@ -22,7 +22,7 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 
 	public GameKeyFlagType Type
 	{
-		readonly get => (GameKeyFlagType)(this.PackedFlag | 0b00011111);
+		readonly get => (GameKeyFlagType)(this.PackedFlag & 0b00011111);
 		set => this.PackedFlag = (byte)((this.PackedFlag & 0b11100000) | (byte)value);
 	}
 	public readonly byte Length
@@ -113,7 +113,7 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 		byte[] rawFlags = reader.ReadBytes(length);
 		return new(rawFlags);
 	}
-	public unsafe void Serialize(ByteWriter writer)
+	public void Serialize(ByteWriter writer)
 	{
 		writer.WriteByte(this.Length);
 		writer.WriteUnmanaged(this.Type);

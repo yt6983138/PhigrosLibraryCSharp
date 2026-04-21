@@ -3,12 +3,12 @@ using System.Text;
 
 namespace PhigrosLibraryCSharp.Serialization;
 
-public class ByteWriter
+public class ByteWriter :
 {
 	public Stream BaseStream { get; set; }
 	public byte ObjectVersion { get; set; }
 
-	public ByteWriter(Stream stream, byte version)
+	public ByteWriter(Stream stream, byte version = 0)
 	{
 		this.BaseStream = stream;
 		this.ObjectVersion = version;

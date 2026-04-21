@@ -80,16 +80,4 @@ public class LCCombinedAuthData
 	[JsonPropertyName("unionid")]
 	public string UnionID { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
-	internal Dictionary<string, object> ToDictionary()
-	{
-		Type typeOfThis = typeof(LCCombinedAuthData);
-		System.Reflection.PropertyInfo[] properties = typeOfThis.GetProperties();
-		Dictionary<string, object> dict = [];
-		foreach (System.Reflection.PropertyInfo property in properties)
-		{
-			dict.Add(property.Name, property.GetValue(this)!);
-		}
-		return dict;
-	}
 }
