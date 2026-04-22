@@ -1,4 +1,5 @@
 ﻿using PhigrosLibraryCSharp.CloudSave;
+using PhigrosLibraryCSharp.CloudSave.RawData;
 using System.Runtime.CompilerServices;
 
 namespace PhigrosLibraryCSharp.Tests;
@@ -26,8 +27,41 @@ public class SaveTest
 		stream.WriteByte(entry.ObjectVersion);
 		stream.Write(entry.Data);
 	}
+	private static void Dump(byte[] data, [CallerArgumentExpression(nameof(data))] string name = "")
+	{
+		EnsureCurrentDirectory();
+		using Stream stream = File.OpenWrite($"TestData/{name}.bin");
+		stream.Write(data);
+	}
 	[TestMethod]
-	public async Task TestSave()
+	public async Task TestSaveToZip()
+	{
+		Save save = new(Secret.Token, false);
+
+		SaveInfo saveInfo = (await save.GetSaveInfoFromCloudAsync()).Results[0];
+		byte[] rawZip = await save.GetSaveZipAsync(saveInfo.Simplify());
+		SaveContext ctx = await SaveContext.FromZipAsync(rawZip, saveInfo, save.Decrypt);
+
+		EnsureCurrentDirectory();
+
+		using FileStream rawZipStream = File.Open("TestData/raw.zip", FileMode.Create, FileAccess.ReadWrite);
+		rawZipStream.Write(rawZip);
+
+		using FileStream zip = File.Open("TestData/save.zip", FileMode.Create, FileAccess.ReadWrite);
+		await ctx.SaveToStreamAsync(zip, save.Encrypt);
+		zip.Seek(0, SeekOrigin.Begin);
+
+		SaveContext ctx2 = await SaveContext.FromZipAsync(zip, saveInfo, save.Decrypt);
+
+		AssertSame(ctx.DecryptedGameProgress, ctx2.DecryptedGameProgress);
+		AssertSame(ctx.DecryptedGameSettings, ctx2.DecryptedGameSettings);
+		AssertSame(ctx.DecryptedGameUserInfo, ctx2.DecryptedGameUserInfo);
+		AssertSame(ctx.DecryptedGameKey, ctx2.DecryptedGameKey);
+		AssertSame(ctx.DecryptedGameRecord, ctx2.DecryptedGameRecord);
+		Assert.IsTrue(ctx.RawSummary.SequenceEqual(ctx2.RawSummary));
+	}
+	[TestMethod]
+	public async Task TestSerialization()
 	{
 		Save save = new(Secret.Token, false);
 		SaveContext ctx = await save.GetSaveContextAsync(0);
@@ -58,12 +92,14 @@ public class SaveTest
 		Dump(ctx.DecryptedGameUserInfo);
 		Dump(ctx.DecryptedGameKey);
 		Dump(ctx.DecryptedGameRecord);
+		Dump(ctx.RawSummary);
 
 		Dump(progressData);
 		Dump(settingsData);
 		Dump(userInfoData);
 		Dump(gameKeyData);
 		Dump(gameRecordData);
+		Dump(summaryData);
 
 		AssertSame(progressData, ctx.DecryptedGameProgress);
 		AssertSame(settingsData, ctx.DecryptedGameSettings);

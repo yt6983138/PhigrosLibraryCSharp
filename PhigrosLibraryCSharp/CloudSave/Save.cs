@@ -58,39 +58,50 @@ public class Save : IDisposable
 	/// </summary>
 	public bool IsInternational { get; private set; }
 
-	private HttpClient Client { get; set; }
+	public HttpClient Client { get; private set; }
 	/// <summary>
 	/// A delegate that can be used on WASM platform or other platforms where AES is not supported.
 	/// </summary>
 	/// <param name="key">Decoded <see cref="CloudAESKey"/>.</param>
 	/// <param name="iv">Decoded <see cref="CloudAESIV"/>.</param>
 	/// <param name="data">Decoded data for decrypting.</param>
-	/// <returns>Decrypted data.</returns>
-	public delegate Task<byte[]> CustomDecrypter(byte[] key, byte[] iv, byte[] data);
+	/// <returns>Decrypted or encrypted data.</returns>
+	public delegate Task<byte[]> AESCipherFunction(byte[] key, byte[] iv, byte[] data);
 	/// <summary>
 	/// On WASM or other platform where AES is not supported, you can set this property to other function
 	/// that is capable to decrypt data.
 	/// </summary>
-	public CustomDecrypter Decrypter { get; init; } = DecryptDefaultImplementation;
+	public AESCipherFunction Decryptor { get; init; } = DecryptDefaultImplementation;
+	public AESCipherFunction Encryptor { get; init; } = EncryptDefaultImplementation;
 
 	private static Task<byte[]> DecryptDefaultImplementation(byte[] key, byte[] iv, byte[] data)
 	{
-		byte[] decrypted;
-		using (Aes aes = Aes.Create())
-		{
-			aes.Key = key;
-			aes.IV = iv;
-			aes.Padding = PaddingMode.PKCS7;
+		using Aes aes = Aes.Create();
+		aes.Key = key;
+		aes.IV = iv;
+		aes.Padding = PaddingMode.PKCS7;
 
-			using MemoryStream ms = new();
-			using (CryptoStream cs = new(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
-			{
-				cs.Write(data, 0, data.Length);
-				cs.FlushFinalBlock();
-			}
-			decrypted = ms.ToArray();
+		using MemoryStream ms = new();
+		using (CryptoStream cs = new(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
+		{
+			cs.Write(data, 0, data.Length);
+			cs.FlushFinalBlock();
 		}
-		return Task.FromResult(decrypted);
+		return Task.FromResult(ms.ToArray());
+	}
+	private static Task<byte[]> EncryptDefaultImplementation(byte[] key, byte[] iv, byte[] data)
+	{
+		using Aes aes = Aes.Create();
+		aes.Key = key;
+		aes.IV = iv;
+		aes.Padding = PaddingMode.PKCS7;
+		using MemoryStream ms = new();
+		using (CryptoStream cs = new(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
+		{
+			cs.Write(data, 0, data.Length);
+			cs.FlushFinalBlock();
+		}
+		return Task.FromResult(ms.ToArray());
 	}
 
 	/// <summary>
@@ -138,7 +149,7 @@ public class Save : IDisposable
 	/// </summary>
 	/// <returns><see cref="SaveInfoContainer"/> containing all raw information.</returns>
 	/// <exception cref="ArgumentNullException">Thrown if the helper is not initialized.</exception>
-	public async Task<SaveInfoContainer> GetRawSaveFromCloudAsync()
+	public async Task<SaveInfoContainer> GetSaveInfoFromCloudAsync()
 	{
 		ArgumentNullException.ThrowIfNull(this.SessionToken);
 		HttpResponseMessage response = await this.Client.GetAsync(this.GetAddress(CloudGameSaveAddress));
@@ -167,14 +178,14 @@ public class Save : IDisposable
 	/// </summary>
 	/// <param name="obj">Target cloud object.</param>
 	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
-	public Task<byte[]> GetSaveRawZipAsync(PhiCloudObj obj)
+	public Task<byte[]> GetSaveZipAsync(PhiCloudObj obj)
 		=> this.GetRawAddressAsync(obj.Url);
 	/// <summary>
 	/// Get raw zip from cloud.
 	/// </summary>
 	/// <param name="obj">Target save.</param>
 	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
-	public Task<byte[]> GetSaveRawZipAsync(SimplifiedSaveInfo obj)
+	public Task<byte[]> GetSaveZipAsync(SimplifiedSaveInfo obj)
 		=> this.GetRawAddressAsync(obj.GameSave.Url);
 	/// <summary>
 	/// Decrypt using Phigros' key and iv.
@@ -182,7 +193,9 @@ public class Save : IDisposable
 	/// <param name="data">The data to decrypt.</param>
 	/// <returns>Decrypted data.</returns>
 	public Task<byte[]> Decrypt(byte[] data)
-		=> this.Decrypter.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data);
+		=> this.Decryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data);
+	public Task<byte[]> Encrypt(byte[] data)
+		=> this.Encryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data);
 	#endregion
 
 	/// <summary>
@@ -219,7 +232,7 @@ public class Save : IDisposable
 	/// </exception>
 	public async Task<SaveContext> GetSaveContextAsync(int index)
 	{
-		List<SaveInfo> rawSaves = (await this.GetRawSaveFromCloudAsync()).Results;
+		List<SaveInfo> rawSaves = (await this.GetSaveInfoFromCloudAsync()).Results;
 		if (index < 0 || index >= rawSaves.Count)
 			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, rawSaves.Count); // raw count
 
@@ -234,7 +247,7 @@ public class Save : IDisposable
 	public async Task<SaveContext> GetSaveContextAsync(SaveInfo rawSave)
 	{
 		SimplifiedSaveInfo simplifiedSave = rawSave.Simplify();
-		byte[] rawZip = await this.GetSaveRawZipAsync(simplifiedSave);
+		byte[] rawZip = await this.GetSaveZipAsync(simplifiedSave);
 
 		return await SaveContext.FromZipAsync(rawZip, rawSave, this.Decrypt);
 	}

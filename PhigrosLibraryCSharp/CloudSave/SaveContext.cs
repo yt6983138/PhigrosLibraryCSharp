@@ -8,6 +8,7 @@ namespace PhigrosLibraryCSharp.CloudSave;
 /// </summary>
 public class SaveContext
 {
+	public delegate Task<byte[]> CipherFunction(byte[] data);
 	public struct Entry
 	{
 		public byte ObjectVersion { get; set; }
@@ -72,11 +73,13 @@ public class SaveContext
 		this.OriginalCloudObject = originalData;
 		this.RawSummary = Convert.FromBase64String(originalData.Summary);
 	}
-	public static async Task<SaveContext> FromZipAsync(byte[] rawZip, SaveInfo originalData, Func<byte[], Task<byte[]>> decryptor)
+	public static async Task<SaveContext> FromZipAsync(byte[] rawZip, SaveInfo originalData, CipherFunction decryptor) =>
+		await FromZipAsync(new MemoryStream(rawZip), originalData, decryptor);
+	public static async Task<SaveContext> FromZipAsync(Stream rawZip, SaveInfo originalData, CipherFunction decryptor)
 	{
 		Dictionary<string, Entry> decryptedEntries = [];
 
-		using ZipArchive archive = new(new MemoryStream(rawZip), ZipArchiveMode.Read);
+		using ZipArchive archive = new(rawZip, ZipArchiveMode.Read, leaveOpen: true);
 		foreach (ZipArchiveEntry item in archive.Entries)
 		{
 			using Stream stream = item.Open();
@@ -86,6 +89,23 @@ public class SaveContext
 		}
 
 		return new(decryptedEntries, originalData);
+	}
+	public async Task SaveToZipAsync(ZipArchive archive, CipherFunction encryptor)
+	{
+		MemoryStream zipStream = new();
+		foreach (KeyValuePair<string, Entry> item in this.DecryptedDataEntries)
+		{
+			ZipArchiveEntry entry = archive.CreateEntry(item.Key);
+			using Stream stream = entry.Open();
+			byte[] encryptedData = await encryptor.Invoke(item.Value.Data);
+			stream.WriteByte(item.Value.ObjectVersion);
+			stream.Write(encryptedData);
+		}
+	}
+	public async Task SaveToStreamAsync(Stream zipStream, CipherFunction encryptor)
+	{
+		using ZipArchive archive = new(zipStream, ZipArchiveMode.Create, leaveOpen: true);
+		await this.SaveToZipAsync(archive, encryptor);
 	}
 
 	#region Read operations
