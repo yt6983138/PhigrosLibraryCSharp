@@ -17,15 +17,10 @@ public enum GameKeyFlagType : byte
 /// </summary>
 public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 {
-	public byte PackedFlag { get; set; }
 	public ulong Payload { get; set; }
 
-	public GameKeyFlagType Type
-	{
-		readonly get => (GameKeyFlagType)(this.PackedFlag & 0b00011111);
-		set => this.PackedFlag = (byte)((this.PackedFlag & 0b11100000) | (byte)value);
-	}
-	public readonly byte Length
+	public GameKeyFlagType Type { get; set; }
+	public readonly byte PayloadCount
 	{
 		get
 		{
@@ -47,12 +42,12 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 	/// <param name="data">The raw flag data to initialize the <see cref="GameKeyFlag"/>.</param>
 	public GameKeyFlag(byte packedFlag, byte[] data)
 	{
-		this.PackedFlag = packedFlag;
+		this.Type = (GameKeyFlagType)packedFlag;
 
 		int flagCount = 0;
 		for (int i = 0; i < 8; i++)
 		{
-			if ((packedFlag & (1 << i)) != 0) continue;
+			if ((packedFlag & (1 << i)) == 0) continue;
 
 			byte payload = data[flagCount];
 			this.Payload |= (ulong)payload << (i * 8);
@@ -115,12 +110,12 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 	}
 	public void Serialize(ByteWriter writer)
 	{
-		writer.WriteByte(this.Length);
+		writer.WriteByte((byte)(this.PayloadCount + sizeof(GameKeyFlagType)));
 		writer.WriteUnmanaged(this.Type);
 
 		for (int i = 0; i < 8; i++)
 		{
-			if ((this.PackedFlag & (1 << i)) != 0) continue;
+			if (((byte)this.Type & (1 << i)) == 0) continue;
 
 			byte data = (byte)((this.Payload >> (i * 8)) & 0xFF);
 			writer.WriteByte(data);

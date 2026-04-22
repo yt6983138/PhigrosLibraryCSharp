@@ -365,3 +365,6 @@ FodyWeavers.xsd
 
 # contains senstive data
 **/Secret.cs
+
+# testing data
+PhigrosLibraryCSharp.Tests/TestData/**

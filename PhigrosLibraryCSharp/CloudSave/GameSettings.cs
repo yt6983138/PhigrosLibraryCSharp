@@ -112,7 +112,6 @@ public class GameSettings : IPhigrosCustomSerialization<GameSettings>
 
 	public static GameSettings FromReader(ByteReader reader)
 	{
-		reader.Jump(1);
 		return new(
 			reader.ObjectVersion,
 			reader.ReadFromPackedBoolNoJump(0),

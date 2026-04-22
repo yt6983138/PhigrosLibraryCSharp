@@ -119,7 +119,7 @@ public class SaveContext
 	public GameSettings ReadGameSettings()
 	{
 		Entry entry = this.DecryptedGameSettings;
-		ByteReader reader = new(entry.Data, entry.ObjectVersion);
+		ByteReader reader = new(entry.Data, version: entry.ObjectVersion);
 		return GameSettings.FromReader(reader);
 	}
 
@@ -130,7 +130,7 @@ public class SaveContext
 	public GameProgress ReadGameProgress()
 	{
 		Entry entry = this.DecryptedGameProgress;
-		ByteReader reader = new(entry.Data, entry.ObjectVersion);
+		ByteReader reader = new(entry.Data, version: entry.ObjectVersion);
 		return GameProgress.FromReader(reader);
 	}
 
@@ -141,7 +141,7 @@ public class SaveContext
 	public GameKey ReadGameKey()
 	{
 		Entry entry = this.DecryptedGameKey;
-		ByteReader reader = new(entry.Data, entry.ObjectVersion);
+		ByteReader reader = new(entry.Data, version: entry.ObjectVersion);
 		return GameKey.FromReader(reader);
 	}
 
@@ -152,7 +152,7 @@ public class SaveContext
 	public GameUserInfo ReadGameUserInfo()
 	{
 		Entry entry = this.DecryptedGameUserInfo;
-		ByteReader reader = new(entry.Data, entry.ObjectVersion);
+		ByteReader reader = new(entry.Data, version: entry.ObjectVersion);
 		return GameUserInfo.FromReader(reader);
 	}
 	#endregion

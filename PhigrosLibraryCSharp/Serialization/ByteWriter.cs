@@ -3,7 +3,7 @@ using System.Text;
 
 namespace PhigrosLibraryCSharp.Serialization;
 
-public class ByteWriter :
+public class ByteWriter
 {
 	public Stream BaseStream { get; set; }
 	public byte ObjectVersion { get; set; }
@@ -184,6 +184,10 @@ public class ByteWriter :
 
 		this.BaseStream.Write(data);
 	}
+	public void WriteBytes(byte[] data)
+		=> this.BaseStream.Write(data);
+	public void WriteBytes(ReadOnlySpan<byte> data)
+		=> this.BaseStream.Write(data);
 
 	public void WritePhigrosSerializableObject<T>(T obj) where T : IPhigrosCustomSerialization<T>
 	{

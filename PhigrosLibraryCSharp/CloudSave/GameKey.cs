@@ -1,4 +1,5 @@
 ﻿using PhigrosLibraryCSharp.Serialization;
+using System.Text;
 
 namespace PhigrosLibraryCSharp.CloudSave;
 
@@ -73,8 +74,10 @@ public class GameKey : IPhigrosCustomSerialization<GameKey>
 		writer.WriteVariedInteger(checked((short)this.Keys.Count));
 		foreach (KeyValuePair<string, GameKeyFlag> item in this.Keys)
 		{
-			writer.WriteByte(checked((byte)item.Key.Length));
-			writer.WriteStringBytes(item.Key);
+			byte[] encoded = Encoding.UTF8.GetBytes(item.Key);
+
+			writer.WriteByte(checked((byte)encoded.Length));
+			writer.WriteBytes(encoded);
 			item.Value.Serialize(writer);
 		}
 

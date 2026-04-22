@@ -77,9 +77,8 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 		byte difficultyExistFlag = reader.ReadByte();
 		byte fullComboFlag = reader.ReadByte();
 
-		for (byte i = 0; i < 4; i++)
+		for (byte i = 0; reader.Offset < endOffset; i++)
 		{
-			if (reader.Offset == endOffset) break;
 			if (!ByteReader.ReadBool(difficultyExistFlag, i) || reader.Offset + 8 > reader.Data.Length)
 				continue;
 

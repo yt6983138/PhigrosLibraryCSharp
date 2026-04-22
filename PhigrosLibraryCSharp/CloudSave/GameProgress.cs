@@ -88,7 +88,6 @@ public class GameProgress : IPhigrosCustomSerialization<GameProgress>
 
 	public static GameProgress FromReader(ByteReader reader)
 	{
-		reader.Jump(1);
 		return new(
 			reader.ObjectVersion,
 			reader.ReadFromPackedBoolNoJump(0),
