@@ -4,7 +4,7 @@ using PhigrosLibraryCSharp.LocalSave;
 namespace PhigrosLibraryCSharp;
 
 /// <summary>
-/// A helper class can be used to assist you.
+/// A helper class for doing score related operations.
 /// </summary>
 public static class ScoreHelper
 {
@@ -45,13 +45,6 @@ public static class ScoreHelper
 	/// <returns>A <see cref="byte"/> presenting the difficulty index.</returns>
 	public static byte DifficultyStringToIndex(string diff)
 	{
-		return diff.ToUpper() switch
-		{
-			"EZ" => 0,
-			"HD" => 1,
-			"IN" => 2,
-			"AT" => 3,
-			_ => throw new ArgumentException("Cannot parse difficulty string.", nameof(diff)),
-		};
+		return (byte)(int)Enum.GetValues<Difficulty>().First(x => x.ToString().Equals(diff, StringComparison.OrdinalIgnoreCase));
 	}
 }

@@ -79,7 +79,9 @@ internal class Program
 		Console.WriteLine("Game user info:");
 		Console.WriteLine(ctx.ReadGameUserInfo().ToJson());
 		Console.WriteLine("User info:");
-		Console.WriteLine((await save.GetUserInfoAsync()).ToJson());
+		Console.WriteLine((await save.GetPlayerInfoAsync()).ToJson());
+		Console.WriteLine("Game key:");
+		Console.WriteLine(ctx.ReadGameKey().ToJson());
 	}
 	private static async Task ShowBest5()
 	{
@@ -89,18 +91,27 @@ internal class Program
 		string tsvPath = Console.ReadLine()!;
 
 		// parse tsv
-		Dictionary<string, float[]> difficulties = [];
+		Dictionary<ChartConstantKey, float> difficulties = [];
 		foreach (string line in File.ReadAllLines(tsvPath))
 		{
 			string[] splitted = line.Split('\t', 2);
 			if (splitted.Length < 2) continue;
+			string id = splitted[0].Trim();
+			if (id[^2..] != ".0")
+				id += ".0"; // Phigros_Resource does not save suffix
 
-			difficulties.Add(splitted[0].Trim(),
-				splitted[1]
+			float[] diffs = splitted[1]
 					.Replace("\n", "")
 					.Split('\t')
 					.Select(x => float.Parse(x.Trim()))
-					.ToArray());
+					.ToArray();
+
+			int j = 0;
+			foreach (float item in diffs)
+			{
+				difficulties.Add(new ChartConstantKey(id, (Difficulty)j), item);
+				j++;
+			}
 		}
 
 		// scores
@@ -108,9 +119,10 @@ internal class Program
 		Console.WriteLine("Your summary:");
 		Console.WriteLine(ctx.ReadSummary().ToJson());
 		Console.WriteLine("Your top 5 scores:");
-		GameRecord records = ctx.ReadGameRecord(difficulties);
+		GameRecord records = ctx.ReadGameRecord();
 
 		int i = 0;
-		Console.WriteLine(records.GetSortedListForRks().OtherScores.Take(5).Select(x => $"{++i}:\n{x}").Join("\n\n"));
+		Console.WriteLine(records.GetSortedListForRks(difficulties, null!) // using null to ignore name, since we are not showing it
+			.OtherScores.Take(5).Select(x => $"{++i}:\n{x.Score}, RKS: {x.Rks}").Join("\n\n"));
 	}
 }
