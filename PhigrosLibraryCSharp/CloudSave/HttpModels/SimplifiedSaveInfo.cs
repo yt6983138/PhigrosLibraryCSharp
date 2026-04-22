@@ -1,4 +1,4 @@
-﻿namespace PhigrosLibraryCSharp.CloudSave.RawData;
+﻿namespace PhigrosLibraryCSharp.CloudSave.HttpModels;
 
 /// <summary>
 /// The simplified save info, trimmed down just for the basic (common) information 

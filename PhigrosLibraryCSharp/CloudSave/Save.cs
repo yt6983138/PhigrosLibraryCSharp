@@ -1,5 +1,5 @@
-﻿using PhigrosLibraryCSharp.CloudSave.Login;
-using PhigrosLibraryCSharp.CloudSave.RawData;
+﻿using PhigrosLibraryCSharp.CloudSave.HttpModels;
+using PhigrosLibraryCSharp.CloudSave.Login;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -140,6 +140,7 @@ public class Save : IDisposable
 
 	public void Dispose()
 	{
+		GC.SuppressFinalize(this);
 		this.Client.Dispose();
 	}
 
@@ -199,11 +200,11 @@ public class Save : IDisposable
 	#endregion
 
 	/// <summary>
-	/// Get the <see cref="UserInfo"/> of the user.
+	/// Get the <see cref="PlayerInfo"/> of the user.
 	/// </summary>
-	/// <returns><see cref="UserInfo"/> of the user.</returns>
+	/// <returns><see cref="PlayerInfo"/> of the user.</returns>
 	/// <exception cref="ArgumentNullException">Thrown if the helper is not initalized.</exception>
-	public async Task<UserInfo> GetUserInfoAsync()
+	public async Task<PlayerInfo> GetUserInfoAsync()
 	{
 		ArgumentNullException.ThrowIfNull(this.SessionToken);
 		HttpResponseMessage response = await this.Client.GetAsync(this.GetAddress(CloudMeAddress));
@@ -211,7 +212,7 @@ public class Save : IDisposable
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		JsonNode node = JsonNode.Parse(content).EnsureNotNull();
 
-		return new UserInfo()
+		return new PlayerInfo()
 		{
 			NickName = node["nickname"].EnsureNotNull().GetValue<string>(),
 			UserName = node["username"].EnsureNotNull().GetValue<string>(),

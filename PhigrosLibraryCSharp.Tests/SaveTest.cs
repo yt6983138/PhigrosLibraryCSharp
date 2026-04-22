@@ -1,5 +1,5 @@
 ﻿using PhigrosLibraryCSharp.CloudSave;
-using PhigrosLibraryCSharp.CloudSave.RawData;
+using PhigrosLibraryCSharp.CloudSave.HttpModels;
 using System.Runtime.CompilerServices;
 
 namespace PhigrosLibraryCSharp.Tests;

@@ -1,4 +1,4 @@
-﻿using PhigrosLibraryCSharp.CloudSave.RawData;
+﻿using PhigrosLibraryCSharp.CloudSave.HttpModels;
 using PhigrosLibraryCSharp.Serialization;
 using System.IO.Compression;
 
@@ -92,7 +92,6 @@ public class SaveContext
 	}
 	public async Task SaveToZipAsync(ZipArchive archive, CipherFunction encryptor)
 	{
-		MemoryStream zipStream = new();
 		foreach (KeyValuePair<string, Entry> item in this.DecryptedDataEntries)
 		{
 			ZipArchiveEntry entry = archive.CreateEntry(item.Key);

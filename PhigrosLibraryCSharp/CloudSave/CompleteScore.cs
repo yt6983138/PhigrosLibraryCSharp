@@ -29,7 +29,6 @@ public struct CompleteScore : IComparable<CompleteScore>
 
 	public int CompareTo(CompleteScore other)
 	{
-		ArgumentNullException.ThrowIfNull(other);
 		return other.Rks.CompareTo(this.Rks);
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PhigrosLibraryCSharp.CloudSave.RawData;
+namespace PhigrosLibraryCSharp.CloudSave.HttpModels;
 
 /// <summary>
 /// A container containing <see cref="SaveInfo"/>s.

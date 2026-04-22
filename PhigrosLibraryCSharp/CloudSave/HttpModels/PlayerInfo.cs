@@ -1,9 +1,9 @@
-﻿namespace PhigrosLibraryCSharp.CloudSave;
+﻿namespace PhigrosLibraryCSharp.CloudSave.HttpModels;
 
 /// <summary>
 /// A struct presenting player's nickname, username...
 /// </summary>
-public class UserInfo
+public class PlayerInfo
 {
 	/// <summary>
 	/// The player's nickname.
@@ -18,7 +18,7 @@ public class UserInfo
 	/// </summary>
 	public DateTime CreationTime { get; set; }
 	/// <summary>
-	/// The last <see cref="UserInfo"/> modification time.
+	/// The last <see cref="PlayerInfo"/> modification time.
 	/// </summary>
 	public DateTime ModificationTime { get; set; }
 }
