@@ -39,7 +39,7 @@ public struct RawScore
 	/// <param name="songId">The id of the song. ex. Stasis.Maozon (no .0)</param>
 	/// <param name="difficulty">The difficulty name of the chart. ex. AT</param>
 	/// <returns></returns>
-	public SongScore ToCompleteScore(string songId, Difficulty difficulty)
+	public SongScore ToSongScore(string songId, Difficulty difficulty)
 	{
 		return new(
 			this.Score,

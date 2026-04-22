@@ -52,7 +52,7 @@ public class Save : IDisposable
 	/// <summary>
 	/// The user's session token.
 	/// </summary>
-	public string? SessionToken { get; private set; } = null;
+	public string SessionToken { get; private set; }
 	/// <summary>
 	/// Indicates whether the save is for the international server or not.
 	/// </summary>
@@ -204,7 +204,7 @@ public class Save : IDisposable
 	/// </summary>
 	/// <returns><see cref="PlayerInfo"/> of the user.</returns>
 	/// <exception cref="ArgumentNullException">Thrown if the helper is not initalized.</exception>
-	public async Task<PlayerInfo> GetUserInfoAsync()
+	public async Task<PlayerInfo> GetPlayerInfoAsync()
 	{
 		ArgumentNullException.ThrowIfNull(this.SessionToken);
 		HttpResponseMessage response = await this.Client.GetAsync(this.GetAddress(CloudMeAddress));

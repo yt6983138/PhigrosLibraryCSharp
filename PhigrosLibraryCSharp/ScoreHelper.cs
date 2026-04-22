@@ -1,6 +1,5 @@
 ﻿using PhigrosLibraryCSharp.CloudSave;
 using PhigrosLibraryCSharp.LocalSave;
-using System.Text;
 
 namespace PhigrosLibraryCSharp;
 
@@ -54,14 +53,5 @@ public static class ScoreHelper
 			"AT" => 3,
 			_ => throw new ArgumentException("Cannot parse difficulty string.", nameof(diff)),
 		};
-	}
-	internal static string ToHex(this byte[] bytes)
-	{
-		StringBuilder sb = new();
-		for (int i = 0; i < bytes.Length; i++)
-		{
-			sb.Append(bytes[i].ToString("x2"));
-		}
-		return sb.ToString();
 	}
 }

@@ -117,7 +117,7 @@ public class SaveTest
 		Console.WriteLine("Game userinfo:");
 		Console.WriteLine(userInfo.ToJson());
 		Console.WriteLine("Userinfo:");
-		Console.WriteLine((await save.GetUserInfoAsync()).ToJson());
+		Console.WriteLine((await save.GetPlayerInfoAsync()).ToJson());
 		Console.WriteLine("Game key:");
 		Console.WriteLine(gameKey.ToJson());
 	}

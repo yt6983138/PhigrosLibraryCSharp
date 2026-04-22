@@ -17,9 +17,9 @@ public enum GameKeyFlagType : byte
 /// </summary>
 public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 {
+	public GameKeyFlagType Type { get; set; }
 	public ulong Payload { get; set; }
 
-	public GameKeyFlagType Type { get; set; }
 	public readonly byte PayloadCount
 	{
 		get
@@ -79,25 +79,25 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 		return bitPosition;
 	}
 
-	public void WriteData(GameKeyFlagType position, byte data)
+	public void WritePayload(GameKeyFlagType position, byte payload)
 	{
 		int bitPosition = ValidatePositionHasOnly1Bit(position);
 
 		this.Type |= position;
 		this.Payload &= ~(0xFFUL << (bitPosition * 8));
-		this.Payload |= (ulong)data << (bitPosition * 8);
+		this.Payload |= (ulong)payload << (bitPosition * 8);
 	}
-	public void RemoveData(GameKeyFlagType position)
+	public void RemovePayload(GameKeyFlagType position)
 	{
 		int bitPosition = ValidatePositionHasOnly1Bit(position);
 
 		this.Type &= ~position;
 		this.Payload &= ~(0xFFUL << (bitPosition * 8));
 	}
-	public byte ReadData(GameKeyFlagType position)
+	public byte ReadPayload(GameKeyFlagType position)
 	{
 		int bitPosition = ValidatePositionHasOnly1Bit(position);
-		if ((position & this.Type) == 0) throw new ArgumentException("The position has no data.", nameof(position));
+		if ((position & this.Type) == 0) throw new ArgumentException("The position has no payload.", nameof(position));
 
 		return (byte)((this.Payload >> (bitPosition * 8)) & 0xFF);
 	}
