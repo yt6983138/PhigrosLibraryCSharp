@@ -1,7 +1,7 @@
 ﻿namespace PhigrosLibraryCSharp.CloudSave;
 
 /// <summary>
-/// The phigros difficulties.
+/// The Phigros difficulties.
 /// </summary>
 public enum Difficulty
 {

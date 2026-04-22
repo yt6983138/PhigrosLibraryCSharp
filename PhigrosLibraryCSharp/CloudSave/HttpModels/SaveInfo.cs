@@ -14,9 +14,9 @@ public struct SaveInfoContainer
 	public List<SaveInfo> Results { get; set; }
 
 	/// <summary>
-	/// Get <see cref="SimplifiedSaveInfo"/>s by parsing them.
+	/// Gets a list of simplified saves converted from <see cref="SaveInfo"/>s in this container.
 	/// </summary>
-	/// <returns>A <see cref="List{T}"/> of <see cref="SimplifiedSaveInfo"/>s containing parsed saves.</returns>
+	/// <returns>A <see cref="List{T}"/> of <see cref="SimplifiedSaveInfo"/>s containing simplified save info.</returns>
 	public readonly List<SimplifiedSaveInfo> GetParsedSaves()
 	{
 		List<SimplifiedSaveInfo> saves = [];
@@ -25,7 +25,7 @@ public struct SaveInfoContainer
 	}
 }
 /// <summary>
-/// Save info directly converted from cloud object.
+/// Save info model directly converted from cloud object.
 /// </summary>
 public class SaveInfo
 {

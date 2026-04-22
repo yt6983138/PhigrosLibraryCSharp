@@ -81,10 +81,12 @@ public struct Challenge : IPhigrosCustomSerialization<Challenge>
 		this.RawCode = code;
 	}
 
+	/// <inheritdoc/>
 	public static Challenge FromReader(ByteReader reader)
 	{
 		return new(reader.ReadShort());
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.WriteShort(this.RawCode);

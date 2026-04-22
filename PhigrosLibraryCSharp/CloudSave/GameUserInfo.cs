@@ -49,6 +49,7 @@ public class GameUserInfo : IPhigrosCustomSerialization<GameUserInfo>
 		this.BackgroundId = backgroundId;
 	}
 
+	/// <inheritdoc/>
 	public static GameUserInfo FromReader(ByteReader reader)
 	{
 		//string tmp;
@@ -60,6 +61,7 @@ public class GameUserInfo : IPhigrosCustomSerialization<GameUserInfo>
 			reader.ReadString(),
 			reader.ReadString());
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.ObjectVersion = this.Version;

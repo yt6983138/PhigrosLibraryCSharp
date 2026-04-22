@@ -52,6 +52,7 @@ public class Money : IPhigrosCustomSerialization<Money>
 		};
 	}
 
+	/// <inheritdoc/>
 	public static Money FromReader(ByteReader reader)
 	{
 		return new(
@@ -61,6 +62,7 @@ public class Money : IPhigrosCustomSerialization<Money>
 			reader.ReadVariedInteger(),
 			reader.ReadVariedInteger());
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.WriteVariedInteger(this.KiB);

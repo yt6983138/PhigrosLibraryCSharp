@@ -86,6 +86,7 @@ public class GameProgress : IPhigrosCustomSerialization<GameProgress>
 	/// <summary>Next node of GameProgress.</summary>
 	public GameProgressNodeVersion2? Node2 { get; set; }
 
+	/// <inheritdoc/>
 	public static GameProgress FromReader(ByteReader reader)
 	{
 		return new(
@@ -111,6 +112,7 @@ public class GameProgress : IPhigrosCustomSerialization<GameProgress>
 					!reader.HasMore ? null : new(
 						reader.ReadUnmanaged<TakumiUnlockFlag>()))));
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.ObjectVersion = this.Version;
@@ -151,7 +153,7 @@ public class GameProgressNodeVersion2
 		this.Node3 = node3;
 	}
 
-	/// <summary>[Unexplained]</summary>
+	/// <summary>Unlocked <c>Random</c> song versions.</summary>
 	public RandomVersionFlag RandomVersionUnlocked { get; set; }
 
 	/// <summary>Next node of GameProgress.</summary>

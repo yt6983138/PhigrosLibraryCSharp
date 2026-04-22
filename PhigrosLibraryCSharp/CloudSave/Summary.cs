@@ -2,13 +2,31 @@
 
 namespace PhigrosLibraryCSharp.CloudSave;
 
-
+/// <summary>
+/// The summary of play counts, including cleared count, full combo count and phi count.
+/// Note: This may not be accurate, please always calculate from <see cref="GameRecord"/>. 
+/// </summary>
 public struct PlayCountSummary : IPhigrosCustomSerialization<PlayCountSummary>
 {
+	/// <summary>
+	/// The cleared count of current difficulty, including full combo and Phis.
+	/// </summary>
 	public short ClearedCount { get; set; }
+	/// <summary>
+	/// The full combo count of current difficulty, including Phis.
+	/// </summary>
 	public short FullComboCount { get; set; }
+	/// <summary>
+	/// The phi count of current difficulty.
+	/// </summary>
 	public short PhiCount { get; set; }
 
+	/// <summary>
+	/// Construct a new instance of <see cref="PlayCountSummary"/>.
+	/// </summary>
+	/// <param name="cleared">The cleared count of current difficulty, including full combo and Phis.</param>
+	/// <param name="fullCombo">The full combo count of current difficulty, including Phis.</param>
+	/// <param name="phi">The phi count of current difficulty.</param>
 	public PlayCountSummary(short cleared, short fullCombo, short phi)
 	{
 		this.ClearedCount = cleared;
@@ -16,10 +34,12 @@ public struct PlayCountSummary : IPhigrosCustomSerialization<PlayCountSummary>
 		this.PhiCount = phi;
 	}
 
+	/// <inheritdoc/>
 	public static PlayCountSummary FromReader(ByteReader reader)
 	{
 		return new(reader.ReadShort(), reader.ReadShort(), reader.ReadShort());
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.WriteShort(this.ClearedCount);
@@ -60,9 +80,21 @@ public class Summary : IPhigrosCustomSerialization<Summary>
 	/// Avatar id. Example: <c>Introduction</c>, <c>-SURREALISM-</c>
 	/// </summary>
 	public string Avatar { get; set; }
+	/// <summary>
+	/// The play count summary of easy difficulty.
+	/// </summary>
 	public PlayCountSummary EZPlayRecord { get; set; }
+	/// <summary>
+	/// The play count summary of hard difficulty.
+	/// </summary>
 	public PlayCountSummary HDPlayRecord { get; set; }
+	/// <summary>
+	/// The play count summary of insane difficulty.
+	/// </summary>
 	public PlayCountSummary INPlayRecord { get; set; }
+	/// <summary>
+	/// The play count summary of another difficulty.
+	/// </summary>
 	public PlayCountSummary ATPlayRecord { get; set; }
 
 	/// <summary>
@@ -73,7 +105,10 @@ public class Summary : IPhigrosCustomSerialization<Summary>
 	/// <param name="challenge"></param>
 	/// <param name="rks"></param>
 	/// <param name="avatar"></param>
-	/// <param name="clears"></param>
+	/// <param name="ez"></param>
+	/// <param name="hd"></param>
+	/// <param name="in"></param>
+	/// <param name="at"></param>
 	public Summary(
 		byte saveVersion,
 		Challenge challenge,
@@ -96,6 +131,7 @@ public class Summary : IPhigrosCustomSerialization<Summary>
 		this.ATPlayRecord = at;
 	}
 
+	/// <inheritdoc/>
 	public static Summary FromReader(ByteReader reader)
 	{
 		return new(
@@ -109,6 +145,7 @@ public class Summary : IPhigrosCustomSerialization<Summary>
 			PlayCountSummary.FromReader(reader),
 			PlayCountSummary.FromReader(reader));
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.WriteByte(this.SaveVersion);

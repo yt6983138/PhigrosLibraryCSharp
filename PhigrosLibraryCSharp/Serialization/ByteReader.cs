@@ -11,7 +11,7 @@ namespace PhigrosLibraryCSharp.Serialization;
 // read header	| read string bytes					|read record																									| read string... 
 
 /// <summary>
-/// A class can be used to read gameRecord file.
+/// A reader for Phigros save files.
 /// </summary>
 public class ByteReader // fuck my brain is going to explode if i keep working on this shit
 {
@@ -30,12 +30,12 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	public byte Current => this.Data[this.Offset];
 
 	/// <summary>
-	/// The version read from save objects (gameSettings etc), like 0, 1, 2 etc.
+	/// The version read from save files, at the very first byte of <i>encrypted</i> file.
 	/// </summary>
 	public byte ObjectVersion { get; set; }
 
 	/// <summary>
-	/// Indicates whether the reader has more data that can be read or not.
+	/// Indicates whether the reader has more data to read or not.
 	/// </summary>
 	/// <returns><see langword="true"/> if there is more data, otherwise <see langword="false"/>.</returns>
 	public bool HasMore => this.Offset != this.Data.Length;
@@ -54,11 +54,11 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	}
 
 	/// <summary>
-	/// Phigros decided to put 4 or more <see cref="bool"/>s inside a <see cref="byte"/>, use this to get the bool from index.
+	/// Reads packed <see langword="bool"/>s from a <see langword="int"/>.
 	/// </summary>
-	/// <param name="num">The data.</param>
+	/// <param name="num">The packed payload to read from.</param>
 	/// <param name="index">Index of the <see cref="bool"/> you want to read.</param>
-	/// <returns>The <see cref="bool"/> gotten from num.</returns>
+	/// <returns>The <see cref="bool"/> extracted from the packed payload.</returns>
 	public static bool ReadBool(int num, int index)
 	{
 		return (num & (1 << index)) != 0;
@@ -68,8 +68,8 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// Reads the data as unmanaged struct. 
 	/// With structs that are managed but marshalable, use <see cref="ReadMarshalable{T}"/>
 	/// </summary>
-	/// <typeparam name="T">Unmanaged struct</typeparam>
-	/// <returns>The struct directly converted from data</returns>
+	/// <typeparam name="T">Unmanaged struct.</typeparam>
+	/// <returns>The struct directly converted from data.</returns>
 	public unsafe T ReadUnmanaged<T>() where T : unmanaged
 	{
 		int offset = this.Offset;
@@ -86,7 +86,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// Reads the data as marshalable struct.
 	/// </summary>
 	/// <typeparam name="T">Marshalable struct.</typeparam>
-	/// <returns>The struct directly converted from data</returns>
+	/// <returns>The struct converted using marshal methods.</returns>
 	public unsafe T ReadMarshalable<T>() where T : struct
 	{
 		int size = Marshal.SizeOf<T>();
@@ -99,8 +99,20 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		}
 	}
 
+	/// <summary>
+	/// Reads a <see langword="bool"/> from a packed <see langword="byte"/> at current offset, without jumping.
+	/// This is used to read packed bools inline so you don't need to cache the byte and use static methods (break api pattern).
+	/// </summary>
+	/// <param name="offset">The offset to read <see langword="bool"/> at.</param>
+	/// <returns>The <see langword="bool"/> extracted from the packed byte.</returns>
 	public bool ReadFromPackedBoolNoJump(int offset)
 		=> ReadBool(this.Data[this.Offset], offset);
+	/// <summary>
+	/// Reads a <see langword="bool"/> from a packed <see langword="byte"/> at current offset, then jump to the next byte.
+	/// This is used to read packed bools inline so you don't need to cache the byte and use static methods (break api pattern).
+	/// </summary>
+	/// <param name="offset">The offset to read <see langword="bool"/> at.</param>
+	/// <returns>The <see langword="bool"/> extracted from the packed byte.</returns>
 	public bool ReadFromPackedBoolThenJump(int offset)
 	{
 		bool result = this.ReadFromPackedBoolNoJump(offset);
@@ -109,69 +121,71 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	}
 
 	/// <summary>
-	/// Reads byte at current offset, and jump.
+	/// Reads a <see langword="byte"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The byte at current position.</returns>
 	public byte ReadByte()
 		=> this.ReadUnmanaged<byte>();
 	/// <summary>
-	/// Reads sbyte at current offset, and jump.
+	/// Reads a <see langword="sbyte"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The sbyte at current position.</returns>
 	public sbyte ReadSignedByte()
 		=> this.ReadUnmanaged<sbyte>();
 	/// <summary>
-	/// Reads short at current offset, and jump.
+	/// Reads a <see langword="short"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The short at current position.</returns>
 	public short ReadShort()
 		=> this.ReadUnmanaged<short>();
 	/// <summary>
-	/// Reads ushort at current offset, and jump.
+	/// Reads a <see langword="ushort"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The ushort at current position.</returns>
 	public ushort ReadUnsignedShort()
 		=> this.ReadUnmanaged<ushort>();
 	/// <summary>
-	/// Reads a int at current offset, and jump.
+	/// Reads a <see langword="int"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The int at current position.</returns>
 	public int ReadInt()
 		=> this.ReadUnmanaged<int>();
 	/// <summary>
-	/// Reads a uint at current offset, and jump.
+	/// Reads a <see langword="uint"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The uint at current position.</returns>
 	public uint ReadUnsignedInt()
 		=> this.ReadUnmanaged<uint>();
 	/// <summary>
-	/// Reads a long at current offset, and jump.
+	/// Reads a <see langword="long"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The long at current position.</returns>
 	public long ReadLong()
 		=> this.ReadUnmanaged<long>();
 	/// <summary>
-	/// Reads a ulong at current offset, and jump.
+	/// Reads a <see langword="ulong"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The ulong at current position.</returns>
 	public ulong ReadUnsignedLong()
 		=> this.ReadUnmanaged<ulong>();
 	/// <summary>
-	/// Reads a float at current offset, and jump.
+	/// Reads a <see langword="float"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The float at current position.</returns>
 	public float ReadFloat()
 		=> this.ReadUnmanaged<float>();
 	/// <summary>
-	/// Reads a double at current offset, and jump.
+	/// Reads a <see langword="double"/> at current offset, and jump.
 	/// </summary>
 	/// <returns>The float at current position.</returns>
 	public double ReadDouble()
 		=> this.ReadUnmanaged<double>();
 	/// <summary>
-	/// Reads short/byte at current offset, and jump.
+	/// Reads a variable length integer at current offset, and jump. 
+	/// Essentially a LEB128 encoded integer, however only 2 bytes are decoded.
+	/// (I have no idea why everyone just call it VarInt and not use the proper encoding name)
 	/// </summary>
-	/// <returns>The short/byte at current position.</returns>
+	/// <returns>The LEB128 integer at current position.</returns>
 	public short ReadVariedInteger()
 	{
 		if (this.Data[this.Offset] > 127)
@@ -192,7 +206,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// Read a byte array with given length at current offset, and jump.
 	/// </summary>
 	/// <param name="length">Length of the bytes to read.</param>
-	/// <returns></returns>
+	/// <returns><see langword="byte[]"/> read from the current position.</returns>
 	public byte[] ReadBytes(int length)
 	{
 		byte[] data = this.Data[this.Offset..(this.Offset + length)];
@@ -202,7 +216,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// <summary>
 	/// Reads the string at current offset, and jump. Length is read as a varied integer before the string.
 	/// </summary>
-	/// <returns>The read raw string bytes.</returns>
+	/// <returns>Raw string bytes read at current position.</returns>
 	public byte[] ReadStringBytes()
 	{
 		short length = this.ReadVariedInteger();
@@ -213,7 +227,7 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 	/// Read the string at current offset, and jump. The string is decoded with the given encoding, if not supplied UTF8 is used.
 	/// </summary>
 	/// <param name="encoding">The encoding used to read string, if not supplied UTF8 is used.</param>
-	/// <returns>The read decoded string.</returns>
+	/// <returns>Decoded string read at current position.</returns>
 	public string ReadString(Encoding? encoding = null)
 		=> (encoding ?? Encoding.UTF8).GetString(this.ReadStringBytes());
 	/// <summary>
@@ -244,6 +258,13 @@ public class ByteReader // fuck my brain is going to explode if i keep working o
 		this.Offset = offset;
 	}
 
+	/// <summary>
+	/// Read a custom serialized object that implements <see cref="IPhigrosCustomSerialization{T}"/>. 
+	/// This is basically same as calling <see cref="IPhigrosCustomSerialization{T}.FromReader"/> directly, 
+	/// but it fits the api pattern of this class and is more convenient to use.
+	/// </summary>
+	/// <typeparam name="T">The type of Phigros serializable object to read.</typeparam>
+	/// <returns>The deserialized Phigros object.</returns>
 	public T ReadPhigrosSerializedObject<T>() where T : IPhigrosCustomSerialization<T>
 	{
 		return T.FromReader(this);

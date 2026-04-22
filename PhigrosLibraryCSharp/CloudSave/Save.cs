@@ -57,14 +57,17 @@ public class Save : IDisposable
 	/// Indicates whether the save is for the international server or not.
 	/// </summary>
 	public bool IsInternational { get; private set; }
-
+	/// <summary>
+	/// The client used for making requests to the cloud server. You can use this to make custom requests if needed.
+	/// </summary>
 	public HttpClient Client { get; private set; }
+
 	/// <summary>
 	/// A delegate that can be used on WASM platform or other platforms where AES is not supported.
 	/// </summary>
 	/// <param name="key">Decoded <see cref="CloudAESKey"/>.</param>
 	/// <param name="iv">Decoded <see cref="CloudAESIV"/>.</param>
-	/// <param name="data">Decoded data for decrypting.</param>
+	/// <param name="data">Decoded data for decrypting or encrypting.</param>
 	/// <returns>Decrypted or encrypted data.</returns>
 	public delegate Task<byte[]> AESCipherFunction(byte[] key, byte[] iv, byte[] data);
 	/// <summary>
@@ -72,6 +75,10 @@ public class Save : IDisposable
 	/// that is capable to decrypt data.
 	/// </summary>
 	public AESCipherFunction Decryptor { get; init; } = DecryptDefaultImplementation;
+	/// <summary>
+	/// On WASM or other platform where AES is not supported, you can set this property to other function
+	/// that is capable to encrypt data.
+	/// </summary>
 	public AESCipherFunction Encryptor { get; init; } = EncryptDefaultImplementation;
 
 	private static Task<byte[]> DecryptDefaultImplementation(byte[] key, byte[] iv, byte[] data)
@@ -138,6 +145,7 @@ public class Save : IDisposable
 			sessionToken.All(char.IsLetterOrDigit);
 	}
 
+	/// <inheritdoc/>
 	public void Dispose()
 	{
 		GC.SuppressFinalize(this);
@@ -195,6 +203,11 @@ public class Save : IDisposable
 	/// <returns>Decrypted data.</returns>
 	public Task<byte[]> Decrypt(byte[] data)
 		=> this.Decryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data);
+	/// <summary>
+	/// Encrypt using Phigros' key and iv.
+	/// </summary>
+	/// <param name="data">The data to encrypt.</param>
+	/// <returns>Encrypted data.</returns>
 	public Task<byte[]> Encrypt(byte[] data)
 		=> this.Encryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data);
 	#endregion

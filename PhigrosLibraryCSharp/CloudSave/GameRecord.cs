@@ -18,12 +18,23 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 	/// </summary>
 	public List<SongScore> Records { get; set; }
 
+	/// <summary>
+	/// Creates a new instance of <see cref="GameRecord"/> with the specified records and version.
+	/// </summary>
+	/// <param name="records">Deserialized and flattened song scores.</param>
+	/// <param name="version">The version of the record.</param>
 	public GameRecord(List<SongScore> records, byte version)
 	{
 		this.Records = records;
 		this.Version = version;
 	}
 
+	/// <summary>
+	/// Builds the complete scores with the help of the constant map and name map.
+	/// </summary>
+	/// <param name="constantMap">Map to get chart constant from.</param>
+	/// <param name="nameMap">Map to get name from.</param>
+	/// <returns></returns>
 	public IEnumerable<CompleteScore> GetCompleteScores(IReadOnlyDictionary<ChartConstantKey, float> constantMap, IReadOnlyDictionary<string, string> nameMap)
 	{
 		return this.Records.Select(x => new CompleteScore(x, constantMap, nameMap));
@@ -32,7 +43,8 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 	/// Sorts the records and returns the phis and the RKS.
 	/// Note: this is for game version > 3.11.0
 	/// </summary>
-	/// <returns>A tuple containing the sorted list of scores and the RKS.</returns>
+	/// <returns>A tuple containing the sorted list of scores and the RKS.
+	/// Note: The Phis are the top 3 scores, however it will not be padded if there are less than 3 scores.</returns>
 	public (List<CompleteScore> Phis, List<CompleteScore> OtherScores, double Rks) GetSortedListForRks(IReadOnlyDictionary<ChartConstantKey, float> constantMap, IReadOnlyDictionary<string, string> nameMap)
 	{
 		List<CompleteScore> sorted = this.GetCompleteScores(constantMap, nameMap).ToList();
@@ -52,7 +64,9 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 	/// Sorts the records, merges the phi scores, and returns the sorted list and the RKS.
 	/// Note: this is for game version > 3.11.0
 	/// </summary>
-	/// <returns>A tuple containing the sorted list of scores and the RKS.</returns>
+	/// <returns>A tuple containing the sorted list of scores and the RKS.
+	/// Note: The first 0 ~ 3 scores are phi scores, however it will not be 
+	/// padded if there are less than 3 scores.</returns>
 	public (List<CompleteScore> Scores, double Rks) GetSortedListForRksMerged(IReadOnlyDictionary<ChartConstantKey, float> constantMap, IReadOnlyDictionary<string, string> nameMap)
 	{
 		(List<CompleteScore>? phis, List<CompleteScore>? scores, double rks) = this.GetSortedListForRks(constantMap, nameMap);
@@ -93,6 +107,7 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 		reader.JumpTo(endOffset);
 		return scores;
 	}
+	/// <inheritdoc/>
 	public static GameRecord FromReader(ByteReader reader)
 	{
 		List<SongScore> scores = [];
@@ -110,6 +125,7 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 
 		return new(scores, reader.ObjectVersion);
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		IGrouping<string, SongScore>[] grouped = this.Records.GroupBy(x => x.Id).ToArray();

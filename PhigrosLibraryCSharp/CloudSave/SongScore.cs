@@ -21,7 +21,7 @@ public class SongScore
 	/// </summary>
 	public float Accuracy { get; set; } = 0;
 	/// <summary>
-	/// ex. Stasis.Maozon.0
+	/// ex. <c>Stasis.Maozon.0</c>
 	/// </summary>
 	public string Id { get; set; } = "";
 	/// <summary>
@@ -50,8 +50,7 @@ public class SongScore
 	/// </summary>
 	/// <param name="score">Score</param>
 	/// <param name="acc">Accuracy</param>
-	/// <param name="chartConstant">Chart constant</param>
-	/// <param name="id">Song id, ex. Stasis.Maozon (no .0)</param>
+	/// <param name="id">Song id, ex. <c>Stasis.Maozon.0</c></param>
 	/// <param name="difficulty">Difficulty id</param>
 	/// <param name="status">Score status</param>
 	public SongScore(
@@ -67,6 +66,14 @@ public class SongScore
 		this.Status = status;
 		this.Difficulty = difficulty;
 	}
+	/// <summary>
+	/// Constructs with raw scores.
+	/// </summary>
+	/// <param name="score">Score</param>
+	/// <param name="acc">Accuracy</param>
+	/// <param name="id">Song id, ex. <c>Stasis.Maozon.0</c></param>
+	/// <param name="isFc">Has player full combo'ed this chart or not.</param>
+	/// <param name="difficulty">Difficulty id</param>
 	public SongScore(int score, float acc, string id, bool isFc, Difficulty difficulty)
 	{
 		this.Score = score;

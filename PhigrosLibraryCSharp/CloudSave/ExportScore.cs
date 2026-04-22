@@ -6,7 +6,7 @@
 public class ExportScore
 {
 	/// <summary>
-	/// The ID of the song. ex. Stasis.Maozon
+	/// The ID of the song. ex. Stasis.Maozon.0
 	/// </summary>
 	public required string ID { get; set; }
 	/// <summary>

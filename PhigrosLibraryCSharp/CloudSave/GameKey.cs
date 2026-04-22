@@ -12,6 +12,7 @@ public class GameKey : IPhigrosCustomSerialization<GameKey>
 	/// <summary>
 	/// Initializes a new instance of the <see cref="GameKey"/> class.
 	/// </summary>
+	/// <param name="version">The version of the game key.</param>
 	/// <param name="keys">A dictionary containing the user's game keys and their corresponding flags.</param>
 	/// <param name="lanotaReadKeys">The flag of Lanota read state.</param>
 	/// <param name="node2">The second version of the game key node.</param>
@@ -46,6 +47,7 @@ public class GameKey : IPhigrosCustomSerialization<GameKey>
 	/// </summary>
 	public GameKeyNodeVersion2? Node2 { get; set; }
 
+	/// <inheritdoc/>
 	public static GameKey FromReader(ByteReader reader)
 	{
 		short entryCount = reader.ReadVariedInteger();
@@ -67,6 +69,7 @@ public class GameKey : IPhigrosCustomSerialization<GameKey>
 					reader.ReadByte() != 0,
 					reader.ReadByte() != 0)));
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.ObjectVersion = this.Version;

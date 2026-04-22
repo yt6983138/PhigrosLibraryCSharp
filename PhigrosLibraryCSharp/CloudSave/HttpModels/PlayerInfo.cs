@@ -1,12 +1,13 @@
 ﻿namespace PhigrosLibraryCSharp.CloudSave.HttpModels;
 
 /// <summary>
-/// A struct presenting player's nickname, username...
+/// A struct presenting player's information, 
+/// which is used in some APIs to present the player who uploaded a save.
 /// </summary>
 public class PlayerInfo
 {
 	/// <summary>
-	/// The player's nickname.
+	/// The player's nickname. (The name shown in game)
 	/// </summary>
 	public string NickName { get; set; } = "";
 	/// <summary>

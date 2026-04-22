@@ -28,17 +28,22 @@ public struct RawScore
 	[JsonPropertyName("c")]
 	public ScoreStatus Status { get; set; }
 
+	/// <summary>
+	/// Constructs a <see cref="RawScore"/> from json string. 
+	/// The json string should be in the format of local save, ex: <c>{"s":996105,"a":99.56718444824219,"c":1}</c>
+	/// </summary>
+	/// <param name="json"></param>
+	/// <returns>A constructed <see cref="RawScore"/> from json string.</returns>
 	public static RawScore FromJson(string json)
 	{
 		return JsonSerializer.Deserialize<RawScore>(json);
 	}
 	/// <summary>
-	/// Converts to <see cref="SongScore"/>.
+	/// Converts to a <see cref="SongScore"/>, for the ease of use.
 	/// </summary>
-	/// <param name="chartConstant">The chart constant of the chart. ex. 11.4 </param>
-	/// <param name="songId">The id of the song. ex. Stasis.Maozon (no .0)</param>
-	/// <param name="difficulty">The difficulty name of the chart. ex. AT</param>
-	/// <returns></returns>
+	/// <param name="songId">The id of the song. ex. <c>Stasis.Maozon.0</c></param>
+	/// <param name="difficulty">The difficulty of this score. ex. <see cref="Difficulty.AT"/></param>
+	/// <returns>A constructed <see cref="SongScore"/> from <see cref="RawScore"/>.</returns>
 	public SongScore ToSongScore(string songId, Difficulty difficulty)
 	{
 		return new(

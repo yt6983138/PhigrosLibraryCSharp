@@ -110,6 +110,7 @@ public class GameSettings : IPhigrosCustomSerialization<GameSettings>
 		this.NoteScale = noteScale;
 	}
 
+	/// <inheritdoc/>
 	public static GameSettings FromReader(ByteReader reader)
 	{
 		return new(
@@ -126,6 +127,7 @@ public class GameSettings : IPhigrosCustomSerialization<GameSettings>
 			reader.ReadFloat(),
 			reader.ReadFloat());
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.ObjectVersion = this.Version;

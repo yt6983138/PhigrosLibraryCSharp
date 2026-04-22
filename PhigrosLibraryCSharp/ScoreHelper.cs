@@ -4,7 +4,7 @@ using PhigrosLibraryCSharp.LocalSave;
 namespace PhigrosLibraryCSharp;
 
 /// <summary>
-/// A helper class for doing score related operations.
+/// A helper class for doing <see cref="ScoreStatus"/> related operations.
 /// </summary>
 public static class ScoreHelper
 {
@@ -12,16 +12,16 @@ public static class ScoreHelper
 	/// Get <see cref="ScoreStatus"/> of a raw record.
 	/// </summary>
 	/// <param name="record">The game record.</param>
-	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
+	/// <returns>The status of the record.</returns>
 	public static ScoreStatus ParseStatus(RawScore record)
 		=> ParseStatus(record.Score, record.Accuracy, record.Status == ScoreStatus.Fc);
 	/// <summary>
-	/// Get <see cref="ScoreStatus"/> of a raw record.
+	/// Get <see cref="ScoreStatus"/> from score, accuracy and full combo status.
 	/// </summary>
 	/// <param name="accuracy">The accuracy of the score, ex. 11.45, 99.114514, 100</param>
-	/// <param name="isFc">If fc'ed, <see langword="true"/>, otherwise <see langword="false"/>.</param>
+	/// <param name="isFc">If full combo'ed, <see langword="true"/>, otherwise <see langword="false"/>.</param>
 	/// <param name="score">The score, ex. 920000, 1000000, 69420, 1145</param>
-	/// <returns>A <see cref="ScoreStatus"/> of the record.</returns>
+	/// <returns>The status of the record.</returns>
 	public static ScoreStatus ParseStatus(int score, double accuracy, bool isFc)
 	{
 		if (accuracy == 100)
@@ -39,7 +39,7 @@ public static class ScoreHelper
 		return ScoreStatus.Bugged;
 	}
 	/// <summary>
-	/// Convert difficulty string to index, ex EZ, HD, IN...
+	/// Convert difficulty string to index, ex. EZ, HD, IN...
 	/// </summary>
 	/// <param name="diff">Difficulty string, ex EZ, HD, IN...</param>
 	/// <returns>A <see cref="byte"/> presenting the difficulty index.</returns>

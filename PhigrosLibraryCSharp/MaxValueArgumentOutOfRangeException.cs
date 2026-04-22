@@ -1,7 +1,7 @@
 ﻿namespace PhigrosLibraryCSharp;
 
 /// <summary>
-/// Throw when a argument is out of range (where getting max value is possible)
+/// Thrown when an argument supplied to a method is out of range (where getting max value is possible)
 /// </summary>
 public class MaxValueArgumentOutOfRangeException : ArgumentOutOfRangeException
 {

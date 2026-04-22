@@ -2,24 +2,55 @@
 
 namespace PhigrosLibraryCSharp.CloudSave;
 
+/// <summary>
+/// The type of the game key flag, which is used to indicate the type of the payload in the flag.
+/// Multiple types may exist in a single flag.
+/// </summary>
 public enum GameKeyFlagType : byte
 {
+	/// <summary>
+	/// Has stored the count of <i>read</i> collection pieces.
+	/// </summary>
 	HasReadCollectionPieceCount = 1 << 0,
+	/// <summary>
+	/// Has unlocked the song in Single collection.
+	/// </summary>
 	HasUnlockedSingle = 1 << 1,
+	/// <summary>
+	/// Has stored the count of <i>unlocked</i> collection pieces. Note: This is different from <see cref="HasReadCollectionPieceCount"/>.
+	/// </summary>
 	HasUnlockedCollectionPieceCount = 1 << 2,
+	/// <summary>
+	/// Has unlocked the illustration.
+	/// </summary>
 	HasUnlockedIllustration = 1 << 3,
+	/// <summary>
+	/// Has unlocked the avatar.
+	/// </summary>
 	HasUnlockedAvatar = 1 << 4
 }
 
 /// <summary>
 /// The flag of the game key, which is used to store various state of the game.
 /// Multiple illustrations/avatars/collections can share same key thus they have to be stored in a single flag.
+/// Note: This does not map directly to save binary structure, so do not use Read/WriteMarshalable or Read/WriteUnmanaged 
+/// to serialize/deserialize this struct, use the provided FromReader and Serialize methods instead.
 /// </summary>
 public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 {
+	/// <summary>
+	/// Types of the payload in the flag. Multiple types may exist in a single flag.
+	/// </summary>
 	public GameKeyFlagType Type { get; set; }
+	/// <summary>
+	/// The packed payload of the flag, please use <see cref="ReadPayload"/> and <see cref="WritePayload"/> 
+	/// to read/write the payload instead of manipulating this field directly.
+	/// </summary>
 	public ulong Payload { get; set; }
 
+	/// <summary>
+	/// The count of the payload in the flag, which is determined by the number of bits set in the <see cref="Type"/>.
+	/// </summary>
 	public readonly byte PayloadCount
 	{
 		get
@@ -39,7 +70,8 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 	/// <summary>
 	/// Create a new instance of <see cref="GameKeyFlag"/> with the given raw flag data.
 	/// </summary>
-	/// <param name="data">The raw flag data to initialize the <see cref="GameKeyFlag"/>.</param>
+	/// <param name="packedFlag">The packed flag data representing the types of the payload.</param>
+	/// <param name="data">The raw payload data to initialize the <see cref="GameKeyFlag"/>.</param>
 	public GameKeyFlag(byte packedFlag, byte[] data)
 	{
 		this.Type = (GameKeyFlagType)packedFlag;
@@ -55,6 +87,10 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 			flagCount++;
 		}
 	}
+	/// <summary>
+	/// Create a new instance of <see cref="GameKeyFlag"/> with the given raw flag data.
+	/// </summary>
+	/// <param name="data">The raw data containing the types and payload to initialize the <see cref="GameKeyFlag"/>.</param>
 	public GameKeyFlag(byte[] data)
 		: this(data[0], data[1..]) { }
 
@@ -79,6 +115,13 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 		return bitPosition;
 	}
 
+	/// <summary>
+	/// Write the payload to the flag at the specified position. 
+	/// This will set the corresponding bit in <see cref="Type"/> and update the <see cref="Payload"/> accordingly.
+	/// </summary>
+	/// <param name="position">The position in the flag to write the payload.</param>
+	/// <param name="payload">The payload value to write.</param>
+	/// <exception cref="ArgumentException">Thrown when the position has more than 1 bit set or no bit set.</exception>
 	public void WritePayload(GameKeyFlagType position, byte payload)
 	{
 		int bitPosition = ValidatePositionHasOnly1Bit(position);
@@ -87,6 +130,12 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 		this.Payload &= ~(0xFFUL << (bitPosition * 8));
 		this.Payload |= (ulong)payload << (bitPosition * 8);
 	}
+	/// <summary>
+	/// Removes the payload from the flag at the specified position. 
+	/// This will clear the corresponding bit in <see cref="Type"/> and update the <see cref="Payload"/> accordingly.
+	/// </summary>
+	/// <param name="position">The position in the flag to remove the payload.</param>
+	/// <exception cref="ArgumentException">Thrown when the position has more than 1 bit set or no bit set.</exception>
 	public void RemovePayload(GameKeyFlagType position)
 	{
 		int bitPosition = ValidatePositionHasOnly1Bit(position);
@@ -94,6 +143,13 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 		this.Type &= ~position;
 		this.Payload &= ~(0xFFUL << (bitPosition * 8));
 	}
+	/// <summary>
+	/// Reads the payload from the flag at the specified position. 
+	/// This will return the value of the payload without modifying the <see cref="Type"/> or <see cref="Payload"/>.
+	/// </summary>
+	/// <param name="position">The position in the flag to read the payload.</param>
+	/// <returns>The value of the payload at the specified position.</returns>
+	/// <exception cref="ArgumentException">Thrown when the position has more than 1 bit set, no bit set, or no payload at the position.</exception>
 	public byte ReadPayload(GameKeyFlagType position)
 	{
 		int bitPosition = ValidatePositionHasOnly1Bit(position);
@@ -102,12 +158,14 @@ public struct GameKeyFlag : IPhigrosCustomSerialization<GameKeyFlag>
 		return (byte)((this.Payload >> (bitPosition * 8)) & 0xFF);
 	}
 
+	/// <inheritdoc/>
 	public static GameKeyFlag FromReader(ByteReader reader)
 	{
 		byte length = reader.ReadByte();
 		byte[] rawFlags = reader.ReadBytes(length);
 		return new(rawFlags);
 	}
+	/// <inheritdoc/>
 	public void Serialize(ByteWriter writer)
 	{
 		writer.WriteByte((byte)(this.PayloadCount + sizeof(GameKeyFlagType)));
