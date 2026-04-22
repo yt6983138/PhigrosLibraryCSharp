@@ -102,7 +102,7 @@ public class Summary : IPhigrosCustomSerialization<Summary>
 			reader.ReadByte(),
 			Challenge.FromReader(reader),
 			reader.ReadFloat(),
-			reader.ReadShort(),
+			reader.ReadVariedInteger(),
 			reader.ReadString(),
 			PlayCountSummary.FromReader(reader),
 			PlayCountSummary.FromReader(reader),
@@ -114,7 +114,7 @@ public class Summary : IPhigrosCustomSerialization<Summary>
 		writer.WriteByte(this.SaveVersion);
 		this.Challenge.Serialize(writer);
 		writer.WriteFloat(this.Rks);
-		writer.WriteShort(this.GameVersion);
+		writer.WriteVariedInteger(this.GameVersion);
 		writer.WriteString(this.Avatar);
 		this.EZPlayRecord.Serialize(writer);
 		this.HDPlayRecord.Serialize(writer);

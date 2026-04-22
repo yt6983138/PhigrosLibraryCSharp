@@ -37,18 +37,21 @@ public class SaveTest
 		GameUserInfo userInfo = ctx.ReadGameUserInfo();
 		GameKey gameKey = ctx.ReadGameKey();
 		GameRecord gameRecord = ctx.ReadGameRecord();
+		Summary summary = ctx.ReadSummary();
 
 		SaveContext.Entry progressData = ctx.DecryptedGameProgress.Clone();
 		SaveContext.Entry settingsData = ctx.DecryptedGameSettings.Clone();
 		SaveContext.Entry userInfoData = ctx.DecryptedGameUserInfo.Clone();
 		SaveContext.Entry gameKeyData = ctx.DecryptedGameKey.Clone();
 		SaveContext.Entry gameRecordData = ctx.DecryptedGameRecord.Clone();
+		byte[] summaryData = ctx.RawSummary.ToArray();
 
 		ctx.SaveGameProgress(progress);
 		ctx.SaveGameSettings(settings);
 		ctx.SaveGameUserInfo(userInfo);
 		ctx.SaveGameKey(gameKey);
 		ctx.SaveGameRecord(gameRecord);
+		ctx.SaveSummary(summary);
 
 		Dump(ctx.DecryptedGameProgress);
 		Dump(ctx.DecryptedGameSettings);
@@ -67,7 +70,10 @@ public class SaveTest
 		AssertSame(userInfoData, ctx.DecryptedGameUserInfo);
 		AssertSame(gameKeyData, ctx.DecryptedGameKey);
 		AssertSame(gameRecordData, ctx.DecryptedGameRecord);
+		Assert.IsTrue(summaryData.SequenceEqual(ctx.RawSummary));
 
+		Console.WriteLine("Summary");
+		Console.WriteLine(summary.ToJson());
 		Console.WriteLine("Progress:");
 		Console.WriteLine(progress.ToJson());
 		Console.WriteLine("Settings:");
