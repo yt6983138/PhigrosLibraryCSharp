@@ -5,7 +5,7 @@
 /// cannot be serialized/deserialized by <see cref="ByteReader"/> and <see cref="ByteWriter"/> directly.
 /// </summary>
 /// <typeparam name="TSelf">The type to serialize to and deserialize from. Usually the class type itself.</typeparam>
-public interface IPhigrosCustomSerialization<TSelf>
+public interface IPhigrosCustomSerialization<out TSelf>
 {
 	/// <summary>
 	/// Constructs an object of type <typeparamref name="TSelf"/> from the given <see cref="ByteReader"/>.
