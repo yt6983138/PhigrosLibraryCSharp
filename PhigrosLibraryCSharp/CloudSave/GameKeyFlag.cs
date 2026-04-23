@@ -6,6 +6,7 @@ namespace PhigrosLibraryCSharp.CloudSave;
 /// The type of the game key flag, which is used to indicate the type of the payload in the flag.
 /// Multiple types may exist in a single flag.
 /// </summary>
+[Flags]
 public enum GameKeyFlagType : byte
 {
 	/// <summary>
