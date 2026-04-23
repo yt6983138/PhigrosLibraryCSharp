@@ -10,24 +10,24 @@ public class SongScore
 	/// </summary>
 	public static SongScore Default => new(0, 0, "", Difficulty.EZ, ScoreStatus.False);
 
-	internal bool _isFc = false;
+	internal bool _isFc;
 
 	/// <summary>
 	/// Scores, 0 ~ 1000000
 	/// </summary>
-	public int Score { get; set; } = 0;
+	public int Score { get; set; }
 	/// <summary>
 	/// Accuracy, 0 ~ 100
 	/// </summary>
-	public float Accuracy { get; set; } = 0;
+	public float Accuracy { get; set; }
 	/// <summary>
 	/// ex. <c>Stasis.Maozon.0</c>
 	/// </summary>
-	public string Id { get; set; } = "";
+	public string Id { get; set; }
 	/// <summary>
 	/// ex. AT
 	/// </summary>
-	public Difficulty Difficulty { get; set; } = default;
+	public Difficulty Difficulty { get; set; }
 	/// <summary>
 	/// ex. ScoreStatus.A
 	/// </summary>
@@ -36,7 +36,7 @@ public class SongScore
 		get => ScoreHelper.ParseStatus(this.Score, this.Accuracy, this._isFc);
 		set
 		{
-			if (value == ScoreStatus.Fc || (value == ScoreStatus.Phi && this.Score == 1000000 && this.Accuracy == 100d))
+			if (value == ScoreStatus.Fc || (value == ScoreStatus.Phi && this.Score == 1000000 && this.Accuracy >= 100f))
 			{
 				this._isFc = true;
 				return;
