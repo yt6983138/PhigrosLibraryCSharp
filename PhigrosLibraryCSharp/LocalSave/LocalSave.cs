@@ -70,16 +70,24 @@ public static class LocalSave
 	/// <summary>
 	/// Decrypt the key/values got from playerPrefsV2.xml.
 	/// </summary>
-	/// <param name="base64EncryptedString">The base64 encrypted string gotten from playerPrefsV2.xml.</param>
+	/// <param name="base64EncryptedString">The base64 encrypted string parsed from playerPrefsV2.xml.</param>
 	/// <returns>Decrypted UTF8 string of <paramref name="base64EncryptedString"/>.</returns>
-	public static string DecryptLocalSaveStringNew(string base64EncryptedString) // https://lchzh3473.github.io/rks-probe/ some code were from it
+	public static string DecryptLocalSaveStringNew(string base64EncryptedString)
+	{
+		return DecryptLocalSaveStringNew(Convert.FromBase64String(base64EncryptedString));
+	}
+	/// <summary>
+	/// Decrypt the key/values got from playerPrefsV2.xml.
+	/// </summary>
+	/// <param name="decodedCipherText">The encrypted bytes parsed from playerPrefsV2.xml.</param>
+	/// <returns>Decrypted UTF8 string of <paramref name="decodedCipherText"/>.</returns>
+	public static string DecryptLocalSaveStringNew(byte[] decodedCipherText) // https://lchzh3473.github.io/rks-probe/ some code were from it
 	{
 		byte[] state = UtilityExtension.QuickCopy(initialVector); // readonly != immutable
 
-		byte[] cipherTextCopy = Convert.FromBase64String(base64EncryptedString);
-		for (int e = 0; e < cipherTextCopy.Length; e += 16)
+		for (int e = 0; e < decodedCipherText.Length; e += 16)
 		{
-			byte[] block = cipherTextCopy[e..(e + 16)];
+			byte[] block = decodedCipherText[e..(e + 16)];
 			AddRoundKey(ref block, invSBox[224..240]);
 			ShiftRows(ref block);
 			SubBytes(ref block);
@@ -92,14 +100,14 @@ public static class LocalSave
 			}
 			AddRoundKey(ref block, invSBox[0..16]);
 			for (int j = 0; j < 16; j++) block[j] ^= state[j];
-			for (int t = 0; t < 16; t++) state[t] = cipherTextCopy[e + t];
-			for (int n = 0; n < 16; n++) cipherTextCopy[e + n] = block[n];
+			for (int t = 0; t < 16; t++) state[t] = decodedCipherText[e + t];
+			for (int n = 0; n < 16; n++) decodedCipherText[e + n] = block[n];
 			for (int m = e; m < e + 16; m++)
 			{
-				cipherTextCopy[m] = block[m - e];
+				decodedCipherText[m] = block[m - e];
 			}
 		}
-		byte[] computed = cipherTextCopy[0..^cipherTextCopy[^1]];
+		byte[] computed = decodedCipherText[0..^decodedCipherText[^1]];
 		return Encoding.UTF8.GetString(computed);
 		// return Encoding.ASCII.GetString(computed);
 	}
