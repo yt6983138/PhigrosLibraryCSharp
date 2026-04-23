@@ -139,7 +139,7 @@ public class SaveContext
 			using Stream stream = entry.Open();
 			byte[] encryptedData = await encryptor.Invoke(item.Value.Data);
 			stream.WriteByte(item.Value.ObjectVersion);
-			stream.Write(encryptedData);
+			await stream.WriteAsync(encryptedData);
 		}
 	}
 	/// <summary>
