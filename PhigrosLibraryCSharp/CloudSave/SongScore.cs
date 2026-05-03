@@ -1,12 +1,15 @@
-﻿namespace PhigrosLibraryCSharp.CloudSave;
+﻿using System.Numerics;
+
+namespace PhigrosLibraryCSharp.CloudSave;
 
 /// <summary>
 /// Score with version-independent properties (no chart constant, name, and RKS)
 /// </summary>
-public class SongScore
+public class SongScore : IEquatable<SongScore>, IEqualityOperators<SongScore, SongScore, bool>
 {
 	/// <summary>
-	/// The default empty score.
+	/// The default empty score. Note: this returns a new value each time, changing the 
+	/// properties of this instance does not affect the default instance.
 	/// </summary>
 	public static SongScore Default => new(0, 0, "", Difficulty.EZ, ScoreStatus.False);
 
@@ -95,5 +98,38 @@ public class SongScore
 				Status: {{this.Status}}
 			}
 			""";
+	}
+
+	/// <inheritdoc/>
+	public bool Equals(SongScore? other)
+	{
+		if (other is null) return false;
+		return this.Score == other.Score
+			&& this.Accuracy == other.Accuracy
+			&& this.Id == other.Id
+			&& this.Difficulty == other.Difficulty
+			&& this._isFc == other._isFc;
+	}
+	/// <inheritdoc/>
+	public override bool Equals(object? obj)
+	{
+		return obj is SongScore score && this.Equals(score);
+	}
+	/// <inheritdoc/>
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(this.Score, this.Accuracy, this.Id, this.Difficulty, this._isFc);
+	}
+
+	/// <inheritdoc/>
+	public static bool operator ==(SongScore? left, SongScore? right)
+	{
+		if (left is null) return right is null;
+		return left.Equals(right);
+	}
+	/// <inheritdoc/>
+	public static bool operator !=(SongScore? left, SongScore? right)
+	{
+		return !(left == right);
 	}
 }
