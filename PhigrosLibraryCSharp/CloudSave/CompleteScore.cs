@@ -1,4 +1,7 @@
-﻿namespace PhigrosLibraryCSharp.CloudSave;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
+
+namespace PhigrosLibraryCSharp.CloudSave;
 
 /// <summary>
 /// Key used to look up chart constant, which is used to calculate rks. Consists of song id and difficulty.
@@ -11,8 +14,31 @@ public record struct ChartConstantKey(string SongId, Difficulty Difficulty);
 /// This was separated from <see cref="SongScore"/> to avoid having to store redundant information 
 /// such as chart constant and song name, also enable dynamic song name/chart constant updates.
 /// </summary>
-public struct CompleteScore : IComparable<CompleteScore>
+public struct CompleteScore :
+	IComparable<CompleteScore>,
+	IEquatable<CompleteScore>,
+	IEqualityOperators<CompleteScore, CompleteScore, bool>
 {
+	private static readonly Dictionary<ChartConstantKey, float> _emptyConstantMap = new()
+	{
+		{ new("", Difficulty.EZ), 0f }
+	};
+	private static readonly Dictionary<string, string> _emptyNameMap = new()
+	{
+		{ "", "" }
+	};
+
+	/// <summary>
+	/// The default instance of <see cref="CompleteScore"/>.
+	/// Note: this uses 2 dummy maps that always return 0 for chart constant and <see cref="string.Empty"/> for name, 
+	/// so setting the <see cref="Score"/> property to a non-default value will make the RKS and Name properties 
+	/// throw exceptions.
+	/// 
+	/// This is primarily used to pad the score list to a certain length, for example, when the player has less 
+	/// than 3 <see cref="ScoreStatus.Phi"/> scores, we can fill the rest with default scores.
+	/// </summary>
+	public static CompleteScore Default => new(SongScore.Default, _emptyConstantMap, _emptyNameMap);
+
 	private readonly IReadOnlyDictionary<ChartConstantKey, float> _constantMap;
 	private readonly IReadOnlyDictionary<string, string> _nameMap;
 
@@ -60,8 +86,39 @@ public struct CompleteScore : IComparable<CompleteScore>
 	}
 
 	/// <inheritdoc/>
-	public int CompareTo(CompleteScore other)
+	public readonly int CompareTo(CompleteScore other)
 	{
 		return other.Rks.CompareTo(this.Rks);
 	}
+	/// <summary>
+	/// Compare two <see cref="CompleteScore"/> for equality. 
+	/// Two scores are considered equal if their core score information, chart constant, and song name are all equal.
+	/// </summary>
+	/// <param name="other"><inheritdoc/></param>
+	/// <returns><inheritdoc/></returns>
+	public readonly bool Equals(CompleteScore other)
+	{
+		return this.Score.Equals(other.Score)
+			&& this.ChartConstant.Equals(other.ChartConstant)
+			&& this.NameOrDefault.Equals(other.NameOrDefault);
+	}
+	/// <summary>
+	/// <inheritdoc cref="Equals(CompleteScore)"/>
+	/// </summary>
+	/// <param name="obj"><inheritdoc/></param>
+	/// <returns><inheritdoc/></returns>
+	public override readonly bool Equals([NotNullWhen(true)] object? obj)
+	{
+		return obj is CompleteScore other && this.Equals(other);
+	}
+	/// <inheritdoc/>
+	public override readonly int GetHashCode()
+	{
+		return HashCode.Combine(this.Score, this.ChartConstant, this.NameOrDefault);
+	}
+
+	/// <inheritdoc/>
+	public static bool operator ==(CompleteScore left, CompleteScore right) => left.Equals(right);
+	/// <inheritdoc/>
+	public static bool operator !=(CompleteScore left, CompleteScore right) => !(left == right);
 }

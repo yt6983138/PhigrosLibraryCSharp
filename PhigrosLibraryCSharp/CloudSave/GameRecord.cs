@@ -65,11 +65,15 @@ public class GameRecord : IPhigrosCustomSerialization<GameRecord>
 	/// Note: this is for game version > 3.11.0
 	/// </summary>
 	/// <returns>A tuple containing the sorted list of scores and the RKS.
-	/// Note: The first 0 ~ 3 scores are phi scores, however it will not be 
-	/// padded if there are less than 3 scores.</returns>
+	/// Note: The first 0 ~ 3 scores are phi scores, it will be 
+	/// padded using <see cref="CompleteScore.Default"/> if there are less than 3 scores.</returns>
 	public (List<CompleteScore> Scores, double Rks) GetSortedListForRksMerged(IReadOnlyDictionary<ChartConstantKey, float> constantMap, IReadOnlyDictionary<string, string> nameMap)
 	{
 		(List<CompleteScore>? phis, List<CompleteScore>? scores, double rks) = this.GetSortedListForRks(constantMap, nameMap);
+		while (phis.Count < 3)
+		{
+			phis.Add(CompleteScore.Default);
+		}
 		scores.InsertRange(0, phis);
 		return (scores, rks);
 	}
