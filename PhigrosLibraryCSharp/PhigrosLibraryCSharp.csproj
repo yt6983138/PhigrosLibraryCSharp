@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>preview</LangVersion>
 
-		<AssemblyVersion>4.0.0</AssemblyVersion>
+		<AssemblyVersion>4.1.0</AssemblyVersion>
 		
 		<PackageId>$(AssemblyName)</PackageId>
 		<Version>$(AssemblyVersion)</Version>
@@ -27,7 +27,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="../README.md;../LICENSE.txt" copyToOutput="true">
+		<Content Include="../README.md;../LICENSE.txt;../CHANGELOG.MD" copyToOutput="true">
 			<IncludeInPackage>true</IncludeInPackage>
 			<CopyToOutput>true</CopyToOutput>
 			<BuildAction>Content</BuildAction>
@@ -36,4 +36,25 @@
 			<PackagePath>.</PackagePath>
 		</Content>
 	</ItemGroup>
+
+	<UsingTask TaskName="ReadReleaseNotes" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+		<ParameterGroup>
+			<FilePath ParameterType="System.String" Required="true" />
+			<Delimiter ParameterType="System.String" Required="true" />
+			<Result ParameterType="System.String" Output="true" />
+		</ParameterGroup>
+		<Task>
+			<Code Type="Fragment" Language="cs">
+				var content = System.IO.File.ReadAllText(FilePath);
+				var idx = content.IndexOf(Delimiter);
+				Result = idx >= 0 ? content.Substring(0, idx).Trim() : content.Trim();
+			</Code>
+		</Task>
+	</UsingTask>
+
+	<Target Name="SetReleaseNotes" BeforeTargets="GenerateNuspec;Pack">
+		<ReadReleaseNotes FilePath="$(SolutionDir)/CHANGELOG.MD" Delimiter="&lt;RELEASE_NOTE_END&gt;">
+			<Output TaskParameter="Result" PropertyName="PackageReleaseNotes" />
+		</ReadReleaseNotes>
+	</Target>
 </Project>
