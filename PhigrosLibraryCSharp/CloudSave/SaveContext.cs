@@ -146,7 +146,7 @@ public class SaveContext
 	/// Encrypt and saves the decrypted data entries to the provided zip archive. 
 	/// The entries will be encrypted using the provided encryptor function before being written to the archive.
 	/// </summary>
-	/// <param name="zipStream">The stream to save the encrypted entries to.</param>
+	/// <param name="zipStream">The stream to save the encrypted entries to. This method will leave it open.</param>
 	/// <param name="encryptor">A function to encrypt the data entries.</param>
 	/// <returns>A task that represents the asynchronous operation.</returns>
 	public async Task SaveToStreamAsync(Stream zipStream, CipherFunction encryptor)
