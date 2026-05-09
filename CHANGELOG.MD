@@ -1,9 +1,15 @@
+# 4.1.1
+- Improved quality of some comments in `Save` and `SaveContext` class
+- Removed redundant session token null check in all methods of `Save` class
+- Added `RequestHandler` property to `Save` class, allowing you to intercept (and modify) requests before they are sent, and responses before they are processed
+- `Save` class now properly dispose `HttpResponseMessage` objects after done with them
+
+<RELEASE_NOTE_END>
+
 # 4.1.0
 - Made `SongScore` and `CompleteScore` implement equality related interfaces and override equality related methods.
 - Added `CompleteScore.Default` property that returns an empty instance of `CompleteScore`.
 - Started writing release note
-
-<RELEASE_NOTE_END>
 
 # 4.0.0
 In v4,the entire library's namespace structure has been reorganized, and added *partial* save write-back support (You can serialize but cannot upload).
