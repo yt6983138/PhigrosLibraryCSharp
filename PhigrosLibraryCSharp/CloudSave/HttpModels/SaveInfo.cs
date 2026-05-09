@@ -96,11 +96,11 @@ public class GameFile
 public class GameFileMetaData
 {
 	[JsonPropertyName("_checksum")]
-	public required string Checksum { get; set; }
+	public string? Checksum { get; set; }
 	[JsonPropertyName("prefix")]
-	public required string Prefix { get; set; }
+	public string? Prefix { get; set; }
 	[JsonPropertyName("size")]
-	public required int Size { get; set; }
+	public int? Size { get; set; }
 }
 public class TapTapSaveTime
 {
