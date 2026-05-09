@@ -63,6 +63,16 @@ public class Save : IDisposable
 	public HttpClient Client { get; private set; }
 
 	/// <summary>
+	/// Custom request handler that can be used to intercept requests to the cloud server. 
+	/// This can be useful for platforms where <see cref="HttpClient"/> is not fully supported, such as WASM.
+	/// </summary>
+	public Func<Save, HttpRequestMessage, Task<HttpResponseMessage>> RequestHandler { get; set; } = DefaultRequestHandler;
+	private static Task<HttpResponseMessage> DefaultRequestHandler(Save save, HttpRequestMessage request)
+	{
+		return save.Client.SendAsync(request);
+	}
+
+	/// <summary>
 	/// A delegate that can be used on WASM platform or other platforms where AES is not supported.
 	/// </summary>
 	/// <param name="key">Decoded <see cref="CloudAESKey"/>.</param>
@@ -153,44 +163,45 @@ public class Save : IDisposable
 	}
 
 	#region Raw operation
+	private Task<HttpResponseMessage> GetAsync(string address)
+	{
+		return this.RequestHandler.Invoke(this, new HttpRequestMessage(HttpMethod.Get, address));
+	}
+
 	/// <summary>
 	/// Get the raw save from cloud.
 	/// </summary>
 	/// <returns><see cref="SaveInfoContainer"/> containing all raw information.</returns>
-	/// <exception cref="ArgumentNullException">Thrown if the helper is not initialized.</exception>
 	public async Task<SaveInfoContainer> GetSaveInfoFromCloudAsync()
 	{
-		ArgumentNullException.ThrowIfNull(this.SessionToken);
-		HttpResponseMessage response = await this.Client.GetAsync(this.GetAddress(CloudGameSaveAddress));
+		using HttpResponseMessage response = await this.GetAsync(this.GetAddress(CloudGameSaveAddress));
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		SaveInfoContainer container = JsonSerializer.Deserialize<SaveInfoContainer>(content, SerializerSettings);
 		return container;
 	}
 	/// <summary>
-	/// Get the raw item at <paramref name="address"/>.
+	/// Get the raw content at <paramref name="address"/>.
 	/// </summary>
-	/// <param name="address">Address of item.</param>
-	/// <returns><see cref="byte"/> array of item.</returns>
-	/// <exception cref="ArgumentNullException">Thrown if the helper is not initialized.</exception>
+	/// <param name="address">Address to make request to.</param>
+	/// <returns><see cref="byte"/> array of content.</returns>
 	public async Task<byte[]> GetRawAddressAsync(string address)
 	{
-		ArgumentNullException.ThrowIfNull(this.SessionToken);
-		HttpResponseMessage response = await this.Client.GetAsync(address);
+		using HttpResponseMessage response = await this.GetAsync(address);
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch.", null, response.StatusCode);
 		byte[] content = await response.Content.ReadAsByteArrayAsync();
 
 		return content;
 	}
 	/// <summary>
-	/// Get raw zip from cloud.
+	/// Get encrypted save zip from cloud.
 	/// </summary>
 	/// <param name="obj">Target cloud object.</param>
 	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
 	public Task<byte[]> GetSaveZipAsync(PhiCloudObj obj)
 		=> this.GetRawAddressAsync(obj.Url);
 	/// <summary>
-	/// Get raw zip from cloud.
+	/// Get encrypted save zip from cloud.
 	/// </summary>
 	/// <param name="obj">Target save.</param>
 	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
@@ -216,11 +227,9 @@ public class Save : IDisposable
 	/// Get the <see cref="PlayerInfo"/> of the user.
 	/// </summary>
 	/// <returns><see cref="PlayerInfo"/> of the user.</returns>
-	/// <exception cref="ArgumentNullException">Thrown if the helper is not initalized.</exception>
 	public async Task<PlayerInfo> GetPlayerInfoAsync()
 	{
-		ArgumentNullException.ThrowIfNull(this.SessionToken);
-		HttpResponseMessage response = await this.Client.GetAsync(this.GetAddress(CloudMeAddress));
+		using HttpResponseMessage response = await this.GetAsync(this.GetAddress(CloudMeAddress));
 		string content = await response.Content.ReadAsStringAsync();
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		JsonNode node = JsonNode.Parse(content).EnsureNotNull();
@@ -240,9 +249,6 @@ public class Save : IDisposable
 	/// <returns>A <see cref="SaveContext"/> object containing the save data.</returns>
 	/// <exception cref="MaxValueArgumentOutOfRangeException">
 	/// Thrown if the specified index is out of range.
-	/// </exception>
-	/// <exception cref="ArgumentNullException">
-	/// Thrown if the session token is null.
 	/// </exception>
 	public async Task<SaveContext> GetSaveContextAsync(int index)
 	{
