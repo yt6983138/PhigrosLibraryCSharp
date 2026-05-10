@@ -1,0 +1,212 @@
+{
+  "repo_notes": [
+    {
+      "content": ""
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "High-level introduction to PhigrosLibraryCSharp: what it is, what it does, its project structure, and how the major subsystems relate. Links to child pages for details.",
+      "page_notes": [
+        {
+          "content": "Please link Examples and Getting Started first."
+        }
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "purpose": "Step-by-step guide for new consumers: installing the NuGet package, obtaining a Phigros token, loading a save, and reading scores. Covers both local-save and cloud-save workflows with code examples drawn from the Examples project.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "Please include code as an example to do everything in single piece, it should include: Input isInternational flag and callbackLogin flag, do qr code login or callback login based on callbackLogin flag, read difficulty.tsv and info.tsv (map from id to name) for parsing scores, fetch PlayerInfo and SaveContext, read GameRecord using GetSortedListForRks... methods, read GameProgress, write some random value to GameProgress value and write back to the save context, then finally, save the save context as a zip. You need to specify that upload is not supported, only saving is."
+        }
+      ]
+    },
+    {
+      "title": "Project Structure and Build Configuration",
+      "purpose": "Describes the multi-project solution layout (core library, Examples, Tests), NuGet packaging settings, target framework, and CI/CD pipeline.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "UnmanagedWrapper and PackageExtract no longer exist, please ignore them as they were never complete either."
+        }
+      ]
+    },
+    {
+      "title": "Authentication and Cloud Access",
+      "purpose": "Overview of how the library authenticates with TapTap and LeanCloud to obtain a Phigros session token and retrieve cloud saves. Links to child pages for each authentication flow and the cloud save API.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "TapTap Authentication",
+      "purpose": "Detailed coverage of the two TapTap login flows (Device/QR-Code flow and OAuth 2.0 Callback flow), PKCE implementation, MAC signature generation, regional endpoint selection, and the data structures involved (TapTapTokenData, TapTapProfileData, CallbackLoginData, CompleteQRCodeData).",
+      "parent": "Authentication and Cloud Access",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "LeanCloud Integration and Session Management",
+      "purpose": "Explains how LCHelper exchanges TapTap credentials for a LeanCloud session token, constructs X-LC-Sign headers, handles China vs. International endpoints, and exposes the MD5 hash override for WASM compatibility.",
+      "parent": "Authentication and Cloud Access",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Cloud Save Retrieval (Save and SaveContext)",
+      "purpose": "Documents the Save class lifecycle: constructor, GetSaveInfoFromCloudAsync, GetSaveContextAsync, GetSaveZipAsync, Decrypt/Encrypt delegates, AES key/IV, SaveInfo/SaveInfoContainer/SimplifiedSaveInfo data structures, PlayerInfo endpoint, and MaxValueArgumentOutOfRangeException.",
+      "parent": "Authentication and Cloud Access",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Save Parsing and Binary Serialization",
+      "purpose": "Overview of how raw encrypted ZIP archives are decrypted, decompressed, and parsed into typed C# objects, and how those objects are serialized back. Links to child pages covering ByteReader, ByteWriter, extension methods, and local-save decryption.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "ByteReader: Binary Stream Reader",
+      "purpose": "Deep dive into the ByteReader class: stateful offset management, ReadUnmanaged<T> with unsafe pointers, ReadMarshalable<T>, ReadVariedInteger (VLQ encoding), ReadString, ReadBool bitmask extraction, Jump/JumpTo, ObjectVersion, and SerialHelper marshaling utilities.",
+      "parent": "Save Parsing and Binary Serialization",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "ByteWriter and IPhigrosCustomSerialization",
+      "purpose": "Documents the ByteWriter class (the write-back counterpart to ByteReader): WriteUnmanaged<T>, WriteMarshalable<T>, WriteVariedInteger, WriteString, WritePackedBools, WritePhigrosSerializableObject. Also covers the IPhigrosCustomSerialization<T> interface contract (FromReader/Serialize) and how domain models implement it for round-trip binary I/O.",
+      "parent": "Save Parsing and Binary Serialization",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Local Save Decryption",
+      "purpose": "Explains the LocalSave.DecryptLocalSaveStringNew method: the custom AES-CBC variant with hardcoded S-Box, inverse S-Box, IV, and rcon tables used to decrypt PlayerPrefv2.xml key/value pairs into JSON. Also covers RawScore JSON deserialization and ToSongScore conversion.",
+      "parent": "Save Parsing and Binary Serialization",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Game Data Models",
+      "purpose": "Overview of all typed data models produced by the parsing layer, organized by domain. Links to child pages for score/record models and game-state models.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Score and Record Models",
+      "purpose": "Documents SongScore (Score, Accuracy, Id, Difficulty, Status), CompleteScore (Rks formula, ChartConstant, IComparable), ChartConstantKey record, RawScore struct, ScoreHelper.ParseStatus, ScoreStatus enum, Difficulty enum, ExportScore, GameRecord container, GetSortedListForRks/GetSortedListForRksMerged, and the chart-constant mapping pattern.",
+      "parent": "Game Data Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Game State Models",
+      "purpose": "Documents the game-state data structures: Summary (RawSummaryFirst/Last, Challenge, ChallengeRank, avatar, clears, PlayCountSummary), GameProgress (versioned node chain, Money, unlock flags, DifficultyUnlockFlag, SongRecordFlag, Chapter8UnlockFlag, TakumiUnlockFlag), GameSettings (boolean bitfields, float offsets), GameUserInfo, and the Challenge struct.",
+      "parent": "Game Data Models",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "GameKey and Unlock State",
+      "purpose": "Overview of the GameKey subsystem that tracks illustration, avatar, collection, and song unlock state. Explains the versioned node chain (GameKeyNodeVersion2/3) and the GameKeyFlag bitmask/payload architecture. Links to child pages for the flag encoding details and the progress flag enumerations.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "GameKey: Versioned Unlock Dictionary",
+      "purpose": "Documents the GameKey class: the string-keyed dictionary of GameKeyFlag entries, LanotaReadKeys bitmask, versioned node chain (GameKeyNodeVersion2/3 with CamelliaReadKey, SideStory4BeginReadKey, OldScoreClearedV390), FromReader deserialization, and Serialize write-back.",
+      "parent": "GameKey and Unlock State",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "GameKeyFlag: Bitmask Payload Encoding",
+      "purpose": "Deep dive into GameKeyFlag and GameKeyFlagType: the [Flags] byte enum, packed ulong payload, WritePayload/ReadPayload/RemovePayload bit-manipulation logic, ValidatePositionHasOnly1Bit, PayloadCount calculation, and the compact binary serialization format (length-prefix + type header + compacted data bytes).",
+      "parent": "GameKey and Unlock State",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Testing and Examples",
+      "purpose": "Describes the test projects (PhigrosLibraryCSharp.Tests) and the Examples console application, explaining how to run them and what they validate. Links to child pages for the core tests and the examples project.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Core Library Tests",
+      "purpose": "Documents PhigrosLibraryCSharp.Tests: LoginTest (TestChinaMode, TestTapTapHelper, TestLCHelper), SaveTest (TestSaveToZip round-trip validation, TestSerialization), the Helper.cs ToJson extension, Secret.cs credential pattern, and how to supply credentials for integration tests.",
+      "parent": "Testing and Examples",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Examples Project",
+      "purpose": "Documents the PhigrosLibraryCSharp.Examples console application: the three main workflows (GetToken QR-code flow, ShowMiscInfo save inspection, ShowBest5 RKS calculation), how to supply a difficulty.tsv file, and how the example ties together TapTapHelper, LCHelper, Save, SaveContext, and GameRecord.GetSortedListForRks.",
+      "parent": "Testing and Examples",
+      "page_notes": [
+        {
+          "content": "For examples, please include following repos as they are using this library and have complexity range of low to high: (low) https://github.com/yt6983138/PhigrosSaveDumper, (high) https://github.com/yt6983138/PSLDiscordBot"
+        }
+      ]
+    },
+    {
+      "title": "Glossary",
+      "purpose": "Definitions of all codebase-specific terms, abbreviations, and domain concepts that an onboarding engineer needs to know, with code pointers to the relevant files and classes.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    }
+  ]
+}
