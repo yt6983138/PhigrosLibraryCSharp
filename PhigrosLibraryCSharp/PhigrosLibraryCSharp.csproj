@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>preview</LangVersion>
 
-		<AssemblyVersion>4.2.0</AssemblyVersion>
+		<AssemblyVersion>4.3.0</AssemblyVersion>
 		
 		<PackageId>$(AssemblyName)</PackageId>
 		<Version>$(AssemblyVersion)</Version>

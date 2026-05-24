@@ -12,8 +12,9 @@ public class SaveContext
 	/// Function to encrypt or decrypt data. The input is the raw data, and the output is the processed data.
 	/// </summary>
 	/// <param name="data">The data to be processed.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>The processed data.</returns>
-	public delegate Task<byte[]> CipherFunction(byte[] data);
+	public delegate Task<byte[]> CipherFunction(byte[] data, CancellationToken ct = default);
 	/// <summary>
 	/// An entry of the decrypted save data, containing the object version and the decrypted data bytes.
 	/// </summary>
@@ -108,8 +109,9 @@ public class SaveContext
 	/// <param name="rawZip">Zip stream containing encrypted entries.</param>
 	/// <param name="originalData">The original save info object.</param>
 	/// <param name="decryptor">A function to decrypt the raw data entries.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>A task that represents the asynchronous operation. The task result contains the created <see cref="SaveContext"/> instance.</returns>
-	public static async Task<SaveContext> FromZipAsync(Stream rawZip, SaveInfo originalData, CipherFunction decryptor)
+	public static async Task<SaveContext> FromZipAsync(Stream rawZip, SaveInfo originalData, CipherFunction decryptor, CancellationToken ct = default)
 	{
 		Dictionary<string, Entry> decryptedEntries = [];
 
@@ -118,8 +120,8 @@ public class SaveContext
 		{
 			using Stream stream = item.Open();
 			byte[] decompressed = new byte[item.Length];
-			await stream.ReadExactlyAsync(decompressed);
-			decryptedEntries.Add(item.Name, new(decompressed[0], await decryptor.Invoke(decompressed[1..])));
+			await stream.ReadExactlyAsync(decompressed, ct);
+			decryptedEntries.Add(item.Name, new(decompressed[0], await decryptor.Invoke(decompressed[1..], ct)));
 		}
 
 		return new(decryptedEntries, originalData);
@@ -130,16 +132,17 @@ public class SaveContext
 	/// </summary>
 	/// <param name="archive">The zip archive to save the encrypted entries to.</param>
 	/// <param name="encryptor">A function to encrypt the data entries.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>A task that represents the asynchronous operation.</returns>
-	public async Task SaveToZipAsync(ZipArchive archive, CipherFunction encryptor)
+	public async Task SaveToZipAsync(ZipArchive archive, CipherFunction encryptor, CancellationToken ct = default)
 	{
 		foreach (KeyValuePair<string, Entry> item in this.DecryptedDataEntries)
 		{
 			ZipArchiveEntry entry = archive.CreateEntry(item.Key);
 			using Stream stream = entry.Open();
-			byte[] encryptedData = await encryptor.Invoke(item.Value.Data);
+			byte[] encryptedData = await encryptor.Invoke(item.Value.Data, ct);
 			stream.WriteByte(item.Value.ObjectVersion);
-			await stream.WriteAsync(encryptedData);
+			await stream.WriteAsync(encryptedData, ct);
 		}
 	}
 	/// <summary>
@@ -148,11 +151,12 @@ public class SaveContext
 	/// </summary>
 	/// <param name="zipStream">The stream to save the encrypted entries to. This method will leave it open.</param>
 	/// <param name="encryptor">A function to encrypt the data entries.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>A task that represents the asynchronous operation.</returns>
-	public async Task SaveToStreamAsync(Stream zipStream, CipherFunction encryptor)
+	public async Task SaveToStreamAsync(Stream zipStream, CipherFunction encryptor, CancellationToken ct = default)
 	{
 		using ZipArchive archive = new(zipStream, ZipArchiveMode.Create, leaveOpen: true);
-		await this.SaveToZipAsync(archive, encryptor);
+		await this.SaveToZipAsync(archive, encryptor, ct);
 	}
 
 	#region Read operations

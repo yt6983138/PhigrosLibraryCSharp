@@ -4,7 +4,7 @@ namespace PhigrosLibraryCSharp.CloudSave.Login;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 /// <summary>
-/// Token data gotten from <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool)"/>.
+/// Token data gotten from <see cref="TapTapHelper.CheckQRCodeResult(CompleteQRCodeData, bool, CancellationToken)"/>.
 /// </summary>
 public class TapTapTokenData
 {

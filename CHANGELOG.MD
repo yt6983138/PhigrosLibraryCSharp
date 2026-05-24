@@ -1,7 +1,10 @@
-# 4.2.0
-- Made `GameFileMetaData` properties nullable to handle missing data in some save files, as early versions of the sdk does not write those. Users depending on those properties should recompile.
+# 4.3.0
+- Made all async apis in `Save`, `SaveContext`, `TapTapHelper`, and `LCHelper` classes cancellable by accepting `CancellationToken` parameters. Users should recompile to prevent `MethodNotFoundException`s.
 
 <RELEASE_NOTE_END>
+
+# 4.2.0
+- Made `GameFileMetaData` properties nullable to handle missing data in some save files, as early versions of the sdk does not write those. Users depending on those properties should recompile.
 
 # 4.1.1
 - Improved quality of some comments in `Save` and `SaveContext` class

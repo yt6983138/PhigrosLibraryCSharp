@@ -3,7 +3,7 @@
 namespace PhigrosLibraryCSharp.CloudSave.Login;
 
 /// <summary>
-/// Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool)"/>.
+/// Profile data gotten from <see cref="TapTapHelper.GetProfile(TapTapTokenData.TokenData, int, bool, CancellationToken)"/>.
 /// </summary>
 public class TapTapProfileData
 {

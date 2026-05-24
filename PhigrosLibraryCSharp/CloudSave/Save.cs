@@ -66,10 +66,10 @@ public class Save : IDisposable
 	/// Custom request handler that can be used to intercept requests to the cloud server. 
 	/// This can be useful for platforms where <see cref="HttpClient"/> is not fully supported, such as WASM.
 	/// </summary>
-	public Func<Save, HttpRequestMessage, Task<HttpResponseMessage>> RequestHandler { get; set; } = DefaultRequestHandler;
-	private static Task<HttpResponseMessage> DefaultRequestHandler(Save save, HttpRequestMessage request)
+	public Func<Save, HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> RequestHandler { get; set; } = DefaultRequestHandler;
+	private static Task<HttpResponseMessage> DefaultRequestHandler(Save save, HttpRequestMessage request, CancellationToken ct = default)
 	{
-		return save.Client.SendAsync(request);
+		return save.Client.SendAsync(request, ct);
 	}
 
 	/// <summary>
@@ -78,8 +78,9 @@ public class Save : IDisposable
 	/// <param name="key">Decoded <see cref="CloudAESKey"/>.</param>
 	/// <param name="iv">Decoded <see cref="CloudAESIV"/>.</param>
 	/// <param name="data">Decoded data for decrypting or encrypting.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>Decrypted or encrypted data.</returns>
-	public delegate Task<byte[]> AESCipherFunction(byte[] key, byte[] iv, byte[] data);
+	public delegate Task<byte[]> AESCipherFunction(byte[] key, byte[] iv, byte[] data, CancellationToken ct = default);
 	/// <summary>
 	/// On WASM or other platform where AES is not supported, you can set this property to other function
 	/// that is capable to decrypt data.
@@ -91,7 +92,7 @@ public class Save : IDisposable
 	/// </summary>
 	public AESCipherFunction Encryptor { get; init; } = EncryptDefaultImplementation;
 
-	private static Task<byte[]> DecryptDefaultImplementation(byte[] key, byte[] iv, byte[] data)
+	private static async Task<byte[]> DecryptDefaultImplementation(byte[] key, byte[] iv, byte[] data, CancellationToken ct = default)
 	{
 		using Aes aes = Aes.Create();
 		aes.Key = key;
@@ -101,12 +102,12 @@ public class Save : IDisposable
 		using MemoryStream ms = new();
 		using (CryptoStream cs = new(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
 		{
-			cs.Write(data, 0, data.Length);
+			await cs.WriteAsync(data, ct);
 			cs.FlushFinalBlock();
 		}
-		return Task.FromResult(ms.ToArray());
+		return ms.ToArray();
 	}
-	private static Task<byte[]> EncryptDefaultImplementation(byte[] key, byte[] iv, byte[] data)
+	private static async Task<byte[]> EncryptDefaultImplementation(byte[] key, byte[] iv, byte[] data, CancellationToken ct = default)
 	{
 		using Aes aes = Aes.Create();
 		aes.Key = key;
@@ -115,17 +116,17 @@ public class Save : IDisposable
 		using MemoryStream ms = new();
 		using (CryptoStream cs = new(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
 		{
-			cs.Write(data, 0, data.Length);
+			await cs.WriteAsync(data, ct);
 			cs.FlushFinalBlock();
 		}
-		return Task.FromResult(ms.ToArray());
+		return ms.ToArray();
 	}
 
 	/// <summary>
 	/// Initialize the helper. Warning: Only check token semantically, does NOT do a connect test.
 	/// </summary>
 	/// <param name="sessionToken">Session token gotten from .userdata or somewhere else like 
-	/// <see cref="LCHelper.LoginAndGetToken(LCCombinedAuthData, bool, bool)"/>.</param>
+	/// <see cref="LCHelper.LoginAndGetToken(LCCombinedAuthData, bool, bool, CancellationToken)"/>.</param>
 	/// <param name="isInternational">Use international server or not.</param>
 	/// <exception cref="ArgumentException">Thrown if the token format is invalid.</exception>
 	public Save(string sessionToken, bool isInternational)
@@ -163,19 +164,20 @@ public class Save : IDisposable
 	}
 
 	#region Raw operation
-	private Task<HttpResponseMessage> GetAsync(string address)
+	private Task<HttpResponseMessage> GetAsync(string address, CancellationToken ct = default)
 	{
-		return this.RequestHandler.Invoke(this, new HttpRequestMessage(HttpMethod.Get, address));
+		return this.RequestHandler.Invoke(this, new HttpRequestMessage(HttpMethod.Get, address), ct);
 	}
 
 	/// <summary>
 	/// Get the raw save from cloud.
 	/// </summary>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns><see cref="SaveInfoContainer"/> containing all raw information.</returns>
-	public async Task<SaveInfoContainer> GetSaveInfoFromCloudAsync()
+	public async Task<SaveInfoContainer> GetSaveInfoFromCloudAsync(CancellationToken ct = default)
 	{
-		using HttpResponseMessage response = await this.GetAsync(this.GetAddress(CloudGameSaveAddress));
-		string content = await response.Content.ReadAsStringAsync();
+		using HttpResponseMessage response = await this.GetAsync(this.GetAddress(CloudGameSaveAddress), ct);
+		string content = await response.Content.ReadAsStringAsync(ct);
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		SaveInfoContainer container = JsonSerializer.Deserialize<SaveInfoContainer>(content, SerializerSettings);
 		return container;
@@ -184,12 +186,13 @@ public class Save : IDisposable
 	/// Get the raw content at <paramref name="address"/>.
 	/// </summary>
 	/// <param name="address">Address to make request to.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns><see cref="byte"/> array of content.</returns>
-	public async Task<byte[]> GetRawAddressAsync(string address)
+	public async Task<byte[]> GetRawAddressAsync(string address, CancellationToken ct = default)
 	{
-		using HttpResponseMessage response = await this.GetAsync(address);
+		using HttpResponseMessage response = await this.GetAsync(address, ct);
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch.", null, response.StatusCode);
-		byte[] content = await response.Content.ReadAsByteArrayAsync();
+		byte[] content = await response.Content.ReadAsByteArrayAsync(ct);
 
 		return content;
 	}
@@ -197,40 +200,45 @@ public class Save : IDisposable
 	/// Get encrypted save zip from cloud.
 	/// </summary>
 	/// <param name="obj">Target cloud object.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
-	public Task<byte[]> GetSaveZipAsync(PhiCloudObj obj)
-		=> this.GetRawAddressAsync(obj.Url);
+	public Task<byte[]> GetSaveZipAsync(PhiCloudObj obj, CancellationToken ct = default)
+		=> this.GetRawAddressAsync(obj.Url, ct);
 	/// <summary>
 	/// Get encrypted save zip from cloud.
 	/// </summary>
 	/// <param name="obj">Target save.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>An array of <see cref="byte"/> of zip's raw data.</returns>
-	public Task<byte[]> GetSaveZipAsync(SimplifiedSaveInfo obj)
-		=> this.GetRawAddressAsync(obj.GameSave.Url);
+	public Task<byte[]> GetSaveZipAsync(SimplifiedSaveInfo obj, CancellationToken ct = default)
+		=> this.GetRawAddressAsync(obj.GameSave.Url, ct);
 	/// <summary>
 	/// Decrypt using Phigros' key and iv.
 	/// </summary>
 	/// <param name="data">The data to decrypt.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>Decrypted data.</returns>
-	public Task<byte[]> Decrypt(byte[] data)
-		=> this.Decryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data);
+	public Task<byte[]> Decrypt(byte[] data, CancellationToken ct = default)
+		=> this.Decryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data, ct);
 	/// <summary>
 	/// Encrypt using Phigros' key and iv.
 	/// </summary>
 	/// <param name="data">The data to encrypt.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>Encrypted data.</returns>
-	public Task<byte[]> Encrypt(byte[] data)
-		=> this.Encryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data);
+	public Task<byte[]> Encrypt(byte[] data, CancellationToken ct = default)
+		=> this.Encryptor.Invoke(UtilityExtension.QuickCopy(Key), UtilityExtension.QuickCopy(Iv), data, ct);
 	#endregion
 
 	/// <summary>
 	/// Get the <see cref="PlayerInfo"/> of the user.
 	/// </summary>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns><see cref="PlayerInfo"/> of the user.</returns>
-	public async Task<PlayerInfo> GetPlayerInfoAsync()
+	public async Task<PlayerInfo> GetPlayerInfoAsync(CancellationToken ct = default)
 	{
-		using HttpResponseMessage response = await this.GetAsync(this.GetAddress(CloudMeAddress));
-		string content = await response.Content.ReadAsStringAsync();
+		using HttpResponseMessage response = await this.GetAsync(this.GetAddress(CloudMeAddress), ct);
+		string content = await response.Content.ReadAsStringAsync(ct);
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		JsonNode node = JsonNode.Parse(content).EnsureNotNull();
 
@@ -246,28 +254,30 @@ public class Save : IDisposable
 	/// Retrieves the save for the specified index.
 	/// </summary>
 	/// <param name="index">The index of the save to retrieve.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>A <see cref="SaveContext"/> object containing the save data.</returns>
 	/// <exception cref="MaxValueArgumentOutOfRangeException">
 	/// Thrown if the specified index is out of range.
 	/// </exception>
-	public async Task<SaveContext> GetSaveContextAsync(int index)
+	public async Task<SaveContext> GetSaveContextAsync(int index, CancellationToken ct = default)
 	{
-		List<SaveInfo> rawSaves = (await this.GetSaveInfoFromCloudAsync()).Results;
+		List<SaveInfo> rawSaves = (await this.GetSaveInfoFromCloudAsync(ct)).Results;
 		if (index < 0 || index >= rawSaves.Count)
 			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, rawSaves.Count); // raw count
 
 		SaveInfo rawSave = rawSaves[index];
-		return await this.GetSaveContextAsync(rawSave);
+		return await this.GetSaveContextAsync(rawSave, ct);
 	}
 	/// <summary>
 	/// Retrieves the save context for the specified raw save.
 	/// </summary>
 	/// <param name="rawSave">The raw save object to retrieve the context for.</param>
+	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>A <see cref="SaveContext"/> object containing the save data.</returns>
-	public async Task<SaveContext> GetSaveContextAsync(SaveInfo rawSave)
+	public async Task<SaveContext> GetSaveContextAsync(SaveInfo rawSave, CancellationToken ct = default)
 	{
 		SimplifiedSaveInfo simplifiedSave = rawSave.Simplify();
-		byte[] rawZip = await this.GetSaveZipAsync(simplifiedSave);
+		byte[] rawZip = await this.GetSaveZipAsync(simplifiedSave, ct);
 
 		return await SaveContext.FromZipAsync(rawZip, rawSave, this.Decrypt);
 	}

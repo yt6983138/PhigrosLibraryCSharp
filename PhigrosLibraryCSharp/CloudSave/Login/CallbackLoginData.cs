@@ -10,7 +10,7 @@ public class CallbackLoginData
 	/// </summary>
 	public string CodeVerifier { get; init; }
 	/// <summary>
-	/// URL that will be redirected to when the login is complete. See <see cref="TapTapHelper.HandleCallbackLogin(CallbackLoginData, string, bool)"/>.
+	/// URL that will be redirected to when the login is complete. See <see cref="TapTapHelper.HandleCallbackLogin(CallbackLoginData, string, bool, CancellationToken)"/>.
 	/// </summary>
 	public string RedirectUrl { get; init; }
 	/// <summary>
