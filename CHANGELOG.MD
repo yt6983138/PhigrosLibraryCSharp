@@ -1,7 +1,12 @@
+# 4.4.0
+- Added custom query parameter to `GetSaveInfoFromCloudAsync()` and `GetSaveContextAsync()` methods, allowing users to specify additional query parameters when requesting save info from the cloud. 
+    - By default, it filters out save files that are not uploaded by the current user.
+    - Users should recompile after upgrading to prevent `MethodNotFoundException`s.
+    
+<RELEASE_NOTE_END>
+
 # 4.3.0
 - Made all async apis in `Save`, `SaveContext`, `TapTapHelper`, and `LCHelper` classes cancellable by accepting `CancellationToken` parameters. Users should recompile to prevent `MethodNotFoundException`s.
-
-<RELEASE_NOTE_END>
 
 # 4.2.0
 - Made `GameFileMetaData` properties nullable to handle missing data in some save files, as early versions of the sdk does not write those. Users depending on those properties should recompile.

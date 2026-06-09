@@ -1,6 +1,7 @@
 ﻿using PhigrosLibraryCSharp.CloudSave.HttpModels;
 using PhigrosLibraryCSharp.CloudSave.Login;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -49,6 +50,8 @@ public class Save : IDisposable
 	};
 	#endregion
 
+	private string? _userObjectId = null;
+
 	/// <summary>
 	/// The user's session token.
 	/// </summary>
@@ -60,7 +63,7 @@ public class Save : IDisposable
 	/// <summary>
 	/// The client used for making requests to the cloud server. You can use this to make custom requests if needed.
 	/// </summary>
-	public HttpClient Client { get; private set; }
+	public HttpClient Client { get; private set; } // TODO: maybe we should use HttpClientFactory in the future, to match server side more
 
 	/// <summary>
 	/// Custom request handler that can be used to intercept requests to the cloud server. 
@@ -156,6 +159,25 @@ public class Save : IDisposable
 			sessionToken.All(char.IsLetterOrDigit);
 	}
 
+	private static string BuildQueryString(string url, ICollection<KeyValuePair<string, string>> queries)
+	{
+		if (queries.Count == 0)
+			return url;
+
+		StringBuilder sb = new(url);
+		if (url[^1] != '?')
+			sb.Append('?');
+
+		foreach (KeyValuePair<string, string> item in queries)
+		{
+			sb.Append(Uri.EscapeDataString(item.Key));
+			sb.Append('=');
+			sb.Append(Uri.EscapeDataString(item.Value));
+		}
+
+		return sb.ToString();
+	}
+
 	/// <inheritdoc/>
 	public void Dispose()
 	{
@@ -172,11 +194,28 @@ public class Save : IDisposable
 	/// <summary>
 	/// Get the raw save from cloud.
 	/// </summary>
+	/// <param name="queries">The queries to filter saves. If <see langword="null"/>, will get saves of current user. Default query looks like this:
+	/// <code>
+	/// where={"user":{"__type":"Pointer","className":"_User","objectId":"[User object id]"}}
+	/// </code>
+	/// The method will handle encoding for you.
+	/// 
+	/// Other queries can be added as needed, such as <c>skip</c> and <c>limit</c>. 
+	/// However, specifying this parameter will not use the default user filter, and you would need to add it yourself.
+	/// </param>
 	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns><see cref="SaveInfoContainer"/> containing all raw information.</returns>
-	public async Task<SaveInfoContainer> GetSaveInfoFromCloudAsync(CancellationToken ct = default)
+	public async Task<SaveInfoContainer> GetSaveInfoFromCloudAsync(ICollection<KeyValuePair<string, string>>? queries = null, CancellationToken ct = default)
 	{
-		using HttpResponseMessage response = await this.GetAsync(this.GetAddress(CloudGameSaveAddress), ct);
+		if (queries is null)
+		{
+			string userId = await this.GetUserObjectId();
+			queries = [new("where", $"{{\"user\":{{\"__type\":\"Pointer\",\"className\":\"_User\",\"objectId\":\"{userId}\"}}}}")];
+		}
+
+		string address = BuildQueryString(this.GetAddress(CloudGameSaveAddress), queries);
+
+		using HttpResponseMessage response = await this.GetAsync(address, ct);
 		string content = await response.Content.ReadAsStringAsync(ct);
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		SaveInfoContainer container = JsonSerializer.Deserialize<SaveInfoContainer>(content, SerializerSettings);
@@ -231,8 +270,26 @@ public class Save : IDisposable
 	#endregion
 
 	/// <summary>
+	/// This method will get the user's object ID. It will cache the result, so subsequent calls will be faster.
+	/// </summary>
+	/// <remarks>
+	/// <see cref="GetPlayerInfoAsync(CancellationToken)"/> will also set the user object ID cache.
+	/// </remarks>
+	/// <returns>The user's object ID.</returns>
+	public async ValueTask<string> GetUserObjectId()
+	{
+		if (this._userObjectId is not null)
+			return this._userObjectId;
+
+		// the get player info will set the _userObjectId, so we can just call it and return the result
+		return (await this.GetPlayerInfoAsync()).ObjectId;
+	}
+	/// <summary>
 	/// Get the <see cref="PlayerInfo"/> of the user.
 	/// </summary>
+	/// <remarks>
+	/// This method will set the user object ID cache, so subsequent calls to <see cref="GetUserObjectId"/> will be faster.
+	/// </remarks>
 	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns><see cref="PlayerInfo"/> of the user.</returns>
 	public async Task<PlayerInfo> GetPlayerInfoAsync(CancellationToken ct = default)
@@ -242,26 +299,31 @@ public class Save : IDisposable
 		if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to fetch: {content}", null, response.StatusCode);
 		JsonNode node = JsonNode.Parse(content).EnsureNotNull();
 
+		string objectId = node["objectId"].EnsureNotNull().GetValue<string>();
+		this._userObjectId = objectId;
+
 		return new PlayerInfo()
 		{
 			NickName = node["nickname"].EnsureNotNull().GetValue<string>(),
 			UserName = node["username"].EnsureNotNull().GetValue<string>(),
 			CreationTime = node["createdAt"].EnsureNotNull().GetValue<DateTime>(),
-			ModificationTime = node["updatedAt"].EnsureNotNull().GetValue<DateTime>()
+			ModificationTime = node["updatedAt"].EnsureNotNull().GetValue<DateTime>(),
+			ObjectId = objectId,
 		};
 	}
 	/// <summary>
 	/// Retrieves the save for the specified index.
 	/// </summary>
 	/// <param name="index">The index of the save to retrieve.</param>
+	/// <param name="queries"><inheritdoc cref="GetSaveInfoFromCloudAsync(ICollection{KeyValuePair{string, string}}?, CancellationToken)"/></param>
 	/// <param name="ct">The cancellation token to cancel the operation.</param>
 	/// <returns>A <see cref="SaveContext"/> object containing the save data.</returns>
 	/// <exception cref="MaxValueArgumentOutOfRangeException">
 	/// Thrown if the specified index is out of range.
 	/// </exception>
-	public async Task<SaveContext> GetSaveContextAsync(int index, CancellationToken ct = default)
+	public async Task<SaveContext> GetSaveContextAsync(int index, ICollection<KeyValuePair<string, string>>? queries = null, CancellationToken ct = default)
 	{
-		List<SaveInfo> rawSaves = (await this.GetSaveInfoFromCloudAsync(ct)).Results;
+		List<SaveInfo> rawSaves = (await this.GetSaveInfoFromCloudAsync(queries, ct)).Results;
 		if (index < 0 || index >= rawSaves.Count)
 			throw new MaxValueArgumentOutOfRangeException(nameof(index), index, rawSaves.Count); // raw count
 
