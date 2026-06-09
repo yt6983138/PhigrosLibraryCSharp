@@ -22,4 +22,8 @@ public class PlayerInfo
 	/// The last <see cref="PlayerInfo"/> modification time.
 	/// </summary>
 	public DateTime ModificationTime { get; set; }
+	/// <summary>
+	/// The player's object ID. Can be used to filter saves uploaded by a specific player.
+	/// </summary>
+	public string ObjectId { get; set; } = "";
 }
