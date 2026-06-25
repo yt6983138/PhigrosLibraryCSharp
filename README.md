@@ -3,6 +3,8 @@ This is a C# implementation of [PhigrosLibrary](https://github.com/7aGiven/Phigr
 allowing you to integrate Phigros login workflow and process your scores nicely.
 
 Now available in [NuGet](https://www.nuget.org/packages/PhigrosLibraryCSharp/)!
+
+> Note: For .NET 10 and above, you should consider using version 5.0.0 or above (`v5` branch, also available in same nuget), this branch holds 4.x.x versions. .NET 8 support will be dropped after reaching EOL.
 # API Usage
 AI generated wiki: [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/yt6983138/PhigrosLibraryCSharp)
 ## Local save (Reading from PlayerPrefv2.xml)
