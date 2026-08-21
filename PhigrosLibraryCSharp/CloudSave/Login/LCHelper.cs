@@ -59,21 +59,21 @@ public static class LCHelper
 	/// <returns>A <see cref="Dictionary{TKey, TValue}"/> containing the logged user information.</returns>
 	public static async Task<JsonNode> LoginWithAuthData(LCCombinedAuthData data, bool useChinaEndpoint = true, bool failOnNotExist = false, CancellationToken ct = default)
 	{
-		Dictionary<string, object> authData = new()
+		JsonObject authData = new()
 		{
-			{ "taptap", data }
+			{ "taptap", JsonSerializer.SerializeToNode(data, LoginSerializationContext.Default.LCCombinedAuthData) }
 		};
 		string path = failOnNotExist ? "users?failOnNotExist=true" : "users";
-		JsonNode response = await Request<JsonNode, Dictionary<string, object>>(
+		JsonNode response = await Request<JsonNode, JsonObject>(
 			path,
 			HttpMethod.Post,
 			useChinaEndpoint,
 			LoginSerializationContext.Default.JsonNode,
 			headers: new() { ["X-LC-Id"] = useChinaEndpoint ? ClientId : InternationalClientId },
-			data: (new Dictionary<string, object>()
+			data: (new JsonObject()
 			{
 				{ "authData", authData }
-			}, LoginSerializationContext.Default.DictionaryStringObject),
+			}, LoginSerializationContext.Default.JsonObject),
 			ct: ct
 		);
 
@@ -106,9 +106,9 @@ public static class LCHelper
 		HttpMethod method,
 		bool useChinaEndpoint,
 		JsonTypeInfo<TResponse> typeInfo,
-		Dictionary<string, object>? headers = null,
+		Dictionary<string, string>? headers = null,
 		(TRequest, JsonTypeInfo<TRequest>)? data = null,
-		Dictionary<string, object>? queryParams = null,
+		Dictionary<string, string>? queryParams = null,
 		bool withAPIVersion = true,
 		CancellationToken ct = default)
 	{
@@ -154,7 +154,7 @@ public static class LCHelper
 		}
 		throw new HttpRequestException(resultString, null, statusCode);
 	}
-	private static string BuildUrl(string path, bool useChinaEndpoint, Dictionary<string, object> queryParams, bool withAPIVersion)
+	private static string BuildUrl(string path, bool useChinaEndpoint, Dictionary<string, string> queryParams, bool withAPIVersion)
 	{
 		StringBuilder urlSB = new(Save.GetCloudServerAddress(useChinaEndpoint));
 		if (withAPIVersion)
@@ -165,20 +165,20 @@ public static class LCHelper
 		{
 			IEnumerable<string> queryPairs = queryParams
 				.Where(kv => kv.Value != null)
-				.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value.ToString()!)}");
+				.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}");
 			string queries = string.Join("&", queryPairs);
 			url = $"{url}?{queries}";
 		}
 		return url;
 	}
-	private static async Task FillHeaders(HttpRequestHeaders headers, bool useChinaEndpoint, Dictionary<string, object>? reqHeaders = null, CancellationToken ct = default)
+	private static async Task FillHeaders(HttpRequestHeaders headers, bool useChinaEndpoint, Dictionary<string, string>? reqHeaders = null, CancellationToken ct = default)
 	{
 		// 额外 headers
 		if (reqHeaders != null)
 		{
-			foreach (KeyValuePair<string, object> kv in reqHeaders)
+			foreach (KeyValuePair<string, string> kv in reqHeaders)
 			{
-				headers.Add(kv.Key, kv.Value.ToString());
+				headers.Add(kv.Key, kv.Value);
 			}
 		}
 		// 签名

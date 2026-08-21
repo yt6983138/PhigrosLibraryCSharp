@@ -12,7 +12,7 @@ namespace PhigrosLibraryCSharp.CloudSave.Login;
 [JsonSerializable(typeof(PartialTapTapQRCodeData))]
 [JsonSerializable(typeof(TapTapProfileData))]
 [JsonSerializable(typeof(TapTapTokenData))]
-[JsonSerializable(typeof(Dictionary<string, object>))]
+[JsonSerializable(typeof(JsonObject))]
 [JsonSerializable(typeof(Dictionary<string, string>))]
 [JsonSerializable(typeof(JsonNode))]
 [JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true, AllowTrailingCommas = true, IncludeFields = true)]

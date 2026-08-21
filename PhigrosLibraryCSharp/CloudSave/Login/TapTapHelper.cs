@@ -106,7 +106,7 @@ public static class TapTapHelper // TODO: Add callback login
 		string state = Guid.NewGuid().ToString("N");
 		string scope = string.Join(",", permissions ?? ["public_profile"]);
 
-		Dictionary<string, object> data = new()
+		Dictionary<string, string> data = new()
 		{
 			{ "client_id", LCHelper.GetClientId(useChinaEndpoint) },
 			{ "response_type", "code" },
@@ -141,12 +141,12 @@ public static class TapTapHelper // TODO: Add callback login
 		};
 
 		// the request method might go wrong since its not for this purpose but ill test first
-		return await Request<TapTapTokenData, Dictionary<string, string>>(
+		return await Request(
 			GetTokenUrl(useChinaEndpoint),
 			HttpMethod.Post,
 			useChinaEndpoint,
 			LoginSerializationContext.Default.TapTapTokenData,
-			data: (@params, LoginSerializationContext.Default.DictionaryStringString),
+			data: @params,
 			ct: ct);
 	}
 
@@ -161,7 +161,7 @@ public static class TapTapHelper // TODO: Add callback login
 	public static async Task<CompleteQRCodeData> RequestLoginQrCode(string[]? permissions = null, bool useChinaEndpoint = true, CancellationToken ct = default)
 	{
 		string deviceId = GenerateDeviceId();
-		Dictionary<string, object> parameters = new()
+		Dictionary<string, string> parameters = new()
 		{
 			{ "client_id", LCHelper.GetClientId(useChinaEndpoint) },
 			{ "response_type", "device_code" },
@@ -172,12 +172,12 @@ public static class TapTapHelper // TODO: Add callback login
 			// ^ https://github.com/taptap/TapSDK-UE4/blob/f66d15048ebff4628f1614ca8df8a7a07dabf6cb/TapCommon/Source/TapCommon/Tools/TUDeviceInfo.h#L30 
 		};
 		return new(
-			await Request<PartialTapTapQRCodeData, Dictionary<string, object>>(
+			await Request(
 				GetCodeUrl(useChinaEndpoint),
 				HttpMethod.Post,
 				useChinaEndpoint,
 				LoginSerializationContext.Default.PartialTapTapQRCodeData,
-				data: (parameters, LoginSerializationContext.Default.DictionaryStringObject),
+				data: parameters,
 				ct: ct),
 			deviceId);
 	}
@@ -203,12 +203,12 @@ public static class TapTapHelper // TODO: Add callback login
 		};
 		try
 		{
-			TapTapTokenData token = await Request<TapTapTokenData, Dictionary<string, string>>(
+			TapTapTokenData token = await Request(
 				GetTokenUrl(useChinaEndpoint),
 				HttpMethod.Post,
 				useChinaEndpoint,
 				LoginSerializationContext.Default.TapTapTokenData,
-				data: (data, LoginSerializationContext.Default.DictionaryStringString),
+				data: data,
 				ct: ct);
 			return token;
 		}
@@ -251,12 +251,12 @@ public static class TapTapHelper // TODO: Add callback login
 			"443",
 			ts
 		);
-		Dictionary<string, object> headers = new()
+		Dictionary<string, string> headers = new()
 		{
 			{ "Authorization", sign }
 		};
 		// this call actually doesn't need any request body, the Dictionary<string, object> is just for generic type inference
-		TapTapProfileData response = await Request<TapTapProfileData, Dictionary<string, object>>(
+		TapTapProfileData response = await Request(
 			url,
 			HttpMethod.Get,
 			useChinaEndpoint,
@@ -292,13 +292,13 @@ public static class TapTapHelper // TODO: Add callback login
 
 		return authorizationHeader.ToString();
 	}
-	internal static async Task<TResponse> Request<TResponse, TRequest>(string url, // why do we have 2 same helper doing this bruh
+	internal static async Task<TResponse> Request<TResponse>(string url, // why do we have 2 same helper doing this bruh
 			HttpMethod method,
 			bool useChinaEndpoint,
 			JsonTypeInfo<TResponse> typeInfo,
-			Dictionary<string, object>? headers = null,
-			(TRequest, JsonTypeInfo<TRequest>)? data = null,
-			Dictionary<string, object>? queryParams = null,
+			Dictionary<string, string>? headers = null,
+			Dictionary<string, string>? data = null,
+			Dictionary<string, string>? queryParams = null,
 			CancellationToken ct = default)
 	{
 		HttpClient client = GetClient(useChinaEndpoint);
@@ -311,13 +311,9 @@ public static class TapTapHelper // TODO: Add callback login
 		// request.SetNoCors();
 		await FillHeaders(request.Headers, headers, ct);
 
-		string? content = null;
 		if (data != null)
 		{
-			content = JsonSerializer.Serialize(data.Value.Item1, data.Value.Item2);
-			Dictionary<string, string> formData = JsonSerializer.Deserialize(content, LoginSerializationContext.Default.DictionaryStringObject)!
-				.ToDictionary(item => item.Key, item => item.Value.ToString()!);
-			FormUrlEncodedContent requestContent = new(formData);
+			FormUrlEncodedContent requestContent = new(data);
 			request.Content = requestContent;
 		}
 		HttpResponseMessage response;
@@ -352,11 +348,11 @@ public static class TapTapHelper // TODO: Add callback login
 		throw new RequestException(resultString, statusCode, type);
 	}
 
-	private static string BuildUrl(string url, Dictionary<string, object>? queryParams)
+	private static string BuildUrl(string url, Dictionary<string, string>? queryParams)
 	{
 		if (queryParams != null)
 		{
-			IEnumerable<string> queryPairs = queryParams.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value.ToString())}");
+			IEnumerable<string> queryPairs = queryParams.Select(kv => $"{HttpUtility.UrlEncode(kv.Key)}={HttpUtility.UrlEncode(kv.Value)}");
 			string queries = string.Join("&", queryPairs);
 
 			if (string.IsNullOrEmpty(url))
@@ -367,14 +363,14 @@ public static class TapTapHelper // TODO: Add callback login
 		return url;
 	}
 
-	private static async Task FillHeaders(HttpRequestHeaders headers, Dictionary<string, object>? reqHeaders = null, CancellationToken ct = default)
+	private static async Task FillHeaders(HttpRequestHeaders headers, Dictionary<string, string>? reqHeaders = null, CancellationToken ct = default)
 	{
 		// 额外 headers
 		if (reqHeaders != null)
 		{
-			foreach (KeyValuePair<string, object> kv in reqHeaders)
+			foreach (KeyValuePair<string, string> kv in reqHeaders)
 			{
-				headers.Add(kv.Key, kv.Value.ToString());
+				headers.Add(kv.Key, kv.Value);
 			}
 		}
 
