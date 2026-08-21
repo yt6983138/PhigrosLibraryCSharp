@@ -1,3 +1,10 @@
+# 5.1.0
+- Improve AOT support. All serializations should have been fixed to work with AOT compilation. As side effect, some internal types are now public, like `PartialTapTapQRCodeData`.
+- Make `PlayerInfo` properties nullable to handle missing nickname.
+- Make `GameFile` property in `SaveInfo` nullable to handle corrupt/missing game file data. Trying to fetch context with a `SaveInfo` that has null `GameFile` will throw an exception.
+
+<RELEASE_NOTE_END>
+
 # 5.0.1
 - Add cancellation token for `FromZipAsync` `byte[]` overload.
 - Reduce allocation and dispose some types properly in `TapTapHelper`.
@@ -5,8 +12,6 @@
 - Fix `BuildQueryString` not appending ampersand for custom `GetSaveInfoFromCloudAsync` filters.
 - Improve exception messages for internal null checks, now they throw `DebugArgumentNullException` with an option to include additional debug data.
     - Note: Only print the `DebugArgumentNullException` with additional message to the backend or log, never to user. As they may contain sensitive information.
-
-<RELEASE_NOTE_END>
 
 # 5.0.0
 - Bump to .NET 10.

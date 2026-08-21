@@ -10,7 +10,7 @@
 
 		<IsAotCompatible>true</IsAotCompatible>
 
-		<AssemblyVersion>5.0.1</AssemblyVersion>
+		<AssemblyVersion>5.1.0</AssemblyVersion>
 		
 		<PackageId>$(AssemblyName)</PackageId>
 		<Version>$(AssemblyVersion)</Version>
