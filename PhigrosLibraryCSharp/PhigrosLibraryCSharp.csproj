@@ -8,6 +8,8 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>preview</LangVersion>
 
+		<IsAotCompatible>true</IsAotCompatible>
+
 		<AssemblyVersion>5.0.1</AssemblyVersion>
 		
 		<PackageId>$(AssemblyName)</PackageId>
@@ -24,6 +26,7 @@
 
 		<BaseOutputPath>..\output\bin</BaseOutputPath>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Configurations>Debug;Release;AOTTesting</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>

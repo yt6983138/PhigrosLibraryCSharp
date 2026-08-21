@@ -36,7 +36,7 @@ public struct RawScore
 	/// <returns>A constructed <see cref="RawScore"/> from json string.</returns>
 	public static RawScore FromJson(string json)
 	{
-		return JsonSerializer.Deserialize<RawScore>(json);
+		return JsonSerializer.Deserialize(json, LocalSaveSerializationContext.Default.RawScore);
 	}
 	/// <summary>
 	/// Converts to a <see cref="SongScore"/>, for the ease of use.

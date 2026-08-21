@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 
 namespace PhigrosLibraryCSharp.CloudSave.Login;
 /// <summary>
@@ -63,14 +64,16 @@ public static class LCHelper
 			{ "taptap", data }
 		};
 		string path = failOnNotExist ? "users?failOnNotExist=true" : "users";
-		JsonNode response = await Request<JsonNode>(
+		JsonNode response = await Request<JsonNode, Dictionary<string, object>>(
 			path,
 			HttpMethod.Post,
 			useChinaEndpoint,
+			LoginSerializationContext.Default.JsonNode,
 			headers: new() { ["X-LC-Id"] = useChinaEndpoint ? ClientId : InternationalClientId },
-			data: new Dictionary<string, object> {
+			data: (new Dictionary<string, object>()
+			{
 				{ "authData", authData }
-			},
+			}, LoginSerializationContext.Default.DictionaryStringObject),
 			ct: ct
 		);
 
@@ -98,12 +101,13 @@ public static class LCHelper
 		return authData["sessionToken"].EnsureNotNull(authDataDebugInfo).GetValue<string>();
 	}
 
-	internal static async Task<T> Request<T>(
+	internal static async Task<TResponse> Request<TResponse, TRequest>(
 		string path,
 		HttpMethod method,
 		bool useChinaEndpoint,
+		JsonTypeInfo<TResponse> typeInfo,
 		Dictionary<string, object>? headers = null,
-		object? data = null,
+		(TRequest, JsonTypeInfo<TRequest>)? data = null,
 		Dictionary<string, object>? queryParams = null,
 		bool withAPIVersion = true,
 		CancellationToken ct = default)
@@ -121,7 +125,7 @@ public static class LCHelper
 		string? content = null;
 		if (data != null)
 		{
-			content = JsonSerializer.Serialize(data, Save.SerializerSettings);
+			content = JsonSerializer.Serialize(data.Value.Item1, data.Value.Item2);
 			StringContent requestContent = new(content);
 			requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 			request.Content = requestContent;
@@ -145,7 +149,7 @@ public static class LCHelper
 
 		if (response.IsSuccessStatusCode)
 		{
-			T ret = JsonSerializer.Deserialize<T>(resultString, Save.SerializerSettings).EnsureNotNull(resultString);
+			TResponse ret = JsonSerializer.Deserialize(resultString, typeInfo).EnsureNotNull(resultString);
 			return ret;
 		}
 		throw new HttpRequestException(resultString, null, statusCode);

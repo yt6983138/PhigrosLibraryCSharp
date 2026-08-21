@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 using System.Web;
 using static PhigrosLibraryCSharp.CloudSave.Login.RequestException;
 
@@ -140,7 +141,13 @@ public static class TapTapHelper // TODO: Add callback login
 		};
 
 		// the request method might go wrong since its not for this purpose but ill test first
-		return await Request<TapTapTokenData>(GetTokenUrl(useChinaEndpoint), HttpMethod.Post, useChinaEndpoint, data: @params, ct: ct);
+		return await Request<TapTapTokenData, Dictionary<string, string>>(
+			GetTokenUrl(useChinaEndpoint),
+			HttpMethod.Post,
+			useChinaEndpoint,
+			LoginSerializationContext.Default.TapTapTokenData,
+			data: (@params, LoginSerializationContext.Default.DictionaryStringString),
+			ct: ct);
 	}
 
 	/// <summary>
@@ -164,7 +171,15 @@ public static class TapTapHelper // TODO: Add callback login
 			{ "info", "{\"device_id\":\"" + deviceId + "\"}" } 
 			// ^ https://github.com/taptap/TapSDK-UE4/blob/f66d15048ebff4628f1614ca8df8a7a07dabf6cb/TapCommon/Source/TapCommon/Tools/TUDeviceInfo.h#L30 
 		};
-		return new(await Request<PartialTapTapQRCodeData>(GetCodeUrl(useChinaEndpoint), HttpMethod.Post, useChinaEndpoint, data: parameters, ct: ct), deviceId);
+		return new(
+			await Request<PartialTapTapQRCodeData, Dictionary<string, object>>(
+				GetCodeUrl(useChinaEndpoint),
+				HttpMethod.Post,
+				useChinaEndpoint,
+				LoginSerializationContext.Default.PartialTapTapQRCodeData,
+				data: (parameters, LoginSerializationContext.Default.DictionaryStringObject),
+				ct: ct),
+			deviceId);
 	}
 	/// <summary>
 	/// Check if the user has logged in through QRCode.
@@ -188,7 +203,13 @@ public static class TapTapHelper // TODO: Add callback login
 		};
 		try
 		{
-			TapTapTokenData token = await Request<TapTapTokenData>(GetTokenUrl(useChinaEndpoint), HttpMethod.Post, useChinaEndpoint, data: data, ct: ct);
+			TapTapTokenData token = await Request<TapTapTokenData, Dictionary<string, string>>(
+				GetTokenUrl(useChinaEndpoint),
+				HttpMethod.Post,
+				useChinaEndpoint,
+				LoginSerializationContext.Default.TapTapTokenData,
+				data: (data, LoginSerializationContext.Default.DictionaryStringString),
+				ct: ct);
 			return token;
 		}
 		catch (RequestException ex)
@@ -234,7 +255,15 @@ public static class TapTapHelper // TODO: Add callback login
 		{
 			{ "Authorization", sign }
 		};
-		TapTapProfileData response = await Request<TapTapProfileData>(url, HttpMethod.Get, useChinaEndpoint, headers: headers, ct: ct);
+		// this call actually doesn't need any request body, the Dictionary<string, object> is just for generic type inference
+		TapTapProfileData response = await Request<TapTapProfileData, Dictionary<string, object>>(
+			url,
+			HttpMethod.Get,
+			useChinaEndpoint,
+			LoginSerializationContext.Default.TapTapProfileData,
+			headers: headers,
+			ct: ct);
+
 		return response;
 	}
 	internal static string GetAuthorizationHeader(string kid,
@@ -263,11 +292,12 @@ public static class TapTapHelper // TODO: Add callback login
 
 		return authorizationHeader.ToString();
 	}
-	internal static async Task<T> Request<T>(string url, // why do we have 2 same helper doing this bruh
+	internal static async Task<TResponse> Request<TResponse, TRequest>(string url, // why do we have 2 same helper doing this bruh
 			HttpMethod method,
 			bool useChinaEndpoint,
+			JsonTypeInfo<TResponse> typeInfo,
 			Dictionary<string, object>? headers = null,
-			object? data = null,
+			(TRequest, JsonTypeInfo<TRequest>)? data = null,
 			Dictionary<string, object>? queryParams = null,
 			CancellationToken ct = default)
 	{
@@ -284,8 +314,8 @@ public static class TapTapHelper // TODO: Add callback login
 		string? content = null;
 		if (data != null)
 		{
-			content = JsonSerializer.Serialize(data, Save.SerializerSettings);
-			Dictionary<string, string> formData = JsonSerializer.Deserialize<Dictionary<string, object>>(content, Save.SerializerSettings)!
+			content = JsonSerializer.Serialize(data.Value.Item1, data.Value.Item2);
+			Dictionary<string, string> formData = JsonSerializer.Deserialize(content, LoginSerializationContext.Default.DictionaryStringObject)!
 				.ToDictionary(item => item.Key, item => item.Value.ToString()!);
 			FormUrlEncodedContent requestContent = new(formData);
 			request.Content = requestContent;
@@ -307,7 +337,7 @@ public static class TapTapHelper // TODO: Add callback login
 
 		if (response.IsSuccessStatusCode)
 		{
-			T ret = JsonSerializer.Deserialize<T>(resultString).EnsureNotNull(resultString);
+			TResponse ret = JsonSerializer.Deserialize(resultString, typeInfo).EnsureNotNull(resultString);
 			return ret;
 		}
 		JsonNode parsed = JsonNode.Parse(resultString).EnsureNotNull(resultString);

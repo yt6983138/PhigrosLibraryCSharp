@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Serialization.Metadata;
 
 namespace PhigrosLibraryCSharp;
 internal static class UtilityExtension
@@ -105,6 +106,14 @@ internal static class UtilityExtension
 			Span<byte> buffer = stackalloc byte[sizeof(TEnum)];
 			self.Read(buffer);
 			return MemoryMarshal.Read<TEnum>(buffer);
+		}
+	}
+
+	extension(IJsonTypeInfoResolver self)
+	{
+		internal IJsonTypeInfoResolver CombineWith(params IJsonTypeInfoResolver?[] others)
+		{
+			return JsonTypeInfoResolver.Combine([self, .. others]);
 		}
 	}
 }
