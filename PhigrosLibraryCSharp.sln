@@ -20,18 +20,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhigrosLibraryCSharp.Exampl
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		AOTTesting|Any CPU = AOTTesting|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.AOTTesting|Any CPU.ActiveCfg = AOTTesting|Any CPU
+		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.AOTTesting|Any CPU.Build.0 = AOTTesting|Any CPU
 		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{252CF720-7CBC-4178-9C77-14E1EA7C91D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.AOTTesting|Any CPU.ActiveCfg = AOTTesting|Any CPU
+		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.AOTTesting|Any CPU.Build.0 = AOTTesting|Any CPU
 		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3A7CFDB-207B-40EC-9581-D4E48773DA8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.AOTTesting|Any CPU.ActiveCfg = Release|Any CPU
+		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.AOTTesting|Any CPU.Build.0 = Release|Any CPU
 		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E0E8F2-6C2A-46D4-9304-D4DB04FB1538}.Release|Any CPU.ActiveCfg = Release|Any CPU

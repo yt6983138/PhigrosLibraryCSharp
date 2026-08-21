@@ -33,6 +33,17 @@ public class SaveTest
 		using Stream stream = File.OpenWrite($"TestData/{name}.bin");
 		stream.Write(data);
 	}
+
+	[TestMethod]
+	public void TestCheckIfIsAOT()
+	{
+#if AOTTesting
+		Console.WriteLine("In AOT");
+		Assert.IsFalse(RuntimeFeature.IsDynamicCodeSupported, "Not in AOT!");
+#else
+		Console.WriteLine("In JIT");
+#endif
+	}
 	[TestMethod]
 	public async Task TestSaveToZip()
 	{
