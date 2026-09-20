@@ -239,8 +239,7 @@ public static class TapTapHelper
 		int ts = timestamp;
 		if (ts == 0)
 		{
-			TimeSpan dt = DateTime.UtcNow - new DateTime(1970, 1, 1);
-			ts = (int)dt.TotalSeconds;
+			ts = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 		}
 		string sign = "MAC " + GetAuthorizationHeader(token.Kid,
 			token.MacKey,
