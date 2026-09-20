@@ -5,14 +5,15 @@ using System.Text;
 using System.Text.Json.Serialization.Metadata;
 
 namespace PhigrosLibraryCSharp;
+
 internal static class UtilityExtension
 {
 	[return: NotNull]
 	internal static T EnsureNotNull<T>(this T obj, string? additionalExceptionInfo = null, [CallerArgumentExpression(nameof(obj))] string? paramName = null)
 	{
-		if (obj == null)
+		if (EqualityComparer<T>.Default.Equals(obj, default))
 			throw new DebugArgumentNullException(paramName, additionalExceptionInfo);
-		return obj;
+		return obj!;
 	}
 	internal static T[] QuickCopy<T>(T[] array)
 	{
