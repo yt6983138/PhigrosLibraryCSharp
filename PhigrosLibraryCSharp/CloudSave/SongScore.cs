@@ -101,7 +101,7 @@ public class SongScore : IEquatable<SongScore>, IEqualityOperators<SongScore, So
 	}
 
 	/// <inheritdoc/>
-	public bool Equals(SongScore? other)
+	public virtual bool Equals(SongScore? other)
 	{
 		if (other is null) return false;
 		return this.Score == other.Score

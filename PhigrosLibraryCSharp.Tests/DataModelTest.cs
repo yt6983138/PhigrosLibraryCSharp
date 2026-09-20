@@ -89,6 +89,12 @@ public class DataModelTest
 		Assert.IsGreaterThan(0, first.CompareTo(null));
 
 		Assert.AreEqual(0, first.CompareTo(identicalFirst));
+		Assert.IsTrue(first >= identicalFirst);
+		Assert.IsTrue(first <= identicalFirst);
+		Assert.IsFalse(first >= null);
+		Assert.IsFalse(first <= null);
+		Assert.IsFalse(first > null);
+		Assert.IsFalse(first < null);
 
 		Money second = new(1, 2, 3, 4, 5);
 		Assert.IsLessThan(0, first.CompareTo(second));
@@ -111,18 +117,28 @@ public class DataModelTest
 
 		Assert.IsLessThan(0, smallP.CompareTo(largeP));
 		Assert.IsGreaterThan(0, largeP.CompareTo(smallP));
+		Assert.IsTrue(smallP < largeP);
+		Assert.IsTrue(largeP > smallP);
 
 		Assert.IsLessThan(0, smallT.CompareTo(largeT));
 		Assert.IsGreaterThan(0, largeT.CompareTo(smallT));
+		Assert.IsTrue(smallT < largeT);
+		Assert.IsTrue(largeT > smallT);
 
 		Assert.IsLessThan(0, smallG.CompareTo(largeG));
 		Assert.IsGreaterThan(0, largeG.CompareTo(smallG));
+		Assert.IsTrue(smallG < largeG);
+		Assert.IsTrue(largeG > smallG);
 
 		Assert.IsLessThan(0, smallM.CompareTo(largeM));
 		Assert.IsGreaterThan(0, largeM.CompareTo(smallM));
+		Assert.IsTrue(smallM < largeM);
+		Assert.IsTrue(largeM > smallM);
 
 		Assert.IsLessThan(0, smallK.CompareTo(largeK));
 		Assert.IsGreaterThan(0, largeK.CompareTo(smallK));
+		Assert.IsTrue(smallK < largeK);
+		Assert.IsTrue(largeK > smallK);
 
 		// test compare on bigger unit first
 		Assert.IsLessThan(0, largeT.CompareTo(smallP));

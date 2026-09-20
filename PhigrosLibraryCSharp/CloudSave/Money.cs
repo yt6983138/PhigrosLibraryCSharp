@@ -93,7 +93,7 @@ public class Money : IPhigrosCustomSerialization<Money>, IEquatable<Money>, IEqu
 	}
 
 	/// <inheritdoc/>
-	public bool Equals(Money? other)
+	public virtual bool Equals(Money? other)
 	{
 		if (other is null) return false;
 
@@ -127,5 +127,33 @@ public class Money : IPhigrosCustomSerialization<Money>, IEquatable<Money>, IEqu
 	public static bool operator !=(Money? left, Money? right)
 	{
 		return !(left == right);
+	}
+	/// <inheritdoc/>
+	public static bool operator <(Money? left, Money? right)
+	{
+		if (left is null || right is null) return false;
+		return left.CompareTo(right) < 0;
+	}
+	/// <inheritdoc/>
+	public static bool operator >(Money? left, Money? right)
+	{
+		if (left is null || right is null) return false;
+		return left.CompareTo(right) > 0;
+	}
+	/// <inheritdoc/>
+	public static bool operator <=(Money? left, Money? right)
+	{
+		if (left is null) return right is null;
+		if (right is null) return false;
+
+		return left.CompareTo(right) <= 0;
+	}
+	/// <inheritdoc/>
+	public static bool operator >=(Money? left, Money? right)
+	{
+		if (left is null) return right is null;
+		if (right is null) return false;
+
+		return left.CompareTo(right) >= 0;
 	}
 }
