@@ -37,7 +37,7 @@ public class Save : IDisposable
 	internal static readonly byte[] Iv = Convert.FromBase64String(CloudAESIV);
 	internal static readonly byte[] Key = Convert.FromBase64String(CloudAESKey);
 
-	internal static string GetAddress(string address, bool useInternational = false)
+	internal static string GetAddress(string address, bool useInternational)
 		=> (useInternational ? InternationalCloudServerAddress : CloudServerAddress) + address;
 	internal string GetAddress(string address)
 		=> GetAddress(address, this.IsInternational);
