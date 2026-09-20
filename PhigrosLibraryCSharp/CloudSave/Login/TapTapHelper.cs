@@ -13,7 +13,7 @@ namespace PhigrosLibraryCSharp.CloudSave.Login;
 /// <summary>
 /// A helper to assist you login at TapTap.
 /// </summary>
-public static class TapTapHelper // TODO: Add callback login
+public static class TapTapHelper
 {
 	#region Constants
 	internal const string TapSDKVersion = "2.1";

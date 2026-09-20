@@ -119,7 +119,7 @@ public static class LCHelper
 			RequestUri = new Uri(url),
 			Method = method,
 		};
-		// request.SetNoCors();
+
 		await FillHeaders(request.Headers, useChinaEndpoint, headers, ct);
 
 		string? content = null;
@@ -130,7 +130,7 @@ public static class LCHelper
 			requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 			request.Content = requestContent;
 		}
-		// LCHttpUtils.PrintRequest(client, request, content);
+
 		HttpResponseMessage response;
 		if (TapTapHelper.Proxy is not null)
 		{
@@ -145,7 +145,6 @@ public static class LCHelper
 		string resultString = await response.Content.ReadAsStringAsync(ct);
 		HttpStatusCode statusCode = response.StatusCode;
 		response.Dispose();
-		// LCHttpUtils.PrintResponse(response, resultString);
 
 		if (response.IsSuccessStatusCode)
 		{

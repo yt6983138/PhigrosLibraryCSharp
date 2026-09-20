@@ -109,7 +109,6 @@ public static class LocalSave
 		}
 		byte[] computed = decodedCipherText[0..^decodedCipherText[^1]];
 		return Encoding.UTF8.GetString(computed);
-		// return Encoding.ASCII.GetString(computed);
 	}
 	private static void SubBytes(ref byte[] state)
 	{
