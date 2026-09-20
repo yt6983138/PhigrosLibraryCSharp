@@ -59,7 +59,7 @@ public class Save : IDisposable
 		using (CryptoStream cs = new(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))
 		{
 			await cs.WriteAsync(data, ct);
-			cs.FlushFinalBlock();
+			await cs.FlushFinalBlockAsync(ct);
 		}
 		return ms.ToArray();
 	}
@@ -73,7 +73,7 @@ public class Save : IDisposable
 		using (CryptoStream cs = new(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
 		{
 			await cs.WriteAsync(data, ct);
-			cs.FlushFinalBlock();
+			await cs.FlushFinalBlockAsync(ct);
 		}
 		return ms.ToArray();
 	}
