@@ -357,6 +357,6 @@ public class Save : IDisposable
 		SimplifiedSaveInfo simplifiedSave = rawSave.Simplify();
 		byte[] rawZip = await this.GetSaveZipAsync(simplifiedSave, ct);
 
-		return await SaveContext.FromZipAsync(rawZip, rawSave, this.Decrypt);
+		return await SaveContext.FromZipAsync(rawZip, rawSave, this.Decrypt, ct);
 	}
 }
