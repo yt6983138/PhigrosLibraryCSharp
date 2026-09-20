@@ -232,7 +232,7 @@ public static class TapTapHelper
 	/// <returns>The TapTap user profile.</returns>
 	public static async Task<TapTapProfileData> GetProfile(TapTapTokenData.TokenData token, int timestamp = 0, bool useChinaEndpoint = true, CancellationToken ct = default)
 	{
-		ArgumentNullException.ThrowIfNull(token, nameof(token));
+		token.EnsureNotNull();
 		bool hasPublicProfile = token.Scope.Contains("public_profile");
 		string url = GetProfileUrl(useChinaEndpoint, hasPublicProfile) + LCHelper.GetClientId(useChinaEndpoint);
 		Uri uri = new(url);
