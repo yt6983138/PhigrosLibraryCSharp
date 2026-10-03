@@ -1,9 +1,15 @@
+# 5.2.0
+- Fix `GameRecord` serialization not ordering the scores correctly.
+- `Money.Equals` is now overridable.
+- Remade entire test suite (no visible changes in the public API for this).
+- Added support for 4.0.0 save files (`gameProgress` v5).
+
+<RELEASE_NOTE_END>
+
 # 5.1.0
 - Improve AOT support. All serializations should have been fixed to work with AOT compilation. As side effect, some internal types are now public, like `PartialTapTapQRCodeData`.
 - Make `PlayerInfo` properties nullable to handle missing nickname.
 - Make `GameFile` property in `SaveInfo` nullable to handle corrupt/missing game file data. Trying to fetch context with a `SaveInfo` that has null `GameFile` will throw an exception.
-
-<RELEASE_NOTE_END>
 
 # 5.0.1
 - Add cancellation token for `FromZipAsync` `byte[]` overload.

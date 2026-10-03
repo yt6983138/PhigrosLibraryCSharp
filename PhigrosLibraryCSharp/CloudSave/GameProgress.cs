@@ -108,7 +108,12 @@ public class GameProgress : IPhigrosCustomSerialization<GameProgress>
 					reader.ReadEnum<Chapter8UnlockFlag>(),
 					reader.ReadEnum<DifficultyUnlockFlag>(),
 					!reader.HasMore ? null : new(
-						reader.ReadEnum<TakumiUnlockFlag>()))));
+						reader.ReadEnum<TakumiUnlockFlag>(),
+						!reader.HasMore ? null : new(
+							reader.ReadEnum<Chapter9UnlockFlag>(),
+							reader.ReadEnum<Chapter9SongUnlockFlag>(),
+							reader.ReadByte(),
+							reader.ReadString())))));
 	}
 	/// <inheritdoc/>
 	public void Serialize(BinaryWriter writer, out byte objectVersion)
@@ -125,15 +130,26 @@ public class GameProgress : IPhigrosCustomSerialization<GameProgress>
 		writer.WriteEnum(this.UnlockFlagOfRrharil);
 		writer.WriteEnum(this.FlagOfSongRecordKey);
 
-		if (this.Node2 is null) return;
-		writer.WriteEnum(this.Node2.RandomVersionUnlocked);
+		GameProgressNodeVersion2? node2 = this.Node2;
+		GameProgressNodeVersion3? node3 = node2?.Node3;
+		GameProgressNodeVersion4? node4 = node3?.Node4;
+		GameProgressNodeVersion5? node5 = node4?.Node5;
 
-		if (this.Node2.Node3 is null) return;
-		writer.WriteEnum(this.Node2.Node3.Chapter8UnlockFlag);
-		writer.WriteEnum(this.Node2.Node3.Chapter8SongUnlockFlag);
+		if (node2 is null) return;
+		writer.WriteEnum(node2.RandomVersionUnlocked);
 
-		if (this.Node2.Node3.Node4 is null) return;
-		writer.WriteEnum(this.Node2.Node3.Node4.FlagOfSongRecordKeyTakumi);
+		if (node3 is null) return;
+		writer.WriteEnum(node3.Chapter8UnlockFlag);
+		writer.WriteEnum(node3.Chapter8SongUnlockFlag);
+
+		if (node4 is null) return;
+		writer.WriteEnum(node4.FlagOfSongRecordKeyTakumi);
+
+		if (node5 is null) return;
+		writer.WriteEnum(node5.Chapter9UnlockFlag);
+		writer.WriteEnum(node5.Chapter9SongUnlockFlag);
+		writer.Write((byte)((node5.Chapter9SecretChallengeSelectedLifeTier << 4) | (node5.Chapter9SecretChallengeLifeTier & 0x0F)));
+		writer.Write(node5.Chapter9SecretPassword);
 	}
 }
 
@@ -196,11 +212,55 @@ public class GameProgressNodeVersion4
 	/// <summary>
 	/// Initializes a new instance of the <see cref="GameProgressNodeVersion4"/> class.
 	/// </summary>
-	public GameProgressNodeVersion4(TakumiUnlockFlag flagOfSongRecordKeyTakumi)
+	public GameProgressNodeVersion4(TakumiUnlockFlag flagOfSongRecordKeyTakumi, GameProgressNodeVersion5? node5)
 	{
 		this.FlagOfSongRecordKeyTakumi = flagOfSongRecordKeyTakumi;
+		this.Node5 = node5;
 	}
 
 	/// <summary>Unlocked Takumi songs.</summary>
 	public TakumiUnlockFlag FlagOfSongRecordKeyTakumi { get; set; }
+
+	/// <summary>Next node of GameProgress.</summary>
+	public GameProgressNodeVersion5? Node5 { get; set; }
+}
+
+/// <summary>
+/// Version 5 node for GameProgress.
+/// </summary>
+public class GameProgressNodeVersion5
+{
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="GameProgressNodeVersion5"/> class.
+	/// </summary>
+	public GameProgressNodeVersion5(Chapter9UnlockFlag chapter9UnlockFlag, Chapter9SongUnlockFlag chapter9SongUnlockFlag, byte packedLifeTier, string chapter9SecretPassword)
+	{
+		this.Chapter9UnlockFlag = chapter9UnlockFlag;
+		this.Chapter9SongUnlockFlag = chapter9SongUnlockFlag;
+		this.Chapter9SecretChallengeLifeTier = (byte)(packedLifeTier & 0x0F);
+		this.Chapter9SecretChallengeSelectedLifeTier = (byte)((packedLifeTier >> 4) & 0x0F);
+		this.Chapter9SecretPassword = chapter9SecretPassword;
+	}
+
+	/// <summary>
+	/// Game progress in chapter 9.
+	/// </summary>
+	public Chapter9UnlockFlag Chapter9UnlockFlag { get; set; }
+	/// <summary>
+	/// Unlocked songs in chapter 9.
+	/// </summary>
+	public Chapter9SongUnlockFlag Chapter9SongUnlockFlag { get; set; }
+	/// <summary>
+	/// Local key: <c>C9SecretChallengeLifeTier</c>
+	/// </summary>
+	public byte Chapter9SecretChallengeLifeTier { get; set; }
+	/// <summary>
+	/// Local key: <c>C9SecretChallengeSelectedLifeTier</c>
+	/// </summary>
+	public byte Chapter9SecretChallengeSelectedLifeTier { get; set; }
+	/// <summary>
+	/// Secret password for chapter 9 last stage.
+	/// </summary>
+	public string Chapter9SecretPassword { get; set; }
 }

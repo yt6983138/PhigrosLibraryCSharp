@@ -141,7 +141,7 @@ public class SaveContextTest
 	[TestMethod]
 	public async Task TestGameProgressSerialize()
 	{
-		byte[] expected = [0x06, 0x03, 0x33, 0x2e, 0x30, 0x2a, 0x43, 0x01, 0x64, 0x32, 0x0a, 0x01, 0x00, 0x03, 0x04, 0x08, 0x01, 0x11, 0x02, 0x06, 0x04];
+		byte[] expected = [0x06, 0x03, 0x33, 0x2e, 0x30, 0x2a, 0x43, 0x01, 0x64, 0x32, 0x0a, 0x01, 0x00, 0x03, 0x04, 0x08, 0x01, 0x11, 0x02, 0x06, 0x04, 0x01, 0x03, 0x94, 0x11, 0x74, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x61, 0x6e, 0x20, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74];
 		GameProgress model = new(
 			4,
 			false,
@@ -156,7 +156,14 @@ public class SaveContextTest
 			DifficultyUnlockFlag.IN,
 			DifficultyUnlockFlag.AT,
 			SongRecordFlag.YATMINSGrade,
-			new(RandomVersionFlag.R | RandomVersionFlag.O, new(Chapter8UnlockFlag.UnlockSecondPhase, DifficultyUnlockFlag.IN | DifficultyUnlockFlag.HD, new(TakumiUnlockFlag.ATruthSeekerINSGrade))));
+			new(RandomVersionFlag.R | RandomVersionFlag.O,
+				new(Chapter8UnlockFlag.UnlockSecondPhase,
+					DifficultyUnlockFlag.IN | DifficultyUnlockFlag.HD,
+					new(TakumiUnlockFlag.ATruthSeekerINSGrade,
+						new(Chapter9UnlockFlag.UnlockBegin,
+						Chapter9SongUnlockFlag.ImplexroughUnlocked | Chapter9SongUnlockFlag.AboutTheUniverseUnlocked,
+						0b10010100,
+						"this is an secret")))));
 		SaveContext context = await this.PrepareSaveContext();
 		context.SaveGameProgress(model);
 		Assert.AreSequenceEqual(expected, context.DecryptedGameProgress.Data);
@@ -165,7 +172,7 @@ public class SaveContextTest
 	[TestMethod]
 	public async Task TestGameProgressDeserialize()
 	{
-		byte[] data = [0x06, 0x03, 0x33, 0x2e, 0x30, 0x2a, 0x43, 0x01, 0x64, 0x32, 0x0a, 0x01, 0x00, 0x03, 0x04, 0x08, 0x01, 0x11, 0x02, 0x06, 0x04];
+		byte[] data = [0x06, 0x03, 0x33, 0x2e, 0x30, 0x2a, 0x43, 0x01, 0x64, 0x32, 0x0a, 0x01, 0x00, 0x03, 0x04, 0x08, 0x01, 0x11, 0x02, 0x06, 0x04, 0x01, 0x03, 0x94, 0x11, 0x74, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x61, 0x6e, 0x20, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74];
 		GameProgress expected = new(
 			4,
 			false,
@@ -180,7 +187,14 @@ public class SaveContextTest
 			DifficultyUnlockFlag.IN,
 			DifficultyUnlockFlag.AT,
 			SongRecordFlag.YATMINSGrade,
-			new(RandomVersionFlag.R | RandomVersionFlag.O, new(Chapter8UnlockFlag.UnlockSecondPhase, DifficultyUnlockFlag.IN | DifficultyUnlockFlag.HD, new(TakumiUnlockFlag.ATruthSeekerINSGrade))));
+			new(RandomVersionFlag.R | RandomVersionFlag.O,
+				new(Chapter8UnlockFlag.UnlockSecondPhase,
+					DifficultyUnlockFlag.IN | DifficultyUnlockFlag.HD,
+					new(TakumiUnlockFlag.ATruthSeekerINSGrade,
+						new(Chapter9UnlockFlag.UnlockBegin,
+						Chapter9SongUnlockFlag.ImplexroughUnlocked | Chapter9SongUnlockFlag.AboutTheUniverseUnlocked,
+						0b10010100,
+						"this is an secret")))));
 		SaveContext context = await this.PrepareSaveContext();
 		context.DecryptedGameProgress = new(4, data);
 		Assert.AreEquivalent(expected, context.ReadGameProgress());

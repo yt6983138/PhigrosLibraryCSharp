@@ -142,3 +142,62 @@ public enum TakumiUnlockFlag : byte
 	/// </summary>
 	ATruthSeekerINSGrade = 1 << 2,
 }
+
+/// <summary>
+/// Chapter 9 progress flag.
+/// </summary>
+public enum Chapter9UnlockFlag : byte
+{
+	/// <summary>
+	/// Nothing has been done.
+	/// </summary>
+	None = 0,
+	/// <summary>
+	/// Has begin chapter 9 unlock.
+	/// </summary>
+	UnlockBegin = 1 << 0,
+	/// <summary>
+	/// [Unknown]
+	/// </summary>
+	SecretChallengePendingLifeUnlock = 1 << 1,
+}
+/// <summary>
+/// Chapter 9 songs unlock flag.
+/// </summary>
+public enum Chapter9SongUnlockFlag : byte
+{
+	/// <summary>
+	/// Nothing has been unlocked.
+	/// </summary>
+	None = 0,
+	/// <summary>
+	/// <c>Implexrough</c> has been unlocked.
+	/// Local key: <c>C9ImplexroughUnlocked</c>
+	/// </summary>
+	ImplexroughUnlocked = 1 << 0,
+	/// <summary>
+	/// <c>About The Universe</c> has been unlocked.
+	/// Local key: <c>C9AboutTheUniverseUnlocked</c>
+	/// </summary>
+	AboutTheUniverseUnlocked = 1 << 1,
+	/// <summary>
+	/// <c>Evanescent</c> has been unlocked.
+	/// Local key: <c>C9EvanescentUnlocked</c>
+	/// </summary>
+	EvanescentUnlocked = 1 << 2,
+	/// <summary>
+	/// <c>Exoplanetary Mirage</c> has been unlocked.
+	/// Local key: <c>C9ExoplanetaryMirageUnlocked</c>
+	/// </summary>
+	ExoplanetaryMirageUnlocked = 1 << 3,
+	/// <summary>
+	/// <c>Entrance to the Chaos</c> has been unlocked.
+	/// Local key: <c>C9EntranceToTheChaosUnlocked</c>
+	/// </summary>
+	EntranceToTheChaosUnlocked = 1 << 4,
+	/// <summary>
+	/// <c>What do you want more than a Happy ending?</c> has been unlocked.
+	/// Local key: <c>C9S6Unlocked</c>
+	/// </summary>
+	S6Unlocked = 1 << 5,
+}
